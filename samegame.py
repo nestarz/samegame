@@ -7,13 +7,16 @@ __date__    = "2014-22-11"
 # ==============================================================================
 #!/bin/python3
 
+import sys
+import pygame
 
-from window import Window
-
+from data.master import Master
 
 def main():
-    window = Window()
-    window.run()
+    master = Master()
+    master.main()
 
-if __name__ == "__main__":
+if __name__=='__main__':
     main()
+    pygame.quit()
+    sys.exit()
