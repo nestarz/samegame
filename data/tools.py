@@ -9,39 +9,8 @@ class State():
         self.done = False
         self.quit = False
 
-class HomeScreen(State):
-    def __init__(self):
-        State.__init__(self)
-        self.buttons = list()
-        self.bg = None
-        self.start()
-
-    def start(self):
-        self.setup_background()
-        self.setup_buttons()
-
-    def setup_background(self):
-        bg_img = cache._cache.images['home screen']
-        self.bg = Background(bg_img)
-        self.bg.resize(1024, 574)
-
-    def setup_buttons(self):
-        self.buttons.append(Button('[S]START', (15,36), (25,475)))
-        self.buttons.append(Button('[Q]QUIT', (15,36), (25,500)))
-
-    def update(self, window):
-        #shitty code - debug only
-        window.blit(self.bg.surface, (0,0))
-        b = []
-        for button in self.buttons:
-            b.append(window.blit(button.rtext, button.dest))
-            for event in pg.event.get():
-                if event.type == pg.MOUSEBUTTONUP:
-                    pos = pg.mouse.get_pos()
-                    if b[-1].collidepoint(pos):
-                        self.done = True
-        #endofshittycode
-
+    def reinitialize(self):
+        self.done = False
 
 class Background():
     def __init__(self, surface):
@@ -54,7 +23,10 @@ class Background():
         self.surface = pg.transform.scale(self.surface,(int(w),int(h)))
 
 class Button(pg.sprite.Sprite):
-    def __init__(self, text, size, dest=(0,0), style='default'):
+    INDEX = 0
+    def __init__(self, text, size, callback=None, dest=(0,0), style='default'):
+        Button.INDEX += 1
+        self.index = Button.INDEX
         super().__init__()
         self.dest = dest
         self.rect = pg.Rect(0, 0, size[0], size[1])
@@ -62,8 +34,18 @@ class Button(pg.sprite.Sprite):
         self.text = text
         self.style = ct.BUTTON_STYLE.get(style, 'default')
         self.font = Font(self.style['fontname'], self.style['fontsize'])
-        self.rtext = self.font.render(
+        self.surface = self.font.render(
             text, 1, self.style['default']['text_color'])
+        self.callback = callback
+
+    def update(self, index):
+        if index == self.index:
+            text = self.text + ' *'
+            self.surface = self.font.render(
+            text, 1, self.style['hover']['text_color'])
+        else:
+            self.surface = self.font.render(
+            self.text, 1, self.style['default']['text_color'])
 
 class Font(pg.font.Font):
     def __init__(self, name, size):
