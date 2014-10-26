@@ -19,6 +19,7 @@ class Master(setup.Window):
         self.state_dict = state_dict
         self.state_name = initial_state
         self.state = self.state_dict[self.state_name]
+        self.state.start()
 
     def update(self):
         """Met a jour le programme"""
@@ -52,7 +53,6 @@ class Master(setup.Window):
 
     def flip_state(self):
         """Change l'etat du programme"""
-        prev_state, self.state_name = self.state_name, self.state.next
+        self.state_name = self.state.next
         self.state = self.state_dict[self.state_name]
-        self.state.previous = prev_state
         self.state.start()

@@ -15,7 +15,6 @@ class HomeScreen(t.State):
         self.allow_input = False
         self.k_return = False
         self.next = 'party'
-        self.start()
 
     def start(self):
         self.setup_background()
