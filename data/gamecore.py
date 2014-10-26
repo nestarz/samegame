@@ -1,14 +1,8 @@
 #!/bin/python3
 
-import pygame as pg
-from . import cache
-from . import constants as ct
-from . import tools as t
+class GameCore:
 
-
-class GameCore(speed, num_color=6, size_x=4, size_y=9):
-
-    def __init__(self):  #need getter, setter, later.
+    def __init__(self, speed=1,num_color=5,size_x=6,size_y=9):  #need getter, setter, later.
         self.speed = speed  #game's speed, int, the higher, the faster
         self.num_color = num_color #the number of color used in the game
         self.size_x = size_x #width of the board
@@ -24,7 +18,7 @@ class GameCore(speed, num_color=6, size_x=4, size_y=9):
         pass
 
 
-class case(color):
+class case():
 
     def __init__(self):  #need getter, setter
         self.color = color
