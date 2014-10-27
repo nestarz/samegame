@@ -19,7 +19,7 @@ class Master(setup.Window):
         self.state_dict = state_dict
         self.state_name = initial_state
         self.state = self.state_dict[self.state_name]
-        self.state.start()
+        self.state.start(self.surface)
 
     def update(self):
         """Met a jour le programme"""

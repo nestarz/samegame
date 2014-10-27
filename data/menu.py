@@ -5,16 +5,15 @@ from . import cache
 from . import constants as ct
 from . import tools as t
 
-class HomeScreen(t.State):
+class MainMenu(t.State):
     def __init__(self):
         super().__init__()
-        self.name = 'home screen'
+        self.name = 'home'
         self.buttons = list()
         self.bg = None
         self.__arrow_index = 0
         self.allow_input = False
-        self.k_return = False
-        self.next = 'party'
+        self.next = 'main_menu'
 
     def start(self):
         self.setup_background()
