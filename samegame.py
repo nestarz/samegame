@@ -10,7 +10,7 @@ __date__    = "2014-22-11"
 from data import cache
 from data.master import Master
 from data import constants as c
-from data import home, menu, party
+from data import home, menu, party, gamecore
 
 def main():
     master = Master()
