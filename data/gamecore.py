@@ -20,15 +20,18 @@ class Board:
         self.color = ['blu','gre','bla','red','pin','yel']
         self.board = []
         self.generate_board()
+        self.gravity()
+        self.cursor = Cursor(num_row, num_col)
 
         
     def generate_board(self):
         """Generate a board, of num_col*num_row case, filled with 24 colored case, rest is set to False
         6 different color by default
-        y index start at 1 because we need a 'hidden' row
+        
+        row index start at 1 because we need a 'hidden' row
 
-        board[0][1] is bottom left, board[size_x][1] is bottom right
-        board[0][size_y] is top left, board[size_x][size_y] is top right 
+        board[1][0] is bottom left, board[1][num_col] is bottom right
+        board[num_row][0] is top left, board[num_row][num_col] is top right 
         """
         for row in range(self.num_row):
             self.board.append([])
@@ -95,16 +98,50 @@ class Board:
             self.board[0][i] = self.color[randrange(0,self.num_color)]
         
         
-    def swap(self,row,col):
-        """Swap the actual case with the one on his right, since you can only swap a case with the one on his right, you only need 2 param, his row and column"""
+    def swap(self):
+        """Swap the actual case, pointed by cursor, with the one on his right, since you can only swap a case with the one on his right"""
 
-        self.board[row][col], self.board[row][col+1] = self.board[row][col+1], self.board[row][col]
+        self.board[self.cursor.pos_row][self.cursor.pos_col], self.board[self.cursor.pos_row][self.cursor.pos_col+1]\
+        = self.board[self.cursor.pos_row][self.cursor.pos_col+1], self.board[self.cursor.pos_row][self.cursor.pos_col]
+
+class Cursor():
+    """The cursor is an object that focuses two cases, in order to swap them
+        Create a cursor that point only one case, no need to specify the 2nd case since it's the one its right
+        You can use .move_up, .move_down, .move_left, .move_right"""
+
+    def __init__(self, num_row, num_col): #find it ugly to push parameters that already exist everywhere, num_row, num_col, need better solution
+        self.max_row = num_row
+        self.max_col = num_col-1
+        self.pos_row = 1
+        self.pos_col = 0
+        
+    def move_up(self):
+        if self.pos_row+1 <= self.max_row:
+            self.pos_row += 1
+        else:
+            print("Can't move up")
+            
+    def move_down(self):
+        if self.pos_row-1 >= 1:
+            self.pos_row -= 1
+        else:
+            print("Can't move down")
+            
+    def move_left(self):
+        if self.pos_col-1 >= 0:
+            self.pos_col -= 1
+        else:
+            print("Can't move left")
+        
+    def move_right(self):
+        if self.pos_col+1 <= max_col:
+            self.pos_col += 1
+        else:
+            print("Can't move right")
 
 
 class Case():
-    """may be useless, need to see     Will be used to create 'BAD' block in versus mode"""
+    """may be useless, need to see, MAYBE    Will be used to create bad giant block in versus mode"""
     
-    def __init__(self):  #need getter, setter
+    def __init__(self):
         self.color = color
-
-
