@@ -13,6 +13,7 @@ class Home(t.State):
         self.bg = None
         self.allow_input = False
         self.next = 'main_menu'
+        self.to_set_done = -1
 
     def start(self, screen):
         self.setup_background(screen)
@@ -29,25 +30,35 @@ class Home(t.State):
 
     def setup_images(self, screen):
         logo_img = t.Image(cache._cache.images['logo'], screen)
-        logo_img.setup_effect(ct.EFFECT['moveup25'], ct.EFFECT['shake50'])
-        logo_img.center(screen)
+        logo_img.setup_effect(ct.EFFECT['moveup25'])
+        logo_img.center(screen, 0, -5)
         sublogo_img = t.Image(t.text_to_surface(ct.AUTHOR, 'joystix', 10, ct.WHITE_RGB), screen)
         sublogo_img.setup_effect(ct.EFFECT['fadein100'], ct.EFFECT['wait25'])
-        sublogo_img.center(screen, 0, 35)
+        sublogo_img.center(screen, 0, 30)
 
         text1 = 'Press Start Button'
-        start_img = t.Image(t.text_to_surface(text1, 'joystix', 10, ct.WHITE_RGB), screen)
-        start_img.setup_effect(ct.EFFECT['blink'], ct.EFFECT['wait50'])
+        img = t.Image(t.text_to_surface(text1, 'joystix', 20, ct.WHITE_RGB), screen)
+        start_img = pg.Surface(img.surface.get_size(), pg.SRCALPHA)
+        start_img.fill((0,0,0,255))
+        start_img.blit(img.surface, img.rect)
+        start_img = t.Image(start_img, screen)
+        start_img.setup_effect(ct.EFFECT['blink'], ct.EFFECT['wait35'])
         start_img.center(screen, 0, 220)
 
         self.images['start'] = start_img
         self.images['logo'] = logo_img
         self.images['sublogo'] = sublogo_img
 
+    def set_done(self, next):
+        self.next = next
+        self.bg.setup_effect({'name':'fadein2',
+                'delay':50})
+        self.to_set_done = 10
+
     def check_for_input(self, keys):
         if self.allow_input:
             if keys[pg.K_RETURN]:
-                self.done = True
+                self.set_done(self.next)
         self.allow_input = False
         if (not keys[pg.K_RETURN]):
                 self.allow_input = True
@@ -59,3 +70,6 @@ class Home(t.State):
         images.extend(list(self.images.values()))
         for img in images:
             img.update()
+        self.to_set_done -= 1
+        if self.to_set_done == 0:
+            self.done = True

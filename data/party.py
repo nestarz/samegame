@@ -26,7 +26,9 @@ class Party(t.State):
         bg_img = cache._cache.images[self.name]
         self.bg = t.Image(bg_img, screen)
         self.bg.resize(*ct.SCREEN_SIZE)
-
+        self.bg.setup_effect({'name':'fadeout2',
+                'delay':20})
+        
     def setup_images(self, screen):
         HEIGHT = screen.get_rect().h
         PANEL1_HEIGHT = HEIGHT/5 + 5
@@ -77,26 +79,26 @@ class Party(t.State):
         panel = self.images['panel3']
 
         txt = 'Perso1'.upper()
-        callback = lambda : self.set_done('arcade')
+        callback = lambda : self.set_done(self.previous)
         arcade_btn = t.Button(panel.surface, txt, 'menu', callback)
         arcade_btn.rect.right = panel.rect.right
         arcade_btn.rect = arcade_btn.rect.move(-25,15)
 
         txt = 'Perso2'.upper()
-        callback = lambda : self.set_done('arcade')
+        callback = lambda : self.set_done(self.previous)
         story_btn = t.Button(panel.surface, txt, 'menu', callback)
         story_btn.rect.right = panel.rect.right
         story_btn.rect = story_btn.rect.move(-25,63)
 
         txt = 'Perso3'.upper()
-        callback = lambda : self.set_done('arcade')
+        callback = lambda : self.set_done(self.previous)
         versus_btn = t.Button(panel.surface, txt, 'menu', callback)
         versus_btn.rect.right = panel.rect.right
         versus_btn.rect = versus_btn.rect.move(-25,110)
 
 
         txt = 'Retour'.upper()
-        callback = lambda : self.set_done('main_menu')
+        callback = lambda : self.set_done(self.previous)
         quit_btn = t.Button(panel.surface, txt, 'menu', callback)
         quit_btn.rect.right = panel.rect.right
         quit_btn.rect = quit_btn.rect.move(-25,155)
@@ -115,6 +117,8 @@ class Party(t.State):
         'direction':ct.LEFT,
         'delay':20,
         'speed':40})
+        self.bg.setup_effect({'name':'fadein2',
+                'delay':100})
         self.to_set_done = 20
 
     def check_for_input(self, keys):

@@ -26,6 +26,8 @@ class MainMenu(t.State):
         bg_img = cache._cache.images[self.name]
         self.bg = t.Image(bg_img, screen)
         self.bg.resize(*ct.SCREEN_SIZE)
+        self.bg.setup_effect({'name':'fadeout2',
+                'delay':20})
 
     def setup_images(self, screen):
         HEIGHT = screen.get_rect().h
@@ -83,13 +85,13 @@ class MainMenu(t.State):
         arcade_btn.rect = arcade_btn.rect.move(-25,15)
 
         txt = 'story'.upper()
-        callback = lambda : self.set_done('story')
+        callback = lambda : self.set_done('arcade')
         story_btn = t.Button(panel.surface, txt, 'menu', callback)
         story_btn.rect.right = panel.rect.right
         story_btn.rect = story_btn.rect.move(-25,63)
 
         txt = 'versus'.upper()
-        callback = lambda : self.set_done('versus')
+        callback = lambda : self.set_done('arcade')
         versus_btn = t.Button(panel.surface, txt, 'menu', callback)
         versus_btn.rect.right = panel.rect.right
         versus_btn.rect = versus_btn.rect.move(-25,110)
@@ -115,6 +117,8 @@ class MainMenu(t.State):
         'direction':ct.LEFT,
         'delay':20,
         'speed':40})
+        self.bg.setup_effect({'name':'fadein2',
+                'delay':100})
         self.to_set_done = 20
 
     def check_for_input(self, keys):

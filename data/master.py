@@ -56,6 +56,9 @@ class Master(setup.Window):
 
     def flip_state(self):
         """Change l'etat du programme"""
+        previous = self.state_name
         self.state_name = self.state.next
+        self.state.reinitialize()
         self.state = self.state_dict[self.state_name]
+        self.state.previous = previous
         self.state.start(self.surface)

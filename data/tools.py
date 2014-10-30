@@ -8,6 +8,7 @@ class State():
     def __init__(self):
         self.done = False
         self.quit = False
+        self.previous = None
 
     def reinitialize(self):
         self.done = False
@@ -95,6 +96,34 @@ class Effect():
                     self.direction[0]*self.speed,
                     self.direction[1]*self.speed)
                 self.current_delay -= 1
+        if self.name == 'fadein2':
+            ratio = (self.current_delay / self.init_delay)
+            self.alpha = int(ratio*255)
+            if self.current_delay == self.init_delay:
+                panel = pg.Surface(surface.get_size(), pg.SRCALPHA)
+                self.panel = Panel(panel, surface, (0,0,0,20), False)
+            elif self.current_delay == 0:
+                self.panel.fill((0,0,0,0))
+                self.done = True
+            else:
+                self.panel.fill((0,0,0,20))
+                self.panel.draw()
+            self.current_delay -= 1
+        if self.name == 'fadeout2':
+            ratio = (self.current_delay / self.init_delay)
+            self.alpha = int(ratio*255)
+            if self.current_delay == self.init_delay:
+                self.surface_init = surface.copy()
+            if self.current_delay == 0:
+                surface = self.surface_init.copy()
+                self.done = True
+            else:
+                surface = self.surface_init.copy()
+                panel = pg.Surface(surface.get_size(), pg.SRCALPHA)
+                self.panel = Panel(panel, surface, (0,0,0,self.alpha), False)
+                self.panel.fill((0,0,0,self.alpha))
+                self.panel.draw()
+            self.current_delay -= 1
         return surface, rect
 
     def apply_alpha(self, surface, alpha):
