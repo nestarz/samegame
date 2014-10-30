@@ -16,7 +16,7 @@ def main():
     master = Master()
     cache.init_cache()
     state_dict = {c.HOME : home.Home(),
-                  c.PARTY : party.Party(),
+                  c.ARCADE : party.Party(),
                   c.MAIN_MENU: menu.MainMenu()}
     master.setup_state(state_dict, c.HOME)
     master.main_loop()
@@ -24,3 +24,6 @@ def main():
 
 if __name__=='__main__':
     main()
+
+
+

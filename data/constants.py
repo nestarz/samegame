@@ -2,14 +2,15 @@
 
 #GAME CONFIG
 NAME = "SAMEGAME"
-AUTHOR = "Mathieu Seurin & Rhouzlane Elias"
+AUTHOR = "Mathieu Seurin & Elias Rhouzlane"
 SCREEN_HEIGHT = 574
 SCREEN_WIDTH = 1024
 SCREEN_SIZE = (SCREEN_WIDTH,SCREEN_HEIGHT)
 
 #STATES NAME
 HOME = "home"
-PARTY = "party"
+ARCADE = "arcade"
+VERSUS = "versus"
 MAIN_MENU = "main_menu"
 
 #COLOR RGB
@@ -19,18 +20,31 @@ RED_RGB = (255, 0, 0)
 BLACK_RGB = (0, 0, 0)
 WHITE_RGB = (255, 255, 255)
 ORANGE_RGB = (255, 69, 0)
-
+GREY_RGB = (240,240,240)
 #STYLES
-BUTTON_STYLE = {
+BTN = {
     "default": {
         "default": {
-            "textcolor": (255, 255, 255)
+            "color": (255, 255, 255)
         },
         "hover": {
-            "textcolor": (253, 84, 72)
+            "color": (253, 84, 72)
         },
-        "fontsize": 18,
-        "fontname": 'joystix'
+        "size": 18,
+        "font": 'joystix',
+        "AA":1
+    },
+    "menu": {
+        "default": {
+            "color": (255, 255, 255)
+        },
+        "hover": {
+            "color": (253, 84, 72)
+        },
+        "size": 33,
+        "font": 'joystix',
+        "AA":1,
+        "bold":0
     }
 }
 
@@ -53,28 +67,41 @@ EFFECT = {
     },
     'fadein200': {
         'name': 'fadein',
-        'delay': 200
+        'delay': 200,
+        'set_alpha':False
     },
     'fadein100': {
         'name': 'fadein',
-        'delay': 100
+        'delay': 100,
+        'set_alpha':False
     },
     'fadein50': {
         'name': 'fadein',
-        'delay': 50
+        'delay': 50,
+        'set_alpha':False
     },
     'fadein10': {
         'name': 'fadein',
-        'delay': 10
+        'delay': 10,
+        'set_alpha':False
     },
     'moveup50': {
         'name': 'move',
         'delay': 50,
         'direction': UP
     },
+    'moveup25': {
+        'name': 'move',
+        'delay': 25,
+        'direction': UP
+    },
     'wait50': {
         'name': 'wait',
         'delay': 50
+    },
+    'wait25': {
+        'name': 'wait',
+        'delay': 25
     },
     'shake50': {
         'name': 'shake',

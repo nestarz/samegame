@@ -48,6 +48,9 @@ class Master(setup.Window):
             self.event_loop()           #controle evenements ihm
             self.update()               #maj du prog
             pg.display.update()         #maj de la fenetre
+            fps = self.clock.get_fps()
+            with_fps = "{} - {:.2f} FPS".format(self.caption, fps)
+            pg.display.set_caption(with_fps)
             self.clock.tick(self.fps)   #si self.fps non depasse, attend
 
 
@@ -55,4 +58,4 @@ class Master(setup.Window):
         """Change l'etat du programme"""
         self.state_name = self.state.next
         self.state = self.state_dict[self.state_name]
-        self.state.start()
+        self.state.start(self.surface)
