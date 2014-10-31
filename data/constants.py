@@ -95,6 +95,18 @@ EFFECT = {
         'delay': 25,
         'direction': UP
     },
+    'wait100': {
+        'name': 'wait',
+        'delay': 100
+    },
+    'wait50': {
+        'name': 'wait',
+        'delay': 50
+    },
+    'wait70': {
+        'name': 'wait',
+        'delay': 70
+    },
     'wait35': {
         'name': 'wait',
         'delay': 35

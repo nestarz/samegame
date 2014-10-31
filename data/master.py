@@ -25,10 +25,8 @@ class Master(setup.Window):
         """Met a jour le programme"""
         self.current_time = pg.time.get_ticks() #maj du chronometre
         if self.state.quit:                     #prog doit se terminer?
-            print('QUIT THIS FUCKING GAME TIMMY!')
             self.done = True                    #le prog est termine
         elif self.state.done:                   #etat doit changer?
-            print('START THIS FUCKING GAME TIMMY!')
             self.flip_state()                   #changement d'etat
         self.state.update(self.surface, self.keys)         #maj de l'etat
 

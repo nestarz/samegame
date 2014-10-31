@@ -91,7 +91,6 @@ class Effect():
             elif self.current_delay > 0:
                 if self.current_delay == self.init_delay:
                     self.init_rect = rect
-                    rect = rect.move(0,0)
                 rect = rect.move(
                     self.direction[0]*self.speed,
                     self.direction[1]*self.speed)
@@ -141,6 +140,7 @@ class Image():
         self.effect = list()
         self.display = True
         self.surfaceToDrawTo = surfaceToDrawTo
+        self.wait = False
 
     def setup_effect(self, *args):
         for item in args:
@@ -152,10 +152,17 @@ class Image():
 
     def update(self):
         for effect in self.effect:
-            self.surface, self.rect = effect.apply(self.surface, self.rect)
-            self.display = effect.display
-            if effect.done:
-                self.effect.remove(effect)
+            if effect.name == 'wait' and not effect.done:
+                self.wait = True
+                effect.apply(self.surface, self.rect)
+                self.display = effect.display
+                if effect.done:
+                    self.wait = False
+            if not self.wait:
+                self.surface, self.rect = effect.apply(self.surface, self.rect)
+                self.display = effect.display
+                if effect.done:
+                    self.effect.remove(effect)
         self.draw()
 
     def draw(self):

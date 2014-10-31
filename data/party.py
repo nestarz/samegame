@@ -28,7 +28,7 @@ class Party(t.State):
         self.bg.resize(*ct.SCREEN_SIZE)
         self.bg.setup_effect({'name':'fadeout2',
                 'delay':20})
-        
+
     def setup_images(self, screen):
         HEIGHT = screen.get_rect().h
         PANEL1_HEIGHT = HEIGHT/5 + 5
@@ -48,9 +48,8 @@ class Party(t.State):
         sublogo.draw()
         effect = {'name':'move2',
         'direction':ct.RIGHT,
-        'delay':28,
-        'speed':15}
-        panel1.setup_effect(effect)
+        'delay':7,
+        'speed':40}
 
         panel2 = pg.Surface((435,PANEL2_HEIGHT), pg.SRCALPHA)
         panel2 = t.Panel(panel2, screen, (255,255,255,70), False)
@@ -65,10 +64,6 @@ class Party(t.State):
         panel3 = pg.Surface((435,PANEL3_HEIGHT), pg.SRCALPHA)
         panel3 = t.Panel(panel3, screen, (0,0,0,50), True)
         panel3.rect.y = PANEL1_HEIGHT + PANEL2_HEIGHT
-        effect = {'name':'move2',
-        'direction':ct.RIGHT,
-        'delay':7,
-        'speed':40}
         panel3.setup_effect(effect)
 
         self.images['panel1'] = panel1
@@ -97,7 +92,7 @@ class Party(t.State):
         versus_btn.rect = versus_btn.rect.move(-25,110)
 
 
-        txt = 'Retour'.upper()
+        txt = 'Back'.upper()
         callback = lambda : self.set_done(self.previous)
         quit_btn = t.Button(panel.surface, txt, 'menu', callback)
         quit_btn.rect.right = panel.rect.right
@@ -112,7 +107,8 @@ class Party(t.State):
 
     def set_done(self, next):
         self.next = next
-        for panel in self.images.values():
+        panels = (self.images['panel2'], self.images['panel3'])
+        for panel in panels:
             panel.setup_effect({'name':'move3',
         'direction':ct.LEFT,
         'delay':20,
@@ -123,7 +119,6 @@ class Party(t.State):
 
     def check_for_input(self, keys):
         if self.allow_input:
-            self.time_down = 0
             if keys[pg.K_UP]:
                 if self.arrow_index == 0:
                     self.arrow_index = len(self.buttons)
@@ -134,14 +129,18 @@ class Party(t.State):
                     self.arrow_index = 0
             elif keys[pg.K_RETURN] or keys[pg.K_SPACE]:
                 self.do_action(self.arrow_index)
+            elif keys[pg.K_ESCAPE]:
+                self.set_done(self.previous)
         self.allow_input = False
         if (not keys[pg.K_DOWN]
             and not keys[pg.K_UP]
             and not keys[pg.K_RETURN]
             and not keys[pg.K_SPACE]
+            and not keys[pg.K_ESCAPE]
             or (self.time_down > 4 and keys[pg.K_DOWN])
             or (self.time_down > 4 and keys[pg.K_UP])):
                 self.allow_input = True
+                self.time_down = 0
         else:
             self.time_down += 1
     @property
