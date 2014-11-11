@@ -1,6 +1,7 @@
 #!/bin/python3
 
 from random import *
+from copy import *
 
 class GameCore:
     """The heart of the game, at the moment, it only generates 1 board, but later, will generate 2 or more board, if you wish"""
@@ -67,11 +68,71 @@ class Board:
         string += a
 
         return(string)
-        
         #return(str(self.board))
         
     def update_board(self):
         pass
+
+    def destroy_block(self): #ultra ugly, need one loop to do all work instead of 2 look-alike
+        """
+        The function check if at least 3 block are lined vertically or horizontally (no diagonal), destroy them if so
+        """
+        destroy = []
+
+        for row in reversed(range(1,self.num_row)): #check per line
+            combo = 1
+            temp_col = True
+            temp_cor = []
+            for col in range(self.num_col):
+                if self.board[row][col]:
+                    if temp_col is True:
+                        temp_col = self.board[row][col]
+                        temp_cor.append((row,col))
+                    elif temp_col == self.board[row][col]:
+                        combo += 1
+                        temp_cor.append((row,col))
+                    elif combo >= 3:
+                        temp_col = True
+                        destroy.append(temp_cor)
+                        temp_cor = []
+                        combo = 1
+                    else:
+                        temp_col = self.board[row][col]
+                        temp_cor.append((row,col))
+                        combo = 1
+
+        
+                        
+        for col in range(self.num_col): #check per column
+            combo = 1
+            temp_col = True
+            temp_cor = []
+            for row in reversed(range(1,self.num_row)):
+                if self.board[row][col]:
+                    if temp_col is True:
+                        temp_col = self.board[row][col]
+                        temp_cor.append((row,col))
+                    elif temp_col == self.board[row][col]:
+                        combo += 1
+                        temp_cor.append((row,col))
+                    elif combo >= 3:
+                        temp_col = True
+                        destroy.append(temp_cor)
+                        temp_cor = []
+                        combo = 1
+                    else:
+                        temp_col = self.board[row][col]
+                        temp_cor.append((row,col))
+                        combo = 1
+
+        print(destroy)
+
+        for line in destroy:
+            for case in line:
+                self.board[case[0]][case[1]] = False
+                        
+                        
+                        
 
     def gravity(self):
         """Makes sure there is no empty space between a case and the bottom"""
@@ -145,3 +206,19 @@ class Case():
     
     def __init__(self):
         self.color = color
+
+
+
+
+a = Board()
+a.board[1][0],a.board[1][1],a.board[1][2] = 'yel','yel','yel'
+
+a.board[2][1],a.board[3][1],a.board[4][1] = 'pin','pin','pin'
+
+b = copy(a.board)
+
+print(a)
+a.destroy_block()
+a.gravity()
+print(a)
+
