@@ -1,0 +1,3 @@
+""" You can put your ideas for the samegame here, will try to implement them """
+
+Bi-color block
