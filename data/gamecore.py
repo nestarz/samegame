@@ -1,7 +1,6 @@
 #!/bin/python3
 
 from random import *
-from copy import *
 
 class GameCore:
     """The heart of the game, at the moment, it only generates 1 board, but later, will generate 2 or more board, if you wish"""
@@ -206,19 +205,3 @@ class Case():
     
     def __init__(self):
         self.color = color
-
-
-
-
-a = Board()
-a.board[1][0],a.board[1][1],a.board[1][2] = 'yel','yel','yel'
-
-a.board[2][1],a.board[3][1],a.board[4][1] = 'pin','pin','pin'
-
-b = copy(a.board)
-
-print(a)
-a.destroy_block()
-a.gravity()
-print(a)
-
