@@ -10,14 +10,16 @@ __date__    = "2014-22-11"
 from data import cache
 from data.master import Master
 from data import constants as c
-from data import home, menu, party, gamecore
+from data import home, menu, party
 
 def main():
     master = Master()
     cache.init_cache()
     state_dict = {c.HOME : home.Home(),
-                  c.ARCADE : party.Party(),
-                  c.MAIN_MENU: menu.MainMenu()}
+                  c.MAIN_MENU : menu.Main(),
+                  c.SELECT_MODE : menu.ModeSelection(),
+                  c.SELECT_CHAR : menu.CharacterSelection(),
+                  c.ARCADE : party.Arcade()}
     master.setup_state(state_dict, c.HOME)
     master.main_loop()
     master.exit()

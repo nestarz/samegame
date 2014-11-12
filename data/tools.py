@@ -2,7 +2,7 @@
 
 import pygame as pg
 from . import cache
-from . import constants as ct
+from . import constants as c
 
 class State():
     def __init__(self):
@@ -16,122 +16,62 @@ class State():
     def check_for_input(self, keys):
         pass
 
-class Effect():
-    def __init__(self, ref, name='default', delay=0):
-        self.name = ref.get('name', name)
-        self.init_delay = ref.get('delay', delay)
-        self.direction = ref.get('direction', ct.STATIC)
-        self.set_alpha = ref.get('set_alpha', False)
-        self.speed = ref.get('speed', 1)
-        self.current_delay = self.init_delay
-        self.display = True
-        self.done = False
-        self.sign1 = 1
-        self.sign2 = -1
+class Screen(State):
+    def __init__(self):
+        super().__init__()
+        self.name = ''
+        self.next = ''
+        self.bg = None
+        self.images = dict()
+        self.buttons = list()
+        self.allow_input = False
+        self.to_set_done = -1
+        self.allow_input_timer = 0
 
-    def apply(self, surface, rect, AA=0):
-        if self.name == 'shake':
-            self.sign1 = - self.sign1
-            self.sign2 = - self.sign2
-            rect = rect.move(self.sign1*1,self.sign2*1)
-        if self.name == 'wait':
-            if self.current_delay == 0:
-                self.display = True
-                self.done = True
-            elif self.current_delay > 0:
-                self.display = False
-                self.current_delay -= 1
-        if self.name == 'move':
-            if self.current_delay == 0:
-                rect = self.init_rect
-                self.done = True
-            elif self.current_delay > 0:
-                if self.current_delay == self.init_delay:
-                    self.init_rect = rect
-                    rect = rect.move(0,self.init_delay)
-                ratio = 1-(self.current_delay / self.init_delay)
-                rect = rect.move(*self.direction)
-                self.current_delay -= 1
-        if self.name == 'blink':
-            if self.current_delay == 0:
-                self.display = not self.display
-                self.current_delay = self.init_delay
-            elif self.current_delay > 0:
-                self.current_delay -= 1
-        if self.name == 'fadein':
-            if self.current_delay == 0:
-                self.alpha = 255
-                self.done = True
-            elif self.current_delay > 0:
-                ratio = 1-(self.current_delay / self.init_delay)
-                self.alpha = ratio*255
-                if self.set_alpha:
-                    # /!\ marche seulement si AA=0
-                    surface.set_alpha(int(self.alpha))
-                else:
-                    # /!\ marche seulement si AA=1
-                    self.apply_alpha(surface, self.alpha)
-                self.current_delay -= 1
-        if self.name == 'move2':
-            if self.current_delay == 0:
-                rect = self.init_rect
-                self.done = True
-            elif self.current_delay > 0:
-                if self.current_delay == self.init_delay:
-                    self.init_rect = rect
-                    rect = rect.move(-surface.get_width(),0)
-                rect = rect.move(
-                    self.direction[0]*self.speed,
-                    self.direction[1]*self.speed)
-                self.current_delay -= 1
-        if self.name == 'move3':
-            if self.current_delay == 0:
-                rect = self.init_rect
-                self.done = True
-            elif self.current_delay > 0:
-                if self.current_delay == self.init_delay:
-                    self.init_rect = rect
-                rect = rect.move(
-                    self.direction[0]*self.speed,
-                    self.direction[1]*self.speed)
-                self.current_delay -= 1
-        if self.name == 'fadein2':
-            ratio = (self.current_delay / self.init_delay)
-            self.alpha = int(ratio*255)
-            if self.current_delay == self.init_delay:
-                panel = pg.Surface(surface.get_size(), pg.SRCALPHA)
-                self.panel = Panel(panel, surface, (0,0,0,20), False)
-            elif self.current_delay == 0:
-                self.panel.fill((0,0,0,0))
-                self.done = True
-            else:
-                self.panel.fill((0,0,0,20))
-                self.panel.draw()
-            self.current_delay -= 1
-        if self.name == 'fadeout2':
-            ratio = (self.current_delay / self.init_delay)
-            self.alpha = int(ratio*255)
-            if self.current_delay == self.init_delay:
-                self.surface_init = surface.copy()
-            if self.current_delay == 0:
-                surface = self.surface_init.copy()
-                self.done = True
-            else:
-                surface = self.surface_init.copy()
-                panel = pg.Surface(surface.get_size(), pg.SRCALPHA)
-                self.panel = Panel(panel, surface, (0,0,0,self.alpha), False)
-                self.panel.fill((0,0,0,self.alpha))
-                self.panel.draw()
-            self.current_delay -= 1
-        return surface, rect
+    def reinitialize(self):
+        super().reinitialize()
+        self.bg = None
+        self.images = dict()
+        self.buttons = list()
 
-    def apply_alpha(self, surface, alpha):
-        for x in range(surface.get_width()):
-            for y in range(surface.get_height()):
-                color = surface.get_at((x, y))
-                if color.a != 0:
-                    color.a = min(int(alpha+1),255)
-                surface.set_at((x, y), color)
+    def start(self, screen):
+        self.setup_background(screen)
+        self.setup_images(screen)
+        self.setup_buttons(screen)
+
+    def setup_background(self, screen):
+        bg_img = cache._cache.images[self.name]
+        self.bg = Image(bg_img, screen)
+        self.bg.resize(*c.SCREEN_SIZE)
+        self.bg.setup_effect('fadein2', 20)
+
+    def setup_images(self, screen):
+        pass
+
+    def setup_buttons(self, screen):
+        pass
+
+    def set_done(self, next):
+        self.next = next
+        self.to_set_done = 0
+
+    def update(self, window, keys):
+        self.check_for_input(keys)
+        images = list()
+        images.append(self.bg)
+        images.extend(list(self.images.values()))
+        for img in images:
+            img.update()
+        for btn in self.buttons:
+            btn.update(self.arrow_index, self.buttons.index(btn))
+        self.to_set_done -= 1
+        self.allow_input_timer += 1
+        self.done = self.to_set_done == 0
+
+    def do_action(self, index):
+        if index in range(0, len(self.buttons)):
+            self.buttons[index].callback()
+
 
 class Image():
     def __init__(self, ref, surfaceToDrawTo):
@@ -141,24 +81,28 @@ class Image():
         self.display = True
         self.surfaceToDrawTo = surfaceToDrawTo
         self.wait = False
+        self.wait_effect = None
 
-    def setup_effect(self, *args):
-        for item in args:
-            self.effect.append(Effect(item))
+    def setup_effect(self, name, *args):
+        from .effect import EFFECTS_DICT
+        Effect = EFFECTS_DICT[name]
+        self.effect.append(Effect(*args))
+        if name == 'wait':
+            self.wait = True
+            self.wait_effect = self.effect[-1]
 
     def center(self, screen, x=0, y=0):
         self.rect.centerx = screen.get_rect().centerx + x
         self.rect.centery = screen.get_rect().centery + y
 
     def update(self):
-        for effect in self.effect:
-            if effect.name == 'wait' and not effect.done:
-                self.wait = True
-                effect.apply(self.surface, self.rect)
-                self.display = effect.display
-                if effect.done:
-                    self.wait = False
-            if not self.wait:
+        if self.wait:
+            self.display = self.wait_effect.apply()
+            if self.wait_effect.done:
+                self.effect.remove(self.wait_effect)
+                self.wait = False
+        if not self.wait:
+            for effect in self.effect:
                 self.surface, self.rect = effect.apply(self.surface, self.rect)
                 self.display = effect.display
                 if effect.done:
@@ -176,7 +120,7 @@ class Image():
 
 class Button(Image):
     def __init__(self, surfaceToDrawTo, txt, stylename='default', callback=None):
-        self.style = ct.BTN[stylename]
+        self.style = c.BTN[stylename]
         self.txt = txt
         ref = text_to_surface(
             txt,

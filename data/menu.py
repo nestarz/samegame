@@ -2,32 +2,13 @@
 
 import pygame as pg
 from . import cache
-from . import constants as ct
+from . import constants as c
 from . import tools as t
 
-class MainMenu(t.State):
+class Menu(t.Screen):
     def __init__(self):
         super().__init__()
-        self.name = 'main_menu'
-        self.buttons, self.images = dict(), dict()
-        self.bg = None
-        self.allow_input = False
-        self.next = 'main_menu'
         self.__arrow_index = 0
-        self.time_down = 0
-        self.to_set_done = -1
-
-    def start(self, screen):
-        self.setup_background(screen)
-        self.setup_images(screen)
-        self.setup_buttons(screen)
-
-    def setup_background(self, screen):
-        bg_img = cache._cache.images[self.name]
-        self.bg = t.Image(bg_img, screen)
-        self.bg.resize(*ct.SCREEN_SIZE)
-        self.bg.setup_effect({'name':'fadeout2',
-                'delay':20})
 
     def setup_images(self, screen):
         HEIGHT = screen.get_rect().h
@@ -37,85 +18,60 @@ class MainMenu(t.State):
 
 
         panel1 = pg.Surface((435,PANEL1_HEIGHT), pg.SRCALPHA)
-        panel1 = t.Panel(panel1, screen, (0,0,0,125), False)
+        panel1 = t.Panel(panel1, screen, (0,0,0,135), False)
         logo = t.Image(cache._cache.images['logo'], panel1.surface)
         logo.rect.centerx = panel1.rect.centerx
         logo.rect.y = 30
-        sublogo = t.Image(t.text_to_surface(ct.AUTHOR, 'joystix', 10, ct.WHITE_RGB), panel1.surface)
+        sublogo = t.Image(t.text_to_surface(c.AUTHOR, 'joystix', 10, c.WHITE_RGB), panel1.surface)
         sublogo.rect.centerx = panel1.rect.centerx
         sublogo.rect.y = 85
         logo.draw()
         sublogo.draw()
-        effect = {'name':'move2',
-        'direction':ct.RIGHT,
-        'delay':7,
-        'speed':40}
+        effect = ('move', 7, c.RIGHT, 'move2', 40)
+        panel1.setup_effect(*effect)
 
-        panel2 = pg.Surface((435,PANEL2_HEIGHT), pg.SRCALPHA)
-        panel2 = t.Panel(panel2, screen, (255,255,255,70), False)
-        menu_txt = 'Main Menu'.upper()
-        menu_img = t.Image(t.text_to_surface(menu_txt, 'larabiefont', 20, ct.GREY_RGB, 1, True, True), panel2.surface)
+        panel2 = pg.Surface((435+10,PANEL2_HEIGHT), pg.SRCALPHA)
+        panel2 = t.Panel(panel2, screen, (253,84,72,190), False)
+        menu_img = t.Image(
+            t.text_to_surface(
+                self.description.upper(),
+                'larabiefont',
+                23,
+                c.WHITE_RGB,
+                1,
+                True,
+                False),
+            panel2.surface)
         menu_img.rect.midright = panel2.rect.midright
         menu_img.rect.x = menu_img.rect.x - 20
         menu_img.draw()
         panel2.rect.y = PANEL1_HEIGHT
-        panel2.setup_effect(effect)
+        panel2.setup_effect(*effect)
 
         panel3 = pg.Surface((435,PANEL3_HEIGHT), pg.SRCALPHA)
-        panel3 = t.Panel(panel3, screen, (0,0,0,50), True)
+        panel3 = t.Panel(panel3, screen, (0,0,0,120), True)
         panel3.rect.y = PANEL1_HEIGHT + PANEL2_HEIGHT
-        panel3.setup_effect(effect)
+        panel3.setup_effect(*effect)
 
         self.images['panel1'] = panel1
         self.images['panel2'] = panel2
         self.images['panel3'] = panel3
 
     def setup_buttons(self, screen):
-        panel = self.images['panel3']
-
-        txt = 'arcade'.upper()
-        callback = lambda : self.set_done('arcade')
-        arcade_btn = t.Button(panel.surface, txt, 'menu', callback)
-        arcade_btn.rect.right = panel.rect.right
-        arcade_btn.rect = arcade_btn.rect.move(-25,15)
-
-        txt = 'story'.upper()
-        callback = lambda : self.set_done('arcade')
-        story_btn = t.Button(panel.surface, txt, 'menu', callback)
-        story_btn.rect.right = panel.rect.right
-        story_btn.rect = story_btn.rect.move(-25,63)
-
-        txt = 'versus'.upper()
-        callback = lambda : self.set_done('arcade')
-        versus_btn = t.Button(panel.surface, txt, 'menu', callback)
-        versus_btn.rect.right = panel.rect.right
-        versus_btn.rect = versus_btn.rect.move(-25,110)
-
-
-        txt = 'quit'.upper()
-        callback = lambda : self.set_done('home')
-        quit_btn = t.Button(panel.surface, txt, 'menu', callback)
-        quit_btn.rect.right = panel.rect.right
-        quit_btn.rect = quit_btn.rect.move(-25,155)
-
-
-        self.buttons['arcade'] = arcade_btn
-        self.buttons['story'] = story_btn
-        self.buttons['versus'] = versus_btn
-        self.buttons['quit'] = quit_btn
-        self.btn_order = [arcade_btn, story_btn, versus_btn, quit_btn]
+        y = 15
+        for button in self.buttons:
+            if button.surfaceToDrawTo == self.images['panel3'].surface:
+                button.rect.right = self.images['panel3'].rect.right
+                button.rect = button.rect.move(-25,y)
+                y += 48
 
     def set_done(self, next):
-        self.next = next
-        panels = (self.images['panel2'], self.images['panel3'])
-        for panel in panels:
-            panel.setup_effect({'name':'move3',
-        'direction':ct.LEFT,
-        'delay':20,
-        'speed':40})
-        self.bg.setup_effect({'name':'fadein2',
-                'delay':100})
+        super().set_done(next)
         self.to_set_done = 20
+
+        for panel in self.images.values():
+            panel.setup_effect('move', 20, c.LEFT, 'move3', 40)
+        self.bg.setup_effect('fadeout', 100)
 
     def check_for_input(self, keys):
         if self.allow_input:
@@ -130,19 +86,17 @@ class MainMenu(t.State):
             elif keys[pg.K_RETURN] or keys[pg.K_SPACE]:
                 self.do_action(self.arrow_index)
             elif keys[pg.K_ESCAPE]:
-                self.set_done('home')
+                self.set_done(self.previous)
         self.allow_input = False
         if (not keys[pg.K_DOWN]
             and not keys[pg.K_UP]
             and not keys[pg.K_RETURN]
             and not keys[pg.K_SPACE]
             and not keys[pg.K_ESCAPE]
-            or (self.time_down > 4 and keys[pg.K_DOWN])
-            or (self.time_down > 4 and keys[pg.K_UP])):
+            or (self.allow_input_timer > 4 and keys[pg.K_DOWN])
+            or (self.allow_input_timer > 4 and keys[pg.K_UP])):
                 self.allow_input = True
-                self.time_down = 0
-        else:
-            self.time_down += 1
+                self.allow_input_timer = 0
     @property
     def arrow_index(self):
         return self.__arrow_index
@@ -153,19 +107,77 @@ class MainMenu(t.State):
         if value in range(0,5):
             self.__arrow_index = value
 
-    def do_action(self, index):
-        if index in range(0, len(self.buttons)):
-            self.btn_order[index].callback()
+class Main(Menu):
+    def __init__(self):
+        super().__init__()
+        self.name = c.MAIN_MENU
+        self.next = c.SELECT_MODE
+        self.description = 'Main Menu'
 
-    def update(self, window, keys):
-        self.check_for_input(keys)
-        images = list()
-        images.append(self.bg)
-        images.extend(list(self.images.values()))
-        for img in images:
-            img.update()
-        for btn in list(self.buttons.values()):
-            btn.update(self.arrow_index, self.btn_order.index(btn))
-        self.to_set_done -= 1
-        if self.to_set_done == 0:
-            self.done = True
+    def setup_buttons(self, screen):
+        surface_to_draw_to = self.images['panel3'].surface
+        btn_style_name = 'menu'
+        btns = []
+
+        btns.extend((
+            ('Continue', lambda : self.set_done(c.SELECT_MODE)),
+            ('New Game', lambda : self.set_done(c.SELECT_MODE)),
+            ('Load Game', lambda : self.set_done(c.SELECT_MODE)),
+            ('quit', lambda : self.set_done(c.HOME))
+            ))
+
+        for btn in btns:
+            self.buttons.append(
+            t.Button(surface_to_draw_to, btn[0], btn_style_name, btn[1]))
+
+        super().setup_buttons(screen)
+
+class ModeSelection(Menu):
+    def __init__(self):
+        super().__init__()
+        self.name = c.SELECT_MODE
+        self.next = c.SELECT_CHAR
+        self.description = 'Selection du Mode'
+
+    def setup_buttons(self, screen):
+        surface_to_draw_to = self.images['panel3'].surface
+        btn_style_name = 'menu'
+        btns = []
+
+        btns.extend((
+            ('story', lambda : self.set_done(c.SELECT_CHAR)),
+            ('arcade', lambda : self.set_done(c.SELECT_CHAR)),
+            ('versus', lambda : self.set_done(c.SELECT_CHAR)),
+            ('back', lambda : self.set_done(self.previous))
+            ))
+
+        for btn in btns:
+            self.buttons.append(
+            t.Button(surface_to_draw_to, btn[0], btn_style_name, btn[1]))
+
+        super().setup_buttons(screen)
+
+class CharacterSelection(Menu):
+    def __init__(self):
+        super().__init__()
+        self.name = c.SELECT_CHAR
+        self.next = c.ARCADE
+        self.description = 'Choose your Hero'
+
+    def setup_buttons(self, screen):
+        surface_to_draw_to = self.images['panel3'].surface
+        btn_style_name = 'menu'
+        btns = []
+
+        btns.extend((
+            ('Perso1', lambda : self.set_done(self.next)),
+            ('Perso2', lambda : self.set_done(self.next)),
+            ('Perso3', lambda : self.set_done(self.next)),
+            ('back', lambda : self.set_done(self.previous))
+            ))
+
+        for btn in btns:
+            self.buttons.append(
+            t.Button(surface_to_draw_to, btn[0], btn_style_name, btn[1]))
+
+        super().setup_buttons(screen)
