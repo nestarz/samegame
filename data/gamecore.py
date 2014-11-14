@@ -15,7 +15,7 @@ class Color:
 
 class GameCore:
     """The heart of the game, at the moment, it only generates 1 board, but later, will generate 2 or more board, if you wish"""
-    def __init__(self,speed=1,num_color=6,num_row=10,num_col=20, num_board=1): #need getter, setter, later.
+    def __init__(self,speed=1,num_color=6,num_row=10,num_col=10, num_board=2): #need getter, setter, later.
         super().__init__()
         self.all_board = []
         for i in range(0,num_board):
@@ -59,7 +59,7 @@ class Board:
 
         i = 0
 
-        while i < 24:
+        while i < ((self.num_col-1)*self.num_row)/2:
             row = randrange(1,self.num_row)
             col = randrange(0,self.num_col)
 
@@ -142,13 +142,14 @@ class Board:
                         temp_col = self.board[row][col]
                         temp_cor.append((row,col))
                         combo = 1
-
-        print(destroy)
+        if destroy:
+            print(destroy)
 
         for line in destroy:
             for case in line:
                 self.board[case[0]][case[1]] = False
 
+        return destroy
 
 
 
@@ -225,3 +226,6 @@ class Case():
 
     def __init__(self):
         self.color = color
+
+a = Board()
+print(a)

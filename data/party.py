@@ -5,11 +5,13 @@ from . import cache
 from . import constants as c
 from . import tools as t
 from .gamecore import GameCore, Cursor
+from time import sleep
 
 class Party(GameCore, t.Screen):
     def __init__(self):
         super().__init__()
         self.timer = 0
+
 
 class Arcade(Party):
     def __init__(self):
@@ -39,7 +41,8 @@ class Arcade(Party):
             elif keys[pg.K_LEFT]:
                 self.cursor.move_left()
             elif keys[pg.K_RETURN] or keys[pg.K_SPACE]:
-                self.board1.swap()
+                for board in self.all_board:
+                  board.swap()
             elif keys[pg.K_ESCAPE]:
                 self.set_done(self.next)
         self.allow_input = False
@@ -50,10 +53,10 @@ class Arcade(Party):
             and not keys[pg.K_RETURN]
             and not keys[pg.K_SPACE]
             and not keys[pg.K_ESCAPE]
-            or (self.allow_input_timer > 6 and keys[pg.K_RIGHT])
-            or (self.allow_input_timer > 6 and keys[pg.K_LEFT])
-            or (self.allow_input_timer > 6 and keys[pg.K_DOWN])
-            or (self.allow_input_timer > 6 and keys[pg.K_UP])):
+            or (self.allow_input_timer > 2 and keys[pg.K_RIGHT])
+            or (self.allow_input_timer > 2 and keys[pg.K_LEFT])
+            or (self.allow_input_timer > 2 and keys[pg.K_DOWN])
+            or (self.allow_input_timer > 2 and keys[pg.K_UP])):
                 self.allow_input = True
                 self.allow_input_timer = 0
 
@@ -74,39 +77,43 @@ class Arcade(Party):
         start_img.rect.x = start_img.rect.x - 80
         start_img.rect.y = start_img.rect.y + 80
         window.blit(start_img.surface, start_img.rect)
-        board = self.board1
-        for row in reversed(range(board.num_row)):
-            for col in range(board.num_col):
-                if not board.board[row][col] is False:
-                    pg.draw.rect(self.images['panel1'].surface,
-                                     board.board[row][col].color+(235,),
-                                     [(5+38)*col+5,
-                                      (5+38)*(board.num_row-row)-30+5,
-                                      38,
-                                      38])
-                else:
-                    pg.draw.rect(self.images['panel1'].surface,
-                                     (255,255,255,50),
-                                     [(5+38)*col+5,
-                                      (5+38)*(board.num_row-row)-30+5,
-                                      38,
-                                      38])
-                pg.draw.rect(self.images['panel1'].surface,
-                                     (0,0,0),
-                                     [(5+38)*col+5,
-                                      (5+38)*(board.num_row-row)-30+5,
-                                      38,
-                                      38],3)
-        pg.draw.rect(self.images['panel1'].surface,
-                                         (255,255,255),
-                                         [(5+38)*self.cursor.pos_col+5,
-                                          (5+38)*(board.num_row-self.cursor.pos_row)-30+5,
-                                          38,
-                                          38],3)
-        pg.draw.rect(self.images['panel1'].surface,
-                                         (255,255,255),
-                                         [(5+38)*(self.cursor.pos_col+1)+5,
-                                          (5+38)*(board.num_row-self.cursor.pos_row)-30+5,
-                                          38,
-                                          38],3)
-        self.board1.gravity()
+        margin_x = 0
+        for board in self.all_board:
+          for row in reversed(range(board.num_row)):
+              for col in range(board.num_col):
+                  if not board.board[row][col] is False:
+                      pg.draw.rect(self.images['panel1'].surface,
+                                       board.board[row][col].color+(235,),
+                                       [margin_x + (5+38)*col+5,
+                                        (5+38)*(board.num_row-row)-30+5,
+                                        38,
+                                        38])
+                  else:
+                      pg.draw.rect(self.images['panel1'].surface,
+                                       (255,255,255,50),
+                                       [margin_x + (5+38)*col+5,
+                                        (5+38)*(board.num_row-row)-30+5,
+                                        38,
+                                        38])
+                  pg.draw.rect(self.images['panel1'].surface,
+                                       (0,0,0),
+                                       [margin_x +(5+38)*col+5,
+                                        (5+38)*(board.num_row-row)-30+5,
+                                        38,
+                                        38],3)
+          pg.draw.rect(self.images['panel1'].surface,
+                                           (255,255,255),
+                                           [margin_x +(5+38)*self.cursor.pos_col+5,
+                                            (5+38)*(board.num_row-self.cursor.pos_row)-30+5,
+                                            38,
+                                            38],3)
+          pg.draw.rect(self.images['panel1'].surface,
+                                           (255,255,255),
+                                           [margin_x +(5+38)*(self.cursor.pos_col+1)+5,
+                                            (5+38)*(board.num_row-self.cursor.pos_row)-30+5,
+                                            38,
+                                            38],3)
+          margin_x += (5+38)* board.num_col + 10
+          board.gravity()
+          board.destroy_block()
+          board.gravity()

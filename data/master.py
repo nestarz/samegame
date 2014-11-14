@@ -40,6 +40,7 @@ class Master(setup.Window):
             elif event.type == pg.KEYUP:
                 self.keys = pg.key.get_pressed()
 
+
     def main_loop(self):
         """Boucle principale du programme"""
         while not self.done:
