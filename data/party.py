@@ -148,5 +148,8 @@ class Arcade(Party):
                              (5+38)*(board.num_row-cursor.pos_row)-30-5,
                              38*2+5, 38],5)
           board.gravity()
-          board.destroy_block()
+          destroy = board.destroy_block()
           board.gravity()
+          if destroy: #debug only
+            print(destroy)
+            print(board)

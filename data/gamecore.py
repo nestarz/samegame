@@ -137,8 +137,6 @@ class Board:
                         temp_col = self.board[row][col]
                         temp_cor.append((row,col))
                         combo = 1
-        if destroy:
-            print(destroy)
 
         for line in destroy:
             for case in line:
@@ -221,6 +219,3 @@ class Case():
 
     def __init__(self):
         self.color = color
-
-a = Board()
-print(a)
