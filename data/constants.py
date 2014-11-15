@@ -1,4 +1,5 @@
 #!/bin/python3
+from pygame import locals as pg
 
 #GAME CONFIG
 NAME = "SAMEGAME"
@@ -27,7 +28,36 @@ PINK_RGB = (240,240,240)
 BLUE_RGB = (66,169,188)
 PURPLE_RGB = (156,82,181)
 MAROON_RGB = (118,93,48)
+COLORS_DICT = {
+    "blue" : BLUE_RGB,
+    "green" : GREEN_RGB,
+    "orange" : ORANGE_RGB,
+    "grey" : GREY_RGB,
+    "purple" : PURPLE_RGB,
+    "yellow" : YELLOW_RGB,
+    "pink" : PINK_RGB,
+    "maroon" : MAROON_RGB,
+    "white" : WHITE_RGB,
+    "red" : RED_RGB,
+    "black" : BLACK_RGB
+}
+#CONTROLS
+PLAYER1_CONTROLS = {
+    'UP' : pg.K_UP,
+    'DOWN' : pg.K_DOWN,
+    'LEFT' : pg.K_LEFT,
+    'RIGHT': pg.K_RIGHT,
+    'SWAP' : pg.K_RETURN
+}
 
+PLAYER2_CONTROLS = {
+    'UP' : pg.K_w,
+    'DOWN' : pg.K_s,
+    'LEFT' : pg.K_a,
+    'RIGHT': pg.K_d,
+    'SWAP' : pg.K_SPACE
+}
+CONTROLS = [PLAYER1_CONTROLS, PLAYER2_CONTROLS]
 #STYLES
 BTN = {
     "default": {

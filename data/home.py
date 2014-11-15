@@ -33,9 +33,9 @@ class Home(t.Screen):
         start_img.setup_effect('wait', 70)
         start_img.center(screen, 0, 220)
 
-        self.images['start'] = start_img
-        self.images['logo'] = logo_img
-        self.images['sublogo'] = sublogo_img
+        self.images.append(start_img)
+        self.images.append(logo_img)
+        self.images.append(sublogo_img)
 
     def set_done(self, next):
         super().set_done(next)
@@ -52,3 +52,4 @@ class Home(t.Screen):
         if (not keys[pg.K_RETURN]
             and self.allow_input_timer > 100):
                 self.allow_input = True
+

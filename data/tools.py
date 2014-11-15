@@ -22,7 +22,7 @@ class Screen(State):
         self.name = ''
         self.next = ''
         self.bg = None
-        self.images = dict()
+        self.images = list()
         self.buttons = list()
         self.allow_input = False
         self.to_set_done = -1
@@ -31,7 +31,7 @@ class Screen(State):
     def reinitialize(self):
         super().reinitialize()
         self.bg = None
-        self.images = dict()
+        self.images = list()
         self.buttons = list()
 
     def start(self, screen):
@@ -59,13 +59,12 @@ class Screen(State):
         self.check_for_input(keys)
         images = list()
         images.append(self.bg)
-        images.extend(list(self.images.values()))
+        images.extend(self.images)
         for img in images:
             img.update()
         for btn in self.buttons:
             btn.update(self.arrow_index, self.buttons.index(btn))
         self.to_set_done -= 1
-        self.allow_input_timer += 1
         self.done = self.to_set_done == 0
 
     def do_action(self, index):

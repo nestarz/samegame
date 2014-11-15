@@ -53,15 +53,15 @@ class Menu(t.Screen):
         panel3.rect.y = PANEL1_HEIGHT + PANEL2_HEIGHT
         panel3.setup_effect(*effect)
 
-        self.images['panel1'] = panel1
-        self.images['panel2'] = panel2
-        self.images['panel3'] = panel3
+        self.images.append(panel1)
+        self.images.append(panel2)
+        self.images.append(panel3)
 
     def setup_buttons(self, screen):
         y = 15
         for button in self.buttons:
-            if button.surfaceToDrawTo == self.images['panel3'].surface:
-                button.rect.right = self.images['panel3'].rect.right
+            if button.surfaceToDrawTo == self.images[2].surface:
+                button.rect.right = self.images[2].rect.right
                 button.rect = button.rect.move(-25,y)
                 y += 48
 
@@ -69,11 +69,12 @@ class Menu(t.Screen):
         super().set_done(next)
         self.to_set_done = 20
 
-        for panel in self.images.values():
+        for panel in self.images:
             panel.setup_effect('move', 20, c.LEFT, 'move3', 40)
         self.bg.setup_effect('fadeout', 100)
 
     def check_for_input(self, keys):
+        self.allow_input_timer += 1
         if self.allow_input:
             if keys[pg.K_UP]:
                 if self.arrow_index == 0:
@@ -97,6 +98,7 @@ class Menu(t.Screen):
             or (self.allow_input_timer > 4 and keys[pg.K_UP])):
                 self.allow_input = True
                 self.allow_input_timer = 0
+
     @property
     def arrow_index(self):
         return self.__arrow_index
@@ -115,7 +117,7 @@ class Main(Menu):
         self.description = 'Main Menu'
 
     def setup_buttons(self, screen):
-        surface_to_draw_to = self.images['panel3'].surface
+        surface_to_draw_to = self.images[2].surface
         btn_style_name = 'menu'
         btns = []
 
@@ -140,7 +142,7 @@ class ModeSelection(Menu):
         self.description = 'Selection du Mode'
 
     def setup_buttons(self, screen):
-        surface_to_draw_to = self.images['panel3'].surface
+        surface_to_draw_to = self.images[2].surface
         btn_style_name = 'menu'
         btns = []
 
@@ -165,7 +167,7 @@ class CharacterSelection(Menu):
         self.description = 'Choose your Hero'
 
     def setup_buttons(self, screen):
-        surface_to_draw_to = self.images['panel3'].surface
+        surface_to_draw_to = self.images[2].surface
         btn_style_name = 'menu'
         btns = []
 

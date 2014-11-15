@@ -2,7 +2,6 @@
 
 from random import *
 from copy import *
-from . import constants as c
 
 class Color:
     def __init__(self, color, name):
@@ -30,13 +29,7 @@ class Board:
         self.num_col = num_col #width of the board
         self.num_row = num_row #length of the board
         self.size = self.num_row, self.num_col
-        self.color = [
-        Color(c.BLUE_RGB, 'blu'),
-        Color(c.GREEN_RGB, 'gre'),
-        Color(c.ORANGE_RGB, 'ora'),
-        Color(c.GREY_RGB, 'gre'),
-        Color(c.PURPLE_RGB, 'pur'),
-        Color(c.YELLOW_RGB, 'yel')]
+        self.color = ['blue', 'green', 'orange', 'grey', 'purple', 'yellow'] #VALUES MUST BE IN THE CONSTANTS COLORS_DICT!!
         self.board = []
         self.generate_board()
         self.gravity()
@@ -71,7 +64,8 @@ class Board:
         self.gravity()
 
     def __str__(self):
-        a = "*---"*self.num_col+"*\n"
+        case_length = len(max(self.color))
+        a = "-"*(case_length+1)*self.num_col+"*\n"
         string = ''
 
         for row in reversed(range(self.num_row)):
@@ -79,9 +73,10 @@ class Board:
             for col in range(self.num_col):
                 string += "|"
                 if self.board[row][col] is False:
-                    string += '   '
+                    string += ' '*case_length
                 else:
-                    string += str(self.board[row][col])
+                    color = str(self.board[row][col])
+                    string += color + ' '*(case_length-len(color)) if len(color) < case_length else color[:case_length]
             string += "| \n"
         string += a
 
@@ -191,7 +186,7 @@ class Cursor():
         You can use .move_up, .move_down, .move_left, .move_right"""
 
     def __init__(self, num_row, num_col): #find it ugly to push parameters that already exist everywhere, num_row, num_col, need better solution
-        self.max_row = num_row
+        self.max_row = num_row-1
         self.max_col = num_col-1
         self.pos_row = 0
         self.pos_col = 0
@@ -215,7 +210,7 @@ class Cursor():
             print("Can't move left")
 
     def move_right(self):
-        if self.pos_col+1 <= self.max_col:
+        if self.pos_col < self.max_col-1:
             self.pos_col += 1
         else:
             print("Can't move right")
