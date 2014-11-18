@@ -27,8 +27,7 @@ class Menu(t.Screen):
         sublogo.rect.y = 85
         logo.draw()
         sublogo.draw()
-        effect = ('move', 0.655, c.RIGHT, 'move2', 7)
-        panel1.setup_effect(*effect)
+        panel1.setup_effect('move', 700,  (-panel1.surface.get_width(),0))
 
         panel2 = pg.Surface((435+10,PANEL2_HEIGHT), pg.SRCALPHA)
         panel2 = t.Panel(panel2, screen, (253,84,72,190), False)
@@ -46,12 +45,12 @@ class Menu(t.Screen):
         menu_img.rect.x = menu_img.rect.x - 20
         menu_img.draw()
         panel2.rect.y = PANEL1_HEIGHT
-        panel2.setup_effect(*effect)
+        panel2.setup_effect('move', 700, (-panel2.surface.get_width(),0))
 
         panel3 = pg.Surface((435,PANEL3_HEIGHT), pg.SRCALPHA)
         panel3 = t.Panel(panel3, screen, (0,0,0,120), True)
         panel3.rect.y = PANEL1_HEIGHT + PANEL2_HEIGHT
-        panel3.setup_effect(*effect)
+        panel3.setup_effect('move', 700,  (-panel3.surface.get_width(),0))
 
         self.images.append(panel1)
         self.images.append(panel2)
@@ -68,10 +67,10 @@ class Menu(t.Screen):
     def set_done(self, next):
         super().set_done(next)
         self.to_set_done = True
-        self.to_set_done_timer = 0.5
+        self.to_set_done_timer = 700
         for panel in self.images:
-            panel.setup_effect('move', 0.655, c.LEFT, 'move3', 7)
-        self.bg.setup_effect('fadeout', 2)
+            panel.setup_effect('move', 700, (-panel.surface.get_width(),0), True)
+        self.bg.setup_effect('fadeout', 1000)
 
     def check_for_input(self, keys):
         self.allow_input_timer += self.elapsed
@@ -94,8 +93,8 @@ class Menu(t.Screen):
             and not keys[pg.K_RETURN]
             and not keys[pg.K_SPACE]
             and not keys[pg.K_ESCAPE]
-            or (self.allow_input_timer > 0.5 and keys[pg.K_DOWN])
-            or (self.allow_input_timer > 0.5 and keys[pg.K_UP])):
+            or (self.allow_input_timer > 500 and keys[pg.K_DOWN])
+            or (self.allow_input_timer > 500 and keys[pg.K_UP])):
                 self.allow_input = True
                 self.allow_input_timer = 0
 

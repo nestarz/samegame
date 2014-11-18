@@ -54,8 +54,9 @@ class Master(setup.Window):
             fps = self.clock.get_fps()
             with_fps = "{} - {:.2f} FPS".format(self.caption, fps)
             pg.display.set_caption(with_fps)
-            self.elapsed = self.clock.tick(self.fps)/1000
+            self.elapsed = self.clock.tick(self.fps)
             #si self.fps non depasse, attend
+
     def flip_state(self):
         """Change l'etat du programme"""
         previous = self.state_name

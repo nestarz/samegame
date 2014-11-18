@@ -91,11 +91,11 @@ class Arcade(Party):
               and not keys[pg.K_ESCAPE])
 
           key_pressed_and_timer_exceed = \
-          ((self.allow_input_timer[i] > .1 and keys[player.keys['DOWN']])
-              or (self.allow_input_timer[i] > .1 and keys[player.keys['UP']])
-              or (self.allow_input_timer[i] > .1 and keys[player.keys['LEFT']])
-              or (self.allow_swap_timer[i] > .5 and keys[player.keys['SWAP']])
-              or (self.allow_input_timer[i] > .1 and keys[player.keys['RIGHT']]))
+          ((self.allow_input_timer[i] > 100 and keys[player.keys['DOWN']])
+              or (self.allow_input_timer[i] > 100 and keys[player.keys['UP']])
+              or (self.allow_input_timer[i] > 100 and keys[player.keys['LEFT']])
+              or (self.allow_swap_timer[i] > 500 and keys[player.keys['SWAP']])
+              or (self.allow_input_timer[i] > 100 and keys[player.keys['RIGHT']]))
 
           if (key_pressed_and_timer_exceed):
                   self.allow_input[i] = True
@@ -103,8 +103,8 @@ class Arcade(Party):
                   self.allow_swap_timer[i] = 0
           elif no_key_pressed:
                   self.allow_input[i] = True
-                  self.allow_input_timer[i] = -.4
-                  self.allow_swap_timer[i] = -.4
+                  self.allow_input_timer[i] = -400
+                  self.allow_swap_timer[i] = -400
 
     def set_done(self, next):
         super().set_done(next)

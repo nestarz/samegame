@@ -174,50 +174,37 @@ class Move(_Effect):
     A modifier pour permettre de décider du point d'arrivé/départ,
     de la vitesse et ne plus dépendre des fps.
     """
-    def __init__(self, delay, direction, mtype='move', speed=0):
+    def __init__(self, delay, distance, reversed_motion=False):
         super().__init__(delay)
-        self.direction = direction
-        self.speed = speed
-        self.mtype = mtype
+        self.reversed_motion = reversed_motion
+        self.distance = distance
+
+    def step(self, elapsed, remaining_range, remaining_delay):
+        return (remaining_range/remaining_delay)*elapsed
 
     def apply(self, elapsed, surface, rect):
-        if self.mtype == 'move':
-            if self.current_delay <= 0:
-                rect = self.init_rect
-                self.done = True
-            elif self.current_delay > 0:
-                if self.first_apply:
+        if self.current_delay > 0:
+            if self.first_apply:
+                if self.reversed_motion:
+                    self.init_rect = rect.move(*self.distance)
+                else:
                     self.init_rect = rect
-                    rect = rect.move(0,22*self.init_delay)
-                    self.first_apply = False
-                ratio = 1-(self.current_delay / self.init_delay)
-                rect = rect.move(*self.direction)
-                self.current_delay -= elapsed
-        if self.mtype == 'move2':
-            if self.current_delay <= 0:
-                rect = self.init_rect
-                self.done = True
-            elif self.current_delay > 0:
-                if self.first_apply:
-                    self.init_rect = rect
-                    rect = rect.move(-surface.get_width(),0)
-                    self.first_apply = False
-                rect = rect.move(
-                    self.direction[0]*self.speed,
-                    self.direction[1]*self.speed)
-                self.current_delay -= elapsed
-        if self.mtype == 'move3':
-            if self.current_delay <= 0:
-                rect = self.init_rect
-                self.done = True
-            elif self.current_delay > 0:
-                if self.first_apply:
-                    self.init_rect = rect
-                    self.first_apply = False
-                rect = rect.move(
-                    self.direction[0]*self.speed,
-                    self.direction[1]*self.speed)
-                self.current_delay -= elapsed
+                    rect = rect.move(*self.distance)
+                self.first_apply = False
+            ratio_y = self.step(
+                elapsed,
+                self.init_rect.y - rect.y,
+                self.current_delay)
+            ratio_x = self.step(
+                elapsed,
+                self.init_rect.x - rect.x,
+                self.current_delay)
+            ratio = (ratio_x, ratio_y)
+            rect = rect.move(*ratio)
+            self.current_delay -= elapsed
+        elif self.current_delay <= 0:
+            rect = self.init_rect
+            self.done = True
         return surface, rect
 
 EFFECTS_DICT = {
