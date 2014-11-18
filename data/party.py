@@ -66,8 +66,8 @@ class Arcade(Party):
 
     def check_for_input(self, keys):
         for i, player in enumerate(self.players):
-          self.allow_input_timer[i] += 1
-          self.allow_swap_timer[i] += 1
+          self.allow_input_timer[i] += self.elapsed
+          self.allow_swap_timer[i] += self.elapsed
           if self.allow_input[i]:
               if keys[player.keys['UP']]:
                   player.cursor.move_up()
@@ -91,11 +91,11 @@ class Arcade(Party):
               and not keys[pg.K_ESCAPE])
 
           key_pressed_and_timer_exceed = \
-          ((self.allow_input_timer[i] > 3 and keys[player.keys['DOWN']])
-              or (self.allow_input_timer[i] > 3 and keys[player.keys['UP']])
-              or (self.allow_input_timer[i] > 3 and keys[player.keys['LEFT']])
-              or (self.allow_swap_timer[i] > 9 and keys[player.keys['SWAP']])
-              or (self.allow_input_timer[i] > 3 and keys[player.keys['RIGHT']]))
+          ((self.allow_input_timer[i] > .1 and keys[player.keys['DOWN']])
+              or (self.allow_input_timer[i] > .1 and keys[player.keys['UP']])
+              or (self.allow_input_timer[i] > .1 and keys[player.keys['LEFT']])
+              or (self.allow_swap_timer[i] > .5 and keys[player.keys['SWAP']])
+              or (self.allow_input_timer[i] > .1 and keys[player.keys['RIGHT']]))
 
           if (key_pressed_and_timer_exceed):
                   self.allow_input[i] = True
@@ -103,16 +103,17 @@ class Arcade(Party):
                   self.allow_swap_timer[i] = 0
           elif no_key_pressed:
                   self.allow_input[i] = True
-                  self.allow_input_timer[i] = -7
-                  self.allow_swap_timer[i] = -7
+                  self.allow_input_timer[i] = -.4
+                  self.allow_swap_timer[i] = -.4
 
     def set_done(self, next):
         super().set_done(next)
-        self.to_set_done = 20
-        self.bg.setup_effect('fadeout', 100)
+        self.to_set_done = True
+        self.to_set_done_timer = 0.5
+        self.bg.setup_effect('fadeout', 2)
 
-    def update(self, window, keys):
-        Party.update(self, window, keys)
+    def update(self, window, keys, elapsed):
+        super().update(window, keys, elapsed)
         self.timer += 1
         img = t.Image(t.text_to_surface(' {:04d} '.format(self.timer), 'joystix', 22, c.WHITE_RGB), window)
         start_img = pg.Surface(img.surface.get_size(), pg.SRCALPHA)

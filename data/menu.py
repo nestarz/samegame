@@ -27,7 +27,7 @@ class Menu(t.Screen):
         sublogo.rect.y = 85
         logo.draw()
         sublogo.draw()
-        effect = ('move', 7, c.RIGHT, 'move2', 40)
+        effect = ('move', 0.655, c.RIGHT, 'move2', 7)
         panel1.setup_effect(*effect)
 
         panel2 = pg.Surface((435+10,PANEL2_HEIGHT), pg.SRCALPHA)
@@ -67,14 +67,14 @@ class Menu(t.Screen):
 
     def set_done(self, next):
         super().set_done(next)
-        self.to_set_done = 20
-
+        self.to_set_done = True
+        self.to_set_done_timer = 0.5
         for panel in self.images:
-            panel.setup_effect('move', 20, c.LEFT, 'move3', 40)
-        self.bg.setup_effect('fadeout', 100)
+            panel.setup_effect('move', 0.655, c.LEFT, 'move3', 7)
+        self.bg.setup_effect('fadeout', 2)
 
     def check_for_input(self, keys):
-        self.allow_input_timer += 1
+        self.allow_input_timer += self.elapsed
         if self.allow_input:
             if keys[pg.K_UP]:
                 if self.arrow_index == 0:
@@ -94,8 +94,8 @@ class Menu(t.Screen):
             and not keys[pg.K_RETURN]
             and not keys[pg.K_SPACE]
             and not keys[pg.K_ESCAPE]
-            or (self.allow_input_timer > 4 and keys[pg.K_DOWN])
-            or (self.allow_input_timer > 4 and keys[pg.K_UP])):
+            or (self.allow_input_timer > 0.5 and keys[pg.K_DOWN])
+            or (self.allow_input_timer > 0.5 and keys[pg.K_UP])):
                 self.allow_input = True
                 self.allow_input_timer = 0
 

@@ -13,8 +13,9 @@ class _Effect():
         self.current_delay = self.init_delay
         self.display = True
         self.done = False
+        self.first_apply = True
 
-    def apply(self, surface, rect):
+    def apply(self, elapsed, surface, rect):
         """
         Met à jour l'effet et l'applique à la surface.
         """
@@ -29,10 +30,10 @@ class Shake(_Effect):
         self.sign1 = 1
         self.sign2 = -1
 
-    def apply(self, surface, rect):
+    def apply(self, elapsed, surface, rect):
         self.sign1 = - self.sign1
         self.sign2 = - self.sign2
-        rect = rect.move(self.sign1*1,self.sign2*1)
+        rect = rect.move(self.sign1*elapsed,self.sign2*elapsed)
 
 class Wait(_Effect):
     """
@@ -41,13 +42,13 @@ class Wait(_Effect):
     def __init__(self, delay):
         super().__init__(delay)
 
-    def apply(self):
-        if self.current_delay == 0:
+    def apply(self, elapsed):
+        if self.current_delay <= 0:
             self.display = True
             self.done = True
         elif self.current_delay > 0:
             self.display = False
-            self.current_delay -= 1
+            self.current_delay -= elapsed
         return self.display
 
 class Blink(_Effect):
@@ -57,12 +58,12 @@ class Blink(_Effect):
     def __init__(self, delay):
         super().__init__(delay)
 
-    def apply(self, surface, rect):
-        if self.current_delay == 0:
+    def apply(self, elapsed, surface, rect):
+        if self.current_delay <= 0:
             self.display = not self.display
             self.current_delay = self.init_delay
         elif self.current_delay > 0:
-            self.current_delay -= 1
+            self.current_delay -= elapsed
         return surface, rect
 
 class FadeIn1(_Effect):
@@ -78,8 +79,8 @@ class FadeIn1(_Effect):
         super().__init__(delay)
         self.set_alpha = set_alpha
 
-    def apply(self, surface, rect):
-        if self.current_delay == 0:
+    def apply(self, elapsed, surface, rect):
+        if self.current_delay <= 0:
             self.alpha = 255
             self.done = True
         elif self.current_delay > 0:
@@ -91,7 +92,7 @@ class FadeIn1(_Effect):
             else:
                 # /!\ marche seulement si AA=1
                 self.apply_alpha(surface, self.alpha)
-            self.current_delay -= 1
+            self.current_delay -= elapsed
         return surface, rect
 
     def apply_alpha(self, surface, alpha):
@@ -118,12 +119,13 @@ class FadeIn2(_Effect):
     def __init__(self, delay):
         super().__init__(delay)
 
-    def apply(self, surface, rect):
-        ratio = (self.current_delay / self.init_delay)
+    def apply(self, elapsed, surface, rect):
+        ratio = (max(0, self.current_delay) / self.init_delay)
         self.alpha = int(ratio*255)
-        if self.current_delay == self.init_delay:
+        if self.first_apply:
             self.surface_init = surface.copy()
-        if self.current_delay == 0:
+            self.first_apply = False
+        if self.current_delay <= 0:
             surface = self.surface_init.copy()
             self.done = True
         else:
@@ -132,7 +134,7 @@ class FadeIn2(_Effect):
             self.panel = Panel(panel, surface, (0,0,0,self.alpha), False)
             self.panel.fill((0,0,0,self.alpha))
             self.panel.draw()
-        self.current_delay -= 1
+        self.current_delay -= elapsed
         return surface, rect
 
 class FadeOut(_Effect):
@@ -145,23 +147,24 @@ class FadeOut(_Effect):
     def __init__(self, delay):
         super().__init__(delay)
 
-    def apply(self, surface, rect):
+    def apply(self, elapsed, surface, rect):
         """
         Applique une surface transparente (alpha:20) sur la surface
         A MODIFIER pour tenir compte de self.alpha
         """
         ratio = (self.current_delay / self.init_delay)
         self.alpha = int(ratio*255)
-        if self.current_delay == self.init_delay:
+        if self.first_apply:
             panel = pg.Surface(surface.get_size(), pg.SRCALPHA)
             self.panel = Panel(panel, surface, (0,0,0,20), False)
-        elif self.current_delay == 0:
+            self.first_apply = False
+        if self.current_delay <= 0:
             self.panel.fill((0,0,0,0))
             self.done = True
         else:
             self.panel.fill((0,0,0,20))
             self.panel.draw()
-        self.current_delay -= 1
+        self.current_delay -= elapsed
         return surface, rect
 
 class Move(_Effect):
@@ -177,41 +180,44 @@ class Move(_Effect):
         self.speed = speed
         self.mtype = mtype
 
-    def apply(self, surface, rect):
+    def apply(self, elapsed, surface, rect):
         if self.mtype == 'move':
-            if self.current_delay == 0:
+            if self.current_delay <= 0:
                 rect = self.init_rect
                 self.done = True
             elif self.current_delay > 0:
-                if self.current_delay == self.init_delay:
+                if self.first_apply:
                     self.init_rect = rect
-                    rect = rect.move(0,self.init_delay)
+                    rect = rect.move(0,22*self.init_delay)
+                    self.first_apply = False
                 ratio = 1-(self.current_delay / self.init_delay)
                 rect = rect.move(*self.direction)
-                self.current_delay -= 1
+                self.current_delay -= elapsed
         if self.mtype == 'move2':
-            if self.current_delay == 0:
+            if self.current_delay <= 0:
                 rect = self.init_rect
                 self.done = True
             elif self.current_delay > 0:
-                if self.current_delay == self.init_delay:
+                if self.first_apply:
                     self.init_rect = rect
                     rect = rect.move(-surface.get_width(),0)
+                    self.first_apply = False
                 rect = rect.move(
                     self.direction[0]*self.speed,
                     self.direction[1]*self.speed)
-                self.current_delay -= 1
+                self.current_delay -= elapsed
         if self.mtype == 'move3':
-            if self.current_delay == 0:
+            if self.current_delay <= 0:
                 rect = self.init_rect
                 self.done = True
             elif self.current_delay > 0:
-                if self.current_delay == self.init_delay:
+                if self.first_apply:
                     self.init_rect = rect
+                    self.first_apply = False
                 rect = rect.move(
                     self.direction[0]*self.speed,
                     self.direction[1]*self.speed)
-                self.current_delay -= 1
+                self.current_delay -= elapsed
         return surface, rect
 
 EFFECTS_DICT = {

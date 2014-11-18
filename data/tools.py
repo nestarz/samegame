@@ -25,8 +25,10 @@ class Screen(State):
         self.images = list()
         self.buttons = list()
         self.allow_input = False
-        self.to_set_done = -1
+        self.to_set_done = False
+        self.to_set_done_timer = 0
         self.allow_input_timer = 0
+        self.elapsed = 0
 
     def reinitialize(self):
         super().reinitialize()
@@ -43,7 +45,7 @@ class Screen(State):
         bg_img = cache._cache.images[self.name]
         self.bg = Image(bg_img, screen)
         self.bg.resize(*c.SCREEN_SIZE)
-        self.bg.setup_effect('fadein2', 20)
+        self.bg.setup_effect('fadein2', 1)
 
     def setup_images(self, screen):
         pass
@@ -53,19 +55,21 @@ class Screen(State):
 
     def set_done(self, next):
         self.next = next
-        self.to_set_done = 0
+        self.to_set_done_timer = 0
 
-    def update(self, window, keys):
+    def update(self, window, keys, elapsed):
+        self.elapsed = elapsed
         self.check_for_input(keys)
         images = list()
         images.append(self.bg)
         images.extend(self.images)
         for img in images:
-            img.update()
+            img.update(elapsed)
         for btn in self.buttons:
-            btn.update(self.arrow_index, self.buttons.index(btn))
-        self.to_set_done -= 1
-        self.done = self.to_set_done == 0
+            btn.update(elapsed, self.arrow_index, self.buttons.index(btn))
+        if self.to_set_done:
+            self.to_set_done_timer -= self.elapsed
+            self.done = max(0, self.to_set_done_timer) == 0
 
     def do_action(self, index):
         if index in range(0, len(self.buttons)):
@@ -94,15 +98,16 @@ class Image():
         self.rect.centerx = screen.get_rect().centerx + x
         self.rect.centery = screen.get_rect().centery + y
 
-    def update(self):
+    def update(self, elapsed):
         if self.wait:
-            self.display = self.wait_effect.apply()
+            self.display = self.wait_effect.apply(elapsed)
             if self.wait_effect.done:
                 self.effect.remove(self.wait_effect)
                 self.wait = False
         if not self.wait:
             for effect in self.effect:
-                self.surface, self.rect = effect.apply(self.surface, self.rect)
+                self.surface, self.rect = effect.apply(
+                    elapsed, self.surface, self.rect)
                 self.display = effect.display
                 if effect.done:
                     self.effect.remove(effect)
@@ -135,7 +140,7 @@ class Button(Image):
         self.start = True
         self.i = 0
 
-    def update(self, arrow_index, index):
+    def update(self, elapsed, arrow_index, index):
         if arrow_index == index:
             style_hover = self.style.get('hover', 'default')
             if self.arrow_txt == '* ':
@@ -167,7 +172,7 @@ class Button(Image):
             self.surface = self.original
             self.effect = []
             self.start = True
-        Image.update(self)
+        super().update(elapsed)
 
 def text_to_surface(text, name, size, color, AA=0, bold=False, italic=False):
     font = Font(name, size)
@@ -188,8 +193,8 @@ class Panel(Image):
             self.RGBA = RGBA
         self.surface.fill(self.RGBA)
 
-    def update(self):
-        Image.update(self)
+    def update(self, elapsed):
+        super().update(elapsed)
         if self.refill:
             self.fill()
 
