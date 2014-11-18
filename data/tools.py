@@ -45,7 +45,7 @@ class Screen(State):
         bg_img = cache._cache.images[self.name]
         self.bg = Image(bg_img, screen)
         self.bg.resize(*c.SCREEN_SIZE)
-        self.bg.setup_effect('fadein2', 1)
+        self.bg.setup_effect('fadein2', 1000)
 
     def setup_images(self, screen):
         pass
