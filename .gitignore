@@ -1,3 +1,10 @@
 *.pyc
 *.psd
 *.dmp
+*.sublime-project
+*.sublime-workspace
+ledgerware/static/*
+resources/images/psd and backupfiles/*
+resources/images/Thumbs.db
+resources/sounds/foo.mp3
+*.db
