@@ -1,12 +1,16 @@
 #!/bin/python3
+# -*- coding: utf-8 -*-
 
 import pygame as pg
 from . import cache
 from . import constants as c
 from . import tools as t
 
+
 class Home(t.Screen):
+
     """ Enfant de l'objet State """
+
     def __init__(self):
         super().__init__()
         self.name = c.HOME
@@ -14,19 +18,21 @@ class Home(t.Screen):
 
     def setup_images(self, screen):
         logo_img = t.Image(cache._cache.images['logo'].copy(), screen)
-        logo_img.setup_effect('move', 1000, (0,25))
+        logo_img.setup_effect('move', 1000, (0, 25))
         logo_img.setup_effect('fadein1', 1000)
         logo_img.center(screen, 0, -5)
 
-        sublogo_img = t.Image(t.text_to_surface(c.AUTHOR, 'joystix', 10, c.WHITE_RGB), screen)
+        sublogo_img = t.Image(t.text_to_surface(c.AUTHOR, 'joystix',
+                              10, c.WHITE_RGB), screen)
         sublogo_img.setup_effect('wait', 600)
         sublogo_img.setup_effect('fadein1', 1500, True)
         sublogo_img.center(screen, 0, 30)
 
         text1 = 'Press Start Button'
-        img = t.Image(t.text_to_surface(text1, 'joystix', 20, c.WHITE_RGB), screen)
+        img = t.Image(t.text_to_surface(text1, 'joystix', 20,
+                      c.WHITE_RGB), screen)
         start_img = pg.Surface(img.surface.get_size(), pg.SRCALPHA)
-        start_img.fill((0,0,0,255))
+        start_img.fill((0, 0, 0, 255))
         start_img.blit(img.surface, img.rect)
         start_img = t.Image(start_img, screen)
         start_img.setup_effect('blink', 500)
@@ -47,18 +53,24 @@ class Home(t.Screen):
 
     def check_for_input(self, keys):
         self.allow_input_timer += self.elapsed
-        #j'augmente à chaque fois le timer
-        #du temps passé depuis le dernier tick
+
+        # j'augmente a chaque fois le timer
+        # du temps passe depuis le dernier tick
+
         if self.allow_input:
             if keys[pg.K_RETURN]:
                 self.allow_input_timer = 0
                 self.set_done(self.next)
         self.allow_input = False
-        if (not keys[pg.K_RETURN]
-            and self.allow_input_timer > 900):
-        #si le temps passé dans la home
-        #est supérieur à 3 seconde alors
-        #j'autorise la personne à passer
-        #l'intro
-                self.allow_input = True
+        if not keys[pg.K_RETURN] and self.allow_input_timer > 900:
+
+        # si le temps passe dans la home
+        # est superieur a 3 seconde alors
+        # j'autorise la personne a passer
+        # l'intro
+
+            self.allow_input = True
+
+
+
 

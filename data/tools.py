@@ -1,10 +1,13 @@
 #!/bin/python3
+# -*- coding: utf-8 -*-
 
 import pygame as pg
 from . import cache
 from . import constants as c
 
-class State():
+
+class State:
+
     def __init__(self):
         self.done = False
         self.quit = False
@@ -16,7 +19,9 @@ class State():
     def check_for_input(self, keys):
         pass
 
+
 class Screen(State):
+
     def __init__(self):
         super().__init__()
         self.name = ''
@@ -57,7 +62,12 @@ class Screen(State):
         self.next = next
         self.to_set_done_timer = 0
 
-    def update(self, window, keys, elapsed):
+    def update(
+        self,
+        window,
+        keys,
+        elapsed,
+        ):
         self.elapsed = elapsed
         self.check_for_input(keys)
         images = list()
@@ -66,7 +76,8 @@ class Screen(State):
         for img in images:
             img.update(elapsed)
         for btn in self.buttons:
-            btn.update(elapsed, self.arrow_index, self.buttons.index(btn))
+            btn.update(elapsed, self.arrow_index,
+                       self.buttons.index(btn))
         if self.to_set_done:
             self.to_set_done_timer -= self.elapsed
             self.done = max(0, self.to_set_done_timer) == 0
@@ -76,7 +87,8 @@ class Screen(State):
             self.buttons[index].callback()
 
 
-class Image():
+class Image:
+
     def __init__(self, ref, surfaceToDrawTo):
         self.surface = ref
         self.rect = self.surface.get_rect()
@@ -94,7 +106,12 @@ class Image():
             self.wait = True
             self.wait_effect = self.effect[-1]
 
-    def center(self, screen, x=0, y=0):
+    def center(
+        self,
+        screen,
+        x=0,
+        y=0,
+        ):
         self.rect.centerx = screen.get_rect().centerx + x
         self.rect.centery = screen.get_rect().centery + y
 
@@ -106,8 +123,8 @@ class Image():
                 self.wait = False
         if not self.wait:
             for effect in self.effect:
-                self.surface, self.rect = effect.apply(
-                    elapsed, self.surface, self.rect)
+                (self.surface, self.rect) = effect.apply(elapsed,
+                        self.surface, self.rect)
                 self.display = effect.display
                 if effect.done:
                     self.effect.remove(effect)
@@ -118,12 +135,20 @@ class Image():
             self.surfaceToDrawTo.blit(self.surface, self.rect)
 
     def resize(self, w, h):
-        self.surface = pg.transform.scale(self.surface,(int(w),int(h)))
+        self.surface = pg.transform.scale(self.surface, (int(w),
+                int(h)))
         self.rect = self.surface.get_rect()
 
 
 class Button(Image):
-    def __init__(self, surfaceToDrawTo, txt, stylename='default', callback=None):
+
+    def __init__(
+        self,
+        surfaceToDrawTo,
+        txt,
+        stylename='default',
+        callback=None,
+        ):
         self.style = c.BTN[stylename]
         self.txt = txt
         ref = text_to_surface(
@@ -132,7 +157,8 @@ class Button(Image):
             self.style['size'],
             self.style['default']['color'],
             self.style['AA'],
-            self.style['bold'])
+            self.style['bold'],
+            )
         super().__init__(ref, surfaceToDrawTo)
         self.callback = callback
         self.original = self.surface
@@ -140,7 +166,12 @@ class Button(Image):
         self.start = True
         self.i = 0
 
-    def update(self, elapsed, arrow_index, index):
+    def update(
+        self,
+        elapsed,
+        arrow_index,
+        index,
+        ):
         if arrow_index == index:
             style_hover = self.style.get('hover', 'default')
             if self.arrow_txt == '* ':
@@ -152,12 +183,14 @@ class Button(Image):
                 self.start = False
             else:
                 if 0 <= self.i < 15:
-                    self.temp_c = tuple([x-4 for x in self.temp_c])
-                    self.color = tuple([max(0,min(x-4,255)) for x in self.temp_c])
+                    self.temp_c = tuple([x - 4 for x in self.temp_c])
+                    self.color = tuple([max(0, min(x - 4, 255))
+                            for x in self.temp_c])
                     self.i += 1
                 elif 15 <= self.i < 30:
-                    self.temp_c = tuple([x+4 for x in self.temp_c])
-                    self.color = tuple([min(max(0,x+4),255) for x in self.temp_c])
+                    self.temp_c = tuple([x + 4 for x in self.temp_c])
+                    self.color = tuple([min(max(0, x + 4), 255)
+                            for x in self.temp_c])
                     self.i += 1
                 else:
                     self.i = 0
@@ -167,22 +200,39 @@ class Button(Image):
                 self.style['size'],
                 self.color,
                 self.style['AA'],
-                self.style['bold'])
+                self.style['bold'],
+                )
         else:
             self.surface = self.original
             self.effect = []
             self.start = True
         super().update(elapsed)
 
-def text_to_surface(text, name, size, color, AA=0, bold=False, italic=False):
+
+def text_to_surface(
+    text,
+    name,
+    size,
+    color,
+    AA=0,
+    bold=False,
+    italic=False,
+    ):
     font = Font(name, size)
     font.set_bold(bold)
     font.set_italic(italic)
-    return font.render(
-        text, AA, color)
+    return font.render(text, AA, color)
+
 
 class Panel(Image):
-    def __init__(self, ref, surfaceToDrawTo, RGBA=(0,0,0,0), refill=False):
+
+    def __init__(
+        self,
+        ref,
+        surfaceToDrawTo,
+        RGBA=(0, 0, 0, 0),
+        refill=False,
+        ):
         super().__init__(ref, surfaceToDrawTo)
         self.RGBA = RGBA
         self.fill(RGBA)
@@ -198,14 +248,21 @@ class Panel(Image):
         if self.refill:
             self.fill()
 
+
 class Font(pg.font.Font):
+
     def __init__(self, name, size):
         self.name = name
         self.size = size
-        super().__init__(
-            cache._cache.fonts.get(name, pg.font.get_default_font()),
-            size)
+        super().__init__(cache._cache.fonts.get(name,
+                         pg.font.get_default_font()), size)
+
 
 class CustomButton(Button):
+
     def __init__(self, text, customstyle):
         super().__init__(text)
+
+
+
+
