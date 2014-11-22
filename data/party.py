@@ -20,6 +20,8 @@ class Player:
         self.board = board
         self.cursor = self.board.cursor
         self.keys = keys
+        self.keys_move = [keys['UP'], keys[
+            'DOWN'], keys['LEFT'], keys['RIGHT']]
 
 
 class Party(t.Screen):
@@ -38,15 +40,13 @@ class Arcade(Party):
         self.players = [Player(), Player()]
         self.img_boards = list()
         self.allow_input = [True for player in self.players]
+        self.allow_swap = [True for player in self.players]
         self.allow_input_timer = [0
                                   for player in self.players]
-        self.allow_swap_timer = self.allow_input_timer
-        self.first_time = True
-        self.previous_key = None
-        self.previous_len_key = 0
 
     def start(self, screen):
-        """ Creation des plateaux de jeu, des touches et attribution des plateaux de jeu aux joueurs """
+        """ Creation des plateaux de jeu, des touches et
+        attribution des plateaux de jeu aux joueurs """
 
         nb_color = 6
         nb_col = 7
@@ -87,9 +87,7 @@ class Arcade(Party):
     def check_for_input(self, keys):
         for (i, player) in enumerate(self.players):
             self.allow_input_timer[i] += self.elapsed
-            self.allow_swap_timer[i] += self.elapsed
-            if self.allow_input[i] and len([key for key in keys
-                                            if key != 0]) > 0:
+            if self.allow_input[i] and len([key for key in keys if key != 0]):
                 if keys[player.keys['UP']]:
                     player.cursor.move_up()
                 if keys[player.keys['DOWN']]:
@@ -98,63 +96,25 @@ class Arcade(Party):
                     player.cursor.move_right()
                 if keys[player.keys['LEFT']]:
                     player.cursor.move_left()
-                if keys[player.keys['SWAP']]:
-                    player.board.swap()
                 if keys[pg.K_ESCAPE]:
                     self.set_done(self.next)
+            if self.allow_swap[i] and keys[player.keys['SWAP']]:
+                player.board.swap()
+
             self.allow_input[i] = False
+            self.allow_swap[i] = False
 
-            no_key_pressed = not keys[player.keys['DOWN']] \
-                and not keys[player.keys['UP']] \
-                and not keys[player.keys['RIGHT']] \
-                and not keys[player.keys['LEFT']] \
-                and not keys[player.keys['SWAP']] \
-                and not keys[pg.K_ESCAPE]
+            no_key_pressed = not sum(keys[key] for key in player.keys_move)
 
-            key_pressed_and_timer_exceed = \
-                self.allow_input_timer[i] > 200 \
-                and keys[player.keys['DOWN']] \
-                or self.allow_input_timer[i] > 200 \
-                and keys[player.keys['UP']] \
-                or self.allow_input_timer[i] > 200 \
-                and keys[player.keys['LEFT']] \
-                or self.allow_swap_timer[i] > 1000 \
-                and keys[player.keys['SWAP']] \
-                or self.allow_input_timer[i] > 200 \
-                and keys[player.keys['RIGHT']]
-
-            key = None
-            for k in ['UP', 'DOWN', 'LEFT', 'SWAP', 'RIGHT']:
-                if keys[player.keys[k]]:
-                    key = k
-
-            if len([key for key in keys
-                    if key != 0]) == 2 and self.previous_len_key == 1:
-                self.allow_input_timer[i] = -300
-                self.allow_swap_timer[i] = -300
-                self.allow_input[i] = True
-
-            if key_pressed_and_timer_exceed:
+            if self.allow_input_timer[i] > 70:
                 self.allow_input[i] = True
                 self.allow_input_timer[i] = 0
-                self.allow_swap_timer[i] = 0
             elif no_key_pressed:
                 self.allow_input[i] = True
-                self.allow_input_timer[i] = -300
-                self.allow_swap_timer[i] = -300
-            self.previous_len_key = len([key for key in keys
-                                         if key != 0])
+                self.allow_input_timer[i] = -170
 
-            if keys[player.keys['UP']]:
-                self.previous_key = 'UP'
-            if keys[player.keys['DOWN']]:
-                self.previous_key = 'DOWN'
-            if keys[player.keys['RIGHT']]:
-                self.previous_key = 'RIGHT'
-            if keys[player.keys['LEFT']]:
-                self.previous_key = 'LEFT'
-            if keys[player.keys['SWAP']]:
-                self.previous_key = 'SWAP'
+            if not keys[player.keys['SWAP']]:
+                self.allow_swap[i] = True
 
     def set_done(self, next):
         super().set_done(next)
