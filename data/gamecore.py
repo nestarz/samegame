@@ -127,55 +127,58 @@ class Board:
 
         destroy = []
 
+        def destroy_local(self,combo, row,col,temp_case,temp_cor,destroy):
+            
+            if self.board[row][col]:
+                if self.board[row][col] == temp_case:
+                    combo += 1
+                    temp_cor.append( (row,col))
+                else:
+                    if combo >= 3:
+                        destroy.append(temp_cor)
+                                               
+                    temp_cor = [(row,col)]
+                    combo = 1
+                    temp_case = self.board[row][col]
+
+            else:
+                if combo >= 3:
+                        destroy.append(temp_cor)
+                        
+                combo = 1
+                temp_core = [(row,col)]
+                temp_case = False
+                    
+
+            return(combo,temp_case,temp_cor,destroy)
+
         for row in reversed(range(1, self.num_row)):  # check per line
             combo = 1
-            temp_col = True
-            temp_cor = []
+            temp_case = self.board[row][0]
+            temp_cor = [(row,0)]
+            
             for col in range(self.num_col):
-                if self.board[row][col]:
-                    if temp_col is True:
-                        temp_col = self.board[row][col]
-                        temp_cor.append((row, col))
-                    elif temp_col == self.board[row][col]:
-                        combo += 1
-                        temp_cor.append((row, col))
-                    elif combo >= 3:
-                        temp_col = True
-                        destroy.append(temp_cor)
-                        temp_cor = []
-                        combo = 1
-                    else:
-                        temp_col = self.board[row][col]
-                        temp_cor.append((row, col))
-                        combo = 1
+                combo,temp_case,temp_cor,destroy = destroy_local(self,combo,row,col,temp_case,temp_cor,destroy)
+
+            if combo >= 3:
+                destroy.append(temp_cor)
 
         for col in range(self.num_col):  # check per column
             combo = 1
-            temp_col = True
-            temp_cor = []
+            temp_col = self.board[1][col]
+            temp_cor = [(1,col)]
+            
             for row in reversed(range(1, self.num_row)):
-                if self.board[row][col]:
-                    if temp_col is True:
-                        temp_col = self.board[row][col]
-                        temp_cor.append((row, col))
-                    elif temp_col == self.board[row][col]:
-                        combo += 1
-                        temp_cor.append((row, col))
-                    elif combo >= 3:
-                        temp_col = True
-                        destroy.append(temp_cor)
-                        temp_cor = []
-                        combo = 1
-                    else:
-                        temp_col = self.board[row][col]
-                        temp_cor.append((row, col))
-                        combo = 1
+                combo,temp_case,temp_cor,destroy = destroy_local(self,combo,row,col,temp_case,temp_cor,destroy)
 
+            if combo >= 3:
+                destroy.append(temp_cor)
+        
+        
+            
         for line in destroy:
             for case in line:
                 self.board[case[0]][case[1]] = False
-
-        return destroy
 
     def gravity(self):
         """Makes sure there is no empty space between a case and the bottom"""
