@@ -33,7 +33,10 @@ class Master(setup.Window):
             self.done = True  # le prog est termine
         elif self.state.done:
             self.flip_state()  # changement d'etat
-        self.state.update(self.surface, self.keys, self.elapsed)  # maj de l'etat
+        self.state.update(
+            self.surface,
+            self.keys,
+            self.elapsed)  # maj de l'etat
 
     def event_loop(self):
         """Boucle des evenements"""
@@ -67,7 +70,3 @@ class Master(setup.Window):
         self.state = self.state_dict[self.state_name]
         self.state.previous = previous
         self.state.start(self.surface)
-
-
-
-

@@ -5,7 +5,9 @@ from . import cache
 from . import constants as ct
 from . import tools as t
 
+
 class Home(t.State):
+
     def __init__(self):
         super().__init__()
         self.name = 'home'
@@ -29,7 +31,12 @@ class Home(t.State):
         logo = t.Image(cache._cache.images['logo'])
         logo.setup_effect(ct.EFFECT['moveup50'], ct.EFFECT['shake50'])
         logo.center(screen)
-        sublogo = t.Image(t.text_to_surface(ct.AUTHOR, 'joystix', 10, ct.WHITE_RGB))
+        sublogo = t.Image(
+            t.text_to_surface(
+                ct.AUTHOR,
+                'joystix',
+                10,
+                ct.WHITE_RGB))
         sublogo.setup_effect(ct.EFFECT['fadein100'], ct.EFFECT['wait50'])
         sublogo.center(screen, 0, 35)
         self.images.append(logo)
@@ -48,12 +55,12 @@ class Home(t.State):
                 self.done = True
         self.allow_input = False
         if (not keys[pg.K_RETURN]):
-                self.allow_input = True
+            self.allow_input = True
 
     def update(self, window, keys):
         self.check_for_input(keys)
-        window.blit(self.bg.surface, (0,0))
-        for item in self.buttons+self.images:
+        window.blit(self.bg.surface, (0, 0))
+        for item in self.buttons + self.images:
             item.update()
             if item.display:
                 window.blit(item.surface, item.rect)

@@ -39,7 +39,7 @@ class Arcade(Party):
         self.img_boards = list()
         self.allow_input = [True for player in self.players]
         self.allow_input_timer = [0
-                for player in self.players]
+                                  for player in self.players]
         self.allow_swap_timer = self.allow_input_timer
         self.first_time = True
         self.previous_key = None
@@ -67,11 +67,14 @@ class Arcade(Party):
         self.images.append(panel)
         margin_x = 30
         for (i, player) in enumerate(self.players):
-            board = pg.Surface((self.margin_x + (self.case_w
-                               + self.margin_x) * player.board.num_col,
-                               self.margin_y + (self.case_h
-                               + self.margin_y) * player.board.num_row
-                               + 10), pg.SRCALPHA)
+            board = pg.Surface((self.margin_x +
+                                (self.case_w +
+                                 self.margin_x) *
+                                player.board.num_col, self.margin_y +
+                                (self.case_h +
+                                 self.margin_y) *
+                                player.board.num_row +
+                                10), pg.SRCALPHA)
             board = t.Panel(board, panel.surface, (255, 255, 255, 30),
                             True)
             board.rect.y = panel.rect.h - board.rect.h
@@ -86,7 +89,7 @@ class Arcade(Party):
             self.allow_input_timer[i] += self.elapsed
             self.allow_swap_timer[i] += self.elapsed
             if self.allow_input[i] and len([key for key in keys
-                    if key != 0]) > 0:
+                                            if key != 0]) > 0:
                 if keys[player.keys['UP']]:
                     player.cursor.move_up()
                 if keys[player.keys['DOWN']]:
@@ -100,7 +103,6 @@ class Arcade(Party):
                 if keys[pg.K_ESCAPE]:
                     self.set_done(self.next)
             self.allow_input[i] = False
-
 
             no_key_pressed = not keys[player.keys['DOWN']] \
                 and not keys[player.keys['UP']] \
@@ -141,7 +143,7 @@ class Arcade(Party):
                 self.allow_input_timer[i] = -300
                 self.allow_swap_timer[i] = -300
             self.previous_len_key = len([key for key in keys
-                    if key != 0])
+                                         if key != 0])
 
             if keys[player.keys['UP']]:
                 self.previous_key = 'UP'
@@ -165,11 +167,11 @@ class Arcade(Party):
         window,
         keys,
         elapsed,
-        ):
+    ):
         super().update(window, keys, elapsed)
         self.timer += 1
         img = t.Image(t.text_to_surface(' {:04d} '.format(self.timer),
-                      'joystix', 22, c.WHITE_RGB), window)
+                                        'joystix', 22, c.WHITE_RGB), window)
         start_img = pg.Surface(img.surface.get_size(), pg.SRCALPHA)
         start_img.fill((0, 0, 0, 150))
         start_img.blit(img.surface, img.rect)
@@ -185,27 +187,24 @@ class Arcade(Party):
             for row in reversed(range(board.num_row)):
                 for col in range(board.num_col):
                     if not board.board[row][col] is False:
-                        pg.draw.rect(self.img_boards[i].surface,
-                                c.COLORS_DICT[board.board[row][col]]
-                                + (235, ), [margin_x + (5 + 38) * col
-                                + 5, (5 + 38) * (board.num_row - row)
-                                - 30 - 5, 38, 38])
+                        pg.draw.rect(
+                            self.img_boards[i].surface, c.COLORS_DICT
+                            [board.board[row][col]] + (235,),
+                            [margin_x + (5 + 38) * col + 5, (5 + 38) *
+                             (board.num_row - row) - 30 - 5, 38, 38])
                     else:
-                        pg.draw.rect(self.img_boards[i].surface, (255,
-                                255, 255, 50), [margin_x + (5 + 38)
-                                * col + 5, (5 + 38) * (board.num_row
-                                - row) - 30 - 5, 38, 38])
-            pg.draw.rect(self.img_boards[i].surface, (255, 255, 255),
-                         [margin_x + (5 + 38) * player.cursor.pos_col
-                         + 5, (5 + 38) * (board.num_row
-                         - cursor.pos_row) - 30 - 5, 38 * 2 + 5, 38], 5)
+                        pg.draw.rect(
+                            self.img_boards[i].surface, (255, 255, 255, 50),
+                            [margin_x + (5 + 38) * col + 5, (5 + 38) *
+                             (board.num_row - row) - 30 - 5, 38, 38])
+            pg.draw.rect(
+                self.img_boards[i].surface, (255, 255, 255),
+                [margin_x + (5 + 38) * player.cursor.pos_col + 5, (5 + 38) *
+                 (board.num_row - cursor.pos_row) - 30 - 5, 38 * 2 + 5, 38],
+                5)
             board.gravity()
             destroy = board.destroy_block()
             board.gravity()
             if destroy:  # debug only
                 print(destroy)
                 print(board)
-
-
-
-

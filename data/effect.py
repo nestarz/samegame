@@ -24,7 +24,7 @@ class _Effect:
         elapsed,
         surface,
         rect,
-        ):
+    ):
         """
         Met a jour l'effet et l'applique a la surface.
         """
@@ -48,7 +48,7 @@ class Shake(_Effect):
         elapsed,
         surface,
         rect,
-        ):
+    ):
         self.sign1 = -self.sign1
         self.sign2 = -self.sign2
         rect = rect.move(self.sign1 * elapsed, self.sign2 * elapsed)
@@ -87,7 +87,7 @@ class Blink(_Effect):
         elapsed,
         surface,
         rect,
-        ):
+    ):
         if self.current_delay <= 0:
             self.display = not self.display
             self.current_delay = self.init_delay
@@ -116,7 +116,7 @@ class FadeIn1(_Effect):
         elapsed,
         surface,
         rect,
-        ):
+    ):
         if self.current_delay <= 0:
             self.alpha = 255
             self.done = True
@@ -169,7 +169,7 @@ class FadeIn2(_Effect):
         elapsed,
         surface,
         rect,
-        ):
+    ):
         ratio = max(0, self.current_delay) / self.init_delay
         self.alpha = int(ratio * 255)
         if self.first_apply:
@@ -206,7 +206,7 @@ class FadeOut(_Effect):
         elapsed,
         surface,
         rect,
-        ):
+    ):
         """
         Applique une surface transparente (alpha:20) sur la surface
         A MODIFIER pour tenir compte de self.alpha
@@ -242,7 +242,7 @@ class Move(_Effect):
         delay,
         distance,
         reversed_motion=False,
-        ):
+    ):
         super().__init__(delay)
         self.reversed_motion = reversed_motion
         self.distance = distance
@@ -252,7 +252,7 @@ class Move(_Effect):
         elapsed,
         remaining_range,
         remaining_delay,
-        ):
+    ):
         return remaining_range / remaining_delay * elapsed
 
     def apply(
@@ -260,7 +260,7 @@ class Move(_Effect):
         elapsed,
         surface,
         rect,
-        ):
+    ):
         if self.current_delay > 0:
             if self.first_apply:
                 if self.reversed_motion:
@@ -289,6 +289,4 @@ EFFECTS_DICT = {
     'fadeout': FadeOut,
     'wait': Wait,
     'move': Move,
-    }
-
-
+}

@@ -23,14 +23,14 @@ class Home(t.Screen):
         logo_img.center(screen, 0, -5)
 
         sublogo_img = t.Image(t.text_to_surface(c.AUTHOR, 'joystix',
-                              10, c.WHITE_RGB), screen)
+                                                10, c.WHITE_RGB), screen)
         sublogo_img.setup_effect('wait', 600)
         sublogo_img.setup_effect('fadein1', 1500, True)
         sublogo_img.center(screen, 0, 30)
 
         text1 = 'Press Start Button'
         img = t.Image(t.text_to_surface(text1, 'joystix', 20,
-                      c.WHITE_RGB), screen)
+                                        c.WHITE_RGB), screen)
         start_img = pg.Surface(img.surface.get_size(), pg.SRCALPHA)
         start_img.fill((0, 0, 0, 255))
         start_img.blit(img.surface, img.rect)
@@ -64,13 +64,9 @@ class Home(t.Screen):
         self.allow_input = False
         if not keys[pg.K_RETURN] and self.allow_input_timer > 900:
 
-        # si le temps passe dans la home
-        # est superieur a 3 seconde alors
-        # j'autorise la personne a passer
-        # l'intro
+            # si le temps passe dans la home
+            # est superieur a 3 seconde alors
+            # j'autorise la personne a passer
+            # l'intro
 
             self.allow_input = True
-
-
-
-
