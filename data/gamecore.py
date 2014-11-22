@@ -152,15 +152,9 @@ class Board:
 
         for row in reversed(range(1, self.num_row)):  # check per line
             combo = 1
-<<<<<<< HEAD
             temp_case = False
             temp_cor = []
-            
-=======
-            temp_case = self.board[row][0]
-            temp_cor = [(row, 0)]
 
->>>>>>> origin/master
             for col in range(self.num_col):
                 combo, temp_case, temp_cor, destroy = destroy_local(
                     self, combo, row, col, temp_case, temp_cor, destroy)
@@ -170,15 +164,10 @@ class Board:
 
         for col in range(self.num_col):  # check per column
             combo = 1
-<<<<<<< HEAD
             temp_col = False
             temp_cor = []
             
-=======
-            temp_col = self.board[1][col]
-            temp_cor = [(1, col)]
 
->>>>>>> origin/master
             for row in reversed(range(1, self.num_row)):
                 combo, temp_case, temp_cor, destroy = destroy_local(
                     self, combo, row, col, temp_case, temp_cor, destroy)
