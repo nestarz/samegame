@@ -29,12 +29,12 @@ class GameCore:
         num_row=10,
         num_col=10,
         num_board=2,
-    ):
+        ):
         super().__init__()
         self.all_board = []
         for i in range(0, num_board):
             self.all_board.append(Board(speed, num_color, num_row,
-                                        num_col))
+                                  num_col))
 
 
 class Board:
@@ -45,7 +45,7 @@ class Board:
         num_color=6,
         num_row=10,
         num_col=6,
-    ):
+        ):
         self.speed = speed  # game's speed, int, the higher, the faster
         self.num_color = num_color  # the number of color used in the game
         self.num_col = num_col  # width of the board
@@ -58,7 +58,7 @@ class Board:
             'grey',
             'purple',
             'yellow',
-        ]
+            ]
         self.board = []
         self.generate_board()
         self.gravity()
@@ -87,7 +87,7 @@ class Board:
 
             if self.board[row][col] is False:
                 self.board[row][col] = self.color[randrange(0,
-                                                            self.num_color)]
+                        self.num_color)]
                 i += 1
 
         self.generate_hidden()
@@ -107,7 +107,7 @@ class Board:
                 else:
                     color = str(self.board[row][col])
                     string += (color + ' ' * (case_length
-                                              - len(color)) if len(color)
+                               - len(color)) if len(color)
                                < case_length else color[:case_length])
             string += '| \n'
         string += a
@@ -119,8 +119,7 @@ class Board:
     def update_board(self):
         pass
 
-    # ultra ugly, need one loop to do all work instead of 2 look-alike
-    def destroy_block(self):
+    def destroy_block(self):  # ultra ugly, need one loop to do all work instead of 2 look-alike
         """
         The function check if at least 3 block are lined vertically or horizontally (no diagonal), destroy them if so
         """
@@ -154,8 +153,8 @@ class Board:
 
         for row in reversed(range(1, self.num_row)):  # check per line
             combo = 1
-            temp_case = self.board[row][0]
-            temp_cor = [(row,0)]
+            temp_case = False
+            temp_cor = []
             
             for col in range(self.num_col):
                 combo,temp_case,temp_cor,destroy = destroy_local(self,combo,row,col,temp_case,temp_cor,destroy)
@@ -165,8 +164,8 @@ class Board:
 
         for col in range(self.num_col):  # check per column
             combo = 1
-            temp_col = self.board[1][col]
-            temp_cor = [(1,col)]
+            temp_col = False
+            temp_cor = []
             
             for row in reversed(range(1, self.num_row)):
                 combo,temp_case,temp_cor,destroy = destroy_local(self,combo,row,col,temp_case,temp_cor,destroy)
@@ -219,9 +218,7 @@ class Cursor:
         Create a cursor that point only one case, no need to specify the 2nd case since it's the one its right
         You can use .move_up, .move_down, .move_left, .move_right"""
 
-    # find it ugly to push parameters that already exist everywhere, num_row,
-    # num_col, need better solution
-    def __init__(self, num_row, num_col):
+    def __init__(self, num_row, num_col):  # find it ugly to push parameters that already exist everywhere, num_row, num_col, need better solution
         self.max_row = num_row - 1
         self.max_col = num_col - 1
         self.pos_row = 0
@@ -258,3 +255,7 @@ class Case:
 
     def __init__(self):
         self.color = color
+
+
+
+			
