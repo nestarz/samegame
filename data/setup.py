@@ -14,7 +14,6 @@ class Window():
         pygame.init()
         self.caption = ct.NAME
         self.surface = pygame.display.set_mode(ct.SCREEN_SIZE, pg.DOUBLEBUF)
-        self.caption = ct.NAME
         pygame.display.set_caption(self.caption)
         self.screen = pygame.display.get_surface()
 
