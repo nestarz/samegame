@@ -113,13 +113,25 @@ class Board:
         string += a
 
         return string
-
         # return(str(self.board))
 
-    def update_board(self):
-        pass
+    def can_up(self):
+        """
+        Check if the top line is empty
+        """
+        return(not(True in [isinstance(x,str) for x in self.board[self.num_row-1]]))
 
-    def destroy_block(self):  # ultra ugly, need one loop to do all work instead of 2 look-alike
+    def up(self):
+        """
+        All rows are going upward, and generate a new hidden line
+        """
+        for row in reversed(range(1,(self.num_row))):
+            for col in range(self.num_col):
+                self.board[row][col] = self.board[row-1][col]
+        self.generate_hidden()
+
+
+    def destroy_block(self): 
         """
         The function check if at least 3 block are lined vertically or horizontally (no diagonal), destroy them if so
         """
@@ -127,6 +139,12 @@ class Board:
         destroy = []
 
         def destroy_local(self, combo, row, col, temp_case, temp_cor, destroy):
+            """
+            Function called by destroy_block
+            Check if the actual case is relevant to the precedent case :
+            If so : increment combo 
+            If not : Destroy case if combo is >= 3  and reset combo
+            """
 
             if self.board[row][col]:
                 if self.board[row][col] == temp_case:
@@ -198,7 +216,7 @@ class Board:
                 row += 1
 
     def generate_hidden(self):
-        """generate the hidden row"""
+        """Generate the hidden row"""
 
         for i in range(0, self.num_col):
             self.board[0][i] = self.color[randrange(0, self.num_color)]
@@ -258,4 +276,7 @@ class Case:
 
 
 
-			
+a = Board()
+print(a)
+
+print(a.can_up())
