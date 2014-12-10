@@ -146,10 +146,10 @@ class Arcade(Party):
             cursor = player.cursor
             for row in reversed(range(board.num_row)):
                 for col in range(board.num_col):
-                    if not board.board[row][col] is False:
+                    if not board.board[row][col].color is False:
                         pg.draw.rect(
                             self.img_boards[i].surface, c.COLORS_DICT
-                            [board.board[row][col]] + (235,),
+                            [board.board[row][col].color] + (235,),
                             [margin_x + (5 + 38) * col + 5, (5 + 38) *
                              (board.num_row - row) - 30 - 5, 38, 38])
                     else:

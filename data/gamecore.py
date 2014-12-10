@@ -19,7 +19,6 @@ class Color:
 
 
 class GameCore:
-
     """The heart of the game, at the moment, it only generates 1 board, but later, will generate 2 or more board, if you wish"""
 
     def __init__(  # need getter, setter, later.
@@ -39,13 +38,13 @@ class GameCore:
 
 class Board:
 
-    def __init__(  # need getter, setter, later.
+    def __init__(  
         self,
         speed=1,
-        num_color=6,
+        num_color=6,                # need getter, setter, later.
         num_row=10,
         num_col=6,
-        ):
+        ):                  
         self.speed = speed  # game's speed, int, the higher, the faster
         self.num_color = num_color  # the number of color used in the game
         self.num_col = num_col  # width of the board
@@ -77,7 +76,7 @@ class Board:
         for row in range(self.num_row):
             self.board.append([])
             for col in range(self.num_col):
-                self.board[row].append(False)
+                self.board[row].append(Case(False,False,False))
 
         i = 0
 
@@ -85,8 +84,8 @@ class Board:
             row = randrange(1, self.num_row)
             col = randrange(0, self.num_col)
 
-            if self.board[row][col] is False:
-                self.board[row][col] = self.color[randrange(0,
+            if self.board[row][col].color is False:
+                self.board[row][col].color = self.color[randrange(0,
                         self.num_color)]
                 i += 1
 
@@ -95,17 +94,17 @@ class Board:
 
     def __str__(self):
         case_length = len(max(self.color))
-        a = '-' * (case_length + 1) * self.num_col + '*\n'
+        a = '*'+ '-' * (case_length + 1) * self.num_col + '*\n'
         string = ''
 
         for row in reversed(range(self.num_row)):
             string += a
             for col in range(self.num_col):
                 string += '|'
-                if self.board[row][col] is False:
+                if self.board[row][col].color is False:
                     string += ' ' * case_length
                 else:
-                    color = str(self.board[row][col])
+                    color = str(self.board[row][col].color)
                     string += (color + ' ' * (case_length
                                - len(color)) if len(color)
                                < case_length else color[:case_length])
@@ -119,7 +118,7 @@ class Board:
         """
         Check if the top line is empty
         """
-        return(not(True in [isinstance(x,str) for x in self.board[self.num_row-1]]))
+        return(not(True in [isinstance(x.color,str) for x in self.board[self.num_row-1]]))
 
     def up(self):
         """
@@ -144,10 +143,12 @@ class Board:
             Check if the actual case is relevant to the precedent case :
             If so : increment combo 
             If not : Destroy case if combo is >= 3  and reset combo
+
+            Return the number of destroyed cases
             """
 
-            if self.board[row][col]:
-                if self.board[row][col] == temp_case:
+            if self.board[row][col].color:
+                if self.board[row][col].color == temp_case:
                     combo += 1
                     temp_cor.append((row, col))
                 else:
@@ -156,7 +157,7 @@ class Board:
 
                     temp_cor = [(row, col)]
                     combo = 1
-                    temp_case = self.board[row][col]
+                    temp_case = self.board[row][col].color
 
             else:
                 if combo >= 3:
@@ -193,11 +194,17 @@ class Board:
             if combo >= 3:
                 destroy.append(temp_cor)
 
+        combo = 0
+
         for line in destroy:
             for case in line:
-                self.board[case[0]][case[1]] = False
+                if not self.board[case[0]][case[1]].color == 'bad':
+                    self.board[case[0]][case[1]] = Case(False,False,False)
+                    combo += 1
 
-    def gravity(self):
+        return(combo)
+    
+    def gravity(self): #to redo
         """Makes sure there is no empty space between a case and the bottom"""
 
         for col in range(self.num_col):
@@ -205,11 +212,11 @@ class Board:
             i = 1
             done = False
             while row < self.num_row:
-                if self.board[row][col] is False:
+                if self.board[row][col].color is False:
                     done = True
                 elif done is True:
                     self.board[i][col] = self.board[row][col]
-                    self.board[row][col] = False
+                    self.board[row][col] = Case(False,False,False)
                     i += 1
                 else:
                     i += 1
@@ -219,7 +226,7 @@ class Board:
         """Generate the hidden row"""
 
         for i in range(0, self.num_col):
-            self.board[0][i] = self.color[randrange(0, self.num_color)]
+            self.board[0][i] = Case(self.color[randrange(0, self.num_color)], False,False)
 
     def swap(self):
         """Swap the actual case, pointed by cursor, with the one on his right, since you can only swap a case with the one on his right"""
@@ -236,7 +243,7 @@ class Cursor:
         Create a cursor that point only one case, no need to specify the 2nd case since it's the one its right
         You can use .move_up, .move_down, .move_left, .move_right"""
 
-    def __init__(self, num_row, num_col):  # find it ugly to push parameters that already exist everywhere, num_row, num_col, need better solution
+    def __init__(self, num_row, num_col): 
         self.max_row = num_row - 1
         self.max_col = num_col - 1
         self.pos_row = 0
@@ -268,15 +275,18 @@ class Cursor:
 
 
 class Case:
-
-    """may be useless, need to see, MAYBE    Will be used to create bad giant block in versus mode"""
-
-    def __init__(self):
+    """
+    Case Class
+    """
+    def __init__(self, color, nex, prev):
         self.color = color
-
-
+        self.next = nex
+        self.prev = prev
+        if color == 'bad':
+            self.can_swap = False
+        else:
+            self.can_swap = True
 
 a = Board()
 print(a)
 
-print(a.can_up())
