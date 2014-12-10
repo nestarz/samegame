@@ -222,6 +222,20 @@ class Board:
                     i += 1
                 row += 1
 
+    def create_bad_block(self, pos, size): #Need Test
+        """
+        Create a 'blocker' case, suppose to bother you during the game
+        Size must be > 3
+        """
+
+        self.board[self.num_row-1][pos] = Case('bad',False,pos+1)
+
+        for i in range(1,size-1)
+            self.board[self.num_row-1][pos+i] = Case('bad',pos+i,pos+i+1)
+
+        self.board[self.num_row-1][pos+size] = Case('bad',pos+size, False)
+
+
     def generate_hidden(self):
         """Generate the hidden row"""
 
@@ -286,7 +300,4 @@ class Case:
             self.can_swap = False
         else:
             self.can_swap = True
-
-a = Board()
-print(a)
 
