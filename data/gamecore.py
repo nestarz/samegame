@@ -114,9 +114,9 @@ class Board:
         return string
         # return(str(self.board))
 
-    def can_up(self):
+    def top_row_empty(self):
         """
-        Check if the top line is empty
+        Check if the top line is empty case by case, return True if the top line is empty, False elsewise 
         """
         return(not(True in [isinstance(x.color,str) for x in self.board[self.num_row-1]]))
 
@@ -207,22 +207,33 @@ class Board:
     def gravity(self): #to redo
         """Makes sure there is no empty space between a case and the bottom"""
 
-        for col in range(self.num_col):
-            row = 1
-            i = 1
-            done = False
-            while row < self.num_row:
-                if self.board[row][col].color is False:
-                    done = True
-                elif done is True:
-                    self.board[i][col] = self.board[row][col]
-                    self.board[row][col] = Case(False,False,False)
-                    i += 1
-                else:
-                    i += 1
-                row += 1
+        # for col in range(self.num_col):
+        #     row = 1
+        #     i = 1
+        #     done = False
+        #     while row < self.num_row:
+        #         if self.board[row][col].color is False:
+        #             done = True
+        #         elif done is True:
+        #             self.board[i][col] = self.board[row][col]
+        #             self.board[row][col] = Case(False,False,False)
+        #             i += 1
+        #         else:
+        #             i += 1
+        #         row += 1
 
-    def create_bad_block(self, pos, size): #Need Test
+        for col in range(self.num_col):
+            pass
+
+    def can_fall(self,case):
+    """
+    Check if a case/block can fall one row down, need to have an empty space between all his case
+    """
+
+    pass
+
+
+    def generate_bad_block(self, pos, size): #Need Test
         """
         Create a 'blocker' case, suppose to bother you during the game
         Size must be > 3
@@ -230,10 +241,10 @@ class Board:
 
         self.board[self.num_row-1][pos] = Case('bad',False,pos+1)
 
-        for i in range(1,size-1)
-            self.board[self.num_row-1][pos+i] = Case('bad',pos+i,pos+i+1)
+        for i in range(1,size-1):
+            self.board[self.num_row-1][pos+i] = Case('bad',pos+i-1,pos+i+1)
 
-        self.board[self.num_row-1][pos+size] = Case('bad',pos+size, False)
+        self.board[self.num_row-1][pos+size-1] = Case('bad',pos+size-1, False)
 
 
     def generate_hidden(self):
@@ -301,3 +312,7 @@ class Case:
         else:
             self.can_swap = True
 
+a = Board()
+print(a)
+a.generate_bad_block(0,3)
+print(a)
