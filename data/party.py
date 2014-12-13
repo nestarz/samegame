@@ -71,7 +71,6 @@ class Arcade(Party):
                              (board.num_row - row) - 30 - 5, 38, 38]
                         color = c.COLORS_DICT[board.board[row][col].color] + (235,)
                         block = t.Block(color, pos, dest)
-                        print(player.blocks, block)
                         block.add(player.blocks)
 
     def setup_images(self, screen):

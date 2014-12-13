@@ -295,11 +295,11 @@ class Block(Sprite):
 
     def __init__(self, color, pos, panel):
         print(color, pos)
-        pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface(Block.size)
+        pg.sprite.DirtySprite.__init__(self)
+        ref = pg.Surface(Block.size, pg.SRCALPHA)
+        Surface.__init__(self, ref)
         self.image.fill(color)
-        self.rect = pos
 
     def update(self, *args):
-        super().update(*args)
-        self.dirty = 0
+        Sprite.update(self,*args)
+        self.dirty = 1

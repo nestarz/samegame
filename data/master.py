@@ -12,7 +12,7 @@ class Master(setup.Window):
         super().__init__()
         self.done = False  # etat du programme
         self.clock = pg.time.Clock()  # horloge du programme
-        self.fps = 60  # frequence d'update
+        self.fps = 2  # frequence d'update
         self.current_time = 0.0  # valeur du chronometre
         self.keys = pg.key.get_pressed()
         self.state_name = None
