@@ -41,11 +41,12 @@ class Board:
     def __init__(  
         self,
         speed=1,
-        num_color=6,                # need getter, setter, later.
+        num_color=6,
         num_row=10,
         num_col=6,
         ):                  
         self.speed = speed  # game's speed, int, the higher, the faster
+        self.pause = 0     #amount of time during which the game is frozen after a combo(i.e the board isn't going upward)
         self.num_color = num_color  # the number of color used in the game
         self.num_col = num_col  # width of the board
         self.num_row = num_row  # length of the board
@@ -118,7 +119,7 @@ class Board:
         """
         Check if the top line is empty case by case, return True if the top line is empty, False elsewise 
         """
-        return(not(True in [isinstance(x.color,str) for x in self.board[self.num_row-1]]))
+        return not(True in [isinstance(x.color,str) for x in self.board[self.num_row-1]])
 
     def up(self):
         """
@@ -202,49 +203,91 @@ class Board:
                     self.board[case[0]][case[1]] = Case(False,False,False)
                     combo += 1
 
-        return(combo)
+        return combo
     
     def gravity(self): #to redo
-        """Makes sure there is no empty space between a case and the bottom"""
+        """
+        Makes sure there is no empty space between a case and the bottom
+        Bad Blocks works as unit of singles cases, so they don't fall if all cases under them are free
 
-        # for col in range(self.num_col):
-        #     row = 1
-        #     i = 1
-        #     done = False
-        #     while row < self.num_row:
-        #         if self.board[row][col].color is False:
-        #             done = True
-        #         elif done is True:
-        #             self.board[i][col] = self.board[row][col]
-        #             self.board[row][col] = Case(False,False,False)
-        #             i += 1
-        #         else:
-        #             i += 1
-        #         row += 1
+        The function works in 2 parts :
+            - Apply gravity on everything, even bad block (which is separated piece by piece during this step)
+            - Get the back block back together
 
-        for col in range(self.num_col):
-            pass
+        This way you get the nice illusion that the block is a unit
+        So, the block won't fall unless all the case under his components are empty
+        """
 
-    def can_fall(self,case):
-    """
-    Check if a case/block can fall one row down, need to have an empty space between all his case
-    """
+        def local_check(self):
+            """
+            The goal of this function is to get back all part of the bad block together
 
-    pass
+            You do this by checking if there is an other part of the bad block on his left (prev)
+            or on his right (next)
+
+            If the part on the left or right is missing, you send the column upward and you re-iterate
+            through the board
+            
+            """
+            if self.board[row][col].color == 'bad':
+                    if (self.board[row][col].nex and not(self.board[row][col+1].color == 'bad') \
+                    or self.board[row][col].prev and not(self.board[row][col-1].color == 'bad')):
+                            for temp_row in reversed(range(row,self.num_row)):
+                                self.board[temp_row][col] = deepcopy(self.board[temp_row-1][col])
+                            self.board[row][col] = Case(False,False,False)
+            
+
+        for col in range(self.num_col):  #First Routine, Makes everything fall down even Bad block
+                row = 1                  #Bad block are separated 
+                i = 1
+                done = False
+                while row < self.num_row:
+                    if self.board[row][col].color is False:
+                        done = True
+                    elif done is True:
+                        self.board[i][col] = self.board[row][col]
+                        self.board[row][col] = Case(False,False,False)
+                        i += 1
+                    else:
+                        i += 1
+                    row += 1
 
 
-    def generate_bad_block(self, pos, size): #Need Test
+        for row in range(1,self.num_row):      #Get the bad blocks together
+            for col in range(self.num_col):
+                local_check(self)
+            for col in reversed(range(self.num_col)):
+                local_check(self)
+                
+            
+
+
+
+                
+
+    def can_fall(self,row,col):
+        """
+        Check if a case/block can fall one row down, need to have an empty space between all his case
+        """
+        Done = False
+        while not Done:
+            if self.board[row-1][col].color:
+                return False
+            elif self.board[row][col].nex:
+                col += 1
+            else:
+                Done = True
+        return True
+
+
+    def generate_bad_block(self, pos, size):
         """
         Create a 'blocker' case, suppose to bother you during the game
-        Size must be > 3
         """
 
-        self.board[self.num_row-1][pos] = Case('bad',False,pos+1)
+        for i in range(0,size):
+            self.board[self.num_row-1][pos+i] = Case('bad',i!=0,i!=size-1)
 
-        for i in range(1,size-1):
-            self.board[self.num_row-1][pos+i] = Case('bad',pos+i-1,pos+i+1)
-
-        self.board[self.num_row-1][pos+size-1] = Case('bad',pos+size-1, False)
 
 
     def generate_hidden(self):
@@ -303,16 +346,20 @@ class Case:
     """
     Case Class
     """
-    def __init__(self, color, nex, prev):
+    def __init__(self, color, prev, nex):
         self.color = color
-        self.next = nex
+        self.nex = nex
         self.prev = prev
         if color == 'bad':
             self.can_swap = False
         else:
             self.can_swap = True
-
+            
+    def __repr__(self):
+        return "Prev = %r, Next = %r, Color is %r" % (self.prev,self.nex,self.color)
+    
 a = Board()
-print(a)
 a.generate_bad_block(0,3)
+
+a.gravity()
 print(a)
