@@ -5,6 +5,27 @@ import pygame as pg
 from . import cache
 from . import constants as c
 
+class EffectList(list):
+
+    def resumeall(self):
+        for e in self:
+            e.resume()
+
+    def stopall(self):
+        for e in self:
+            e.stop()
+
+    def ongoing(self):
+        for e in self:
+            if not e.pause:
+                return True
+        return False
+
+    def backup(self, img, rect):
+        for e in self:
+            if not e.first_apply:
+                return e.backup()
+        return (img, rect)
 
 class State:
 
@@ -27,35 +48,35 @@ class Screen(State):
         self.name = ''
         self.next = ''
         self.bg = None
-        self.images = list()
-        self.buttons = list()
+        self.elapsed = 0
         self.allow_input = False
         self.to_set_done = False
         self.to_set_done_timer = 0
         self.allow_input_timer = 0
-        self.elapsed = 0
+        self.sprites = pg.sprite.LayeredDirty()
+        self.killed = pg.sprite.LayeredDirty()
+        self.rects = []
 
     def reinitialize(self):
-        super().reinitialize()
-        self.bg = None
-        self.images = list()
-        self.buttons = list()
+        self.__init__()
 
-    def start(self, screen):
-        self.setup_background(screen)
-        self.setup_images(screen)
-        self.setup_buttons(screen)
+    def start(self, window):
+        """Set the window"""
+        self.setup_background(window)
+        self.setup_images(window)
+        self.setup_buttons(window)
 
-    def setup_background(self, screen):
-        bg_img = cache._cache.images[self.name]
-        self.bg = Image(bg_img, screen)
-        self.bg.resize(*c.SCREEN_SIZE)
-        self.bg.setup_effect('fadein2', 1000)
+    def setup_background(self, window):
+        """Set background and its effects"""
+        bg_img = cache._cache.images[self.name] #retrieve bg_img from cache
+        self.bg = Image(bg_img, window) #create background to apply on window
+        self.bg.resize(*c.SCREEN_SIZE) #resize bg to window size
+        self.bg.setup_effect('fadein2', 1000) #'ll apply effect fadein during 1s
 
-    def setup_images(self, screen):
+    def setup_images(self, window):
         pass
 
-    def setup_buttons(self, screen):
+    def setup_buttons(self, window):
         pass
 
     def set_done(self, next):
@@ -68,35 +89,35 @@ class Screen(State):
         keys,
         elapsed,
     ):
-        self.elapsed = elapsed
-        self.check_for_input(keys)
-        images = list()
-        images.append(self.bg)
-        images.extend(self.images)
-        for img in images:
-            img.update(elapsed)
-        for btn in self.buttons:
-            btn.update(elapsed, self.arrow_index,
-                       self.buttons.index(btn))
+        self.elapsed = elapsed #on récup le temps passé depuis le dernier up
+        self.check_for_input(keys) #on check les evenements de l'user
+        self.bg.update(elapsed)
+        rects1 = self.bg.draw(window)
+        self.sprites.clear(window, self.bg.image)
+        self.sprites.update(elapsed, self.rects, self.killed)
+        self.killed.update(elapsed, self.rects, self.killed)
+        rects2 = self.sprites.draw(window) #on affiche sur la fenetre les sprites
+        self.rects = rects1 + rects2 if rects1 else rects2
         if self.to_set_done:
+            #si on a demandé à ce que l'event se termine
+            #on up puis check le timer de fin
             self.to_set_done_timer -= self.elapsed
             self.done = max(0, self.to_set_done_timer) == 0
 
     def do_action(self, index):
+        """Lance l'action du boutton ciblé par par l'index"""
         if index in range(0, len(self.buttons)):
             self.buttons[index].callback()
 
-
-class Image:
-
-    def __init__(self, ref, surfaceToDrawTo):
-        self.surface = ref
-        self.rect = self.surface.get_rect()
-        self.effect = list()
+class Surface:
+    def __init__(self, ref):
+        self.image = ref
+        self.rect = self.image.get_rect()
+        self.effect = EffectList()
         self.display = True
-        self.surfaceToDrawTo = surfaceToDrawTo
         self.wait = False
         self.wait_effect = None
+        self.previous_groups = []
 
     def setup_effect(self, name, *args):
         from .effect import EFFECTS_DICT
@@ -106,50 +127,85 @@ class Image:
             self.wait = True
             self.wait_effect = self.effect[-1]
 
+    def resize(self, w, h):
+        self.image = pg.transform.scale(self.image, (int(w),
+                                                         int(h)))
+        self.rect = self.image.get_rect()
+
     def center(
         self,
-        screen,
+        window,
         x=0,
         y=0,
     ):
-        self.rect.centerx = screen.get_rect().centerx + x
-        self.rect.centery = screen.get_rect().centery + y
+        self.rect.centerx = window.get_rect().centerx + x
+        self.rect.centery = window.get_rect().centery + y
 
-    def update(self, elapsed):
+    def update(self, *args):
         if self.wait:
-            self.display = self.wait_effect.apply(elapsed)
+            self.display = self.wait_effect.apply(args[0])
             if self.wait_effect.done:
                 self.effect.remove(self.wait_effect)
                 self.wait = False
         if not self.wait:
             for effect in self.effect:
-                (self.surface,
-                 self.rect) = effect.apply(elapsed,
-                                           self.surface,
-                                           self.rect)
-                self.display = effect.display
-                if effect.done:
-                    self.effect.remove(effect)
-        self.draw()
-
-    def draw(self):
-        if self.display:
-            self.surfaceToDrawTo.blit(self.surface, self.rect)
-
-    def resize(self, w, h):
-        self.surface = pg.transform.scale(self.surface, (int(w),
-                                                         int(h)))
-        self.rect = self.surface.get_rect()
+                if not effect.pause:
+                    (self.image,
+                     self.rect) = effect.apply(args[0],
+                                               self.image,
+                                               self.rect)
+                    self.display = effect.display
+                    if effect.done:
+                        self.effect.remove(effect)
 
 
-class Button(Image):
+class Image(Surface):
+
+    def __init__(self, ref, surfaceToDrawTo):
+        super().__init__(ref)
+        self.imageToDrawTo = surfaceToDrawTo
+        self.need_draw = True
+
+    def update(self, elapsed):
+        self.need_draw = bool(self.effect) # Vrai si j'ai des effets à appliquer
+        Surface.update(self, elapsed)
+
+    def draw(self, dest=None):
+        if self.display and self.need_draw:
+            # Redessine limage uniquement si effet appliqué
+            dest = dest if dest else self.imageToDrawTo
+            dest.blit(self.image, self.rect)
+            return [self.rect]
+
+class Sprite(pg.sprite.DirtySprite, Surface):
+    def __init__(self, *args):
+        pg.sprite.DirtySprite.__init__(self)
+        Surface.__init__(self, *args)
+
+    def update(self, *args):
+        self.dirty = 1
+        Surface.update(self, *args)
+        up_rects = args[1]
+        killed = args[2]
+        if not self.display and not self in killed:
+            self.previous_groups = self.groups()
+            self.kill()
+            self.add(killed)
+        elif self.display and self.previous_groups:
+            self.add(*self.previous_groups)
+            self.remove(killed)
+            self.previous_groups = []
+        if self.effect:
+            self.dirty = 1
+
+class Button(Sprite):
 
     def __init__(
         self,
-        surfaceToDrawTo,
         txt,
         stylename='default',
         callback=None,
+        parent=None
     ):
         self.style = c.BTN[stylename]
         self.txt = txt
@@ -161,54 +217,29 @@ class Button(Image):
             self.style['AA'],
             self.style['bold'],
         )
-        super().__init__(ref, surfaceToDrawTo)
+        pg.sprite.DirtySprite.__init__(self)
+        Surface.__init__(self, ref)
         self.callback = callback
-        self.original = self.surface
-        self.arrow_txt = ''
-        self.start = True
-        self.i = 0
+        self.parent = parent
+        self.targeted = False
+        if self.parent:
+            self.rect.topright = self.parent.rect.topright
+        self.setup_effect('txt_effect1', 300, 2, self.style, self.txt)
 
-    def update(
-        self,
-        elapsed,
-        arrow_index,
-        index,
-    ):
-        if arrow_index == index:
-            style_hover = self.style.get('hover', 'default')
-            if self.arrow_txt == '* ':
-                self.arrow_txt = '+ '
-            else:
-                self.arrow_txt = '* '
-            if self.start:
-                self.color = self.temp_c = style_hover['color']
-                self.start = False
-            else:
-                if 0 <= self.i < 15:
-                    self.temp_c = tuple([x - 4 for x in self.temp_c])
-                    self.color = tuple([max(0, min(x - 4, 255))
-                                        for x in self.temp_c])
-                    self.i += 1
-                elif 15 <= self.i < 30:
-                    self.temp_c = tuple([x + 4 for x in self.temp_c])
-                    self.color = tuple([min(max(0, x + 4), 255)
-                                        for x in self.temp_c])
-                    self.i += 1
-                else:
-                    self.i = 0
-            self.surface = text_to_surface(
-                self.txt + self.arrow_txt,
-                self.style['font'],
-                self.style['size'],
-                self.color,
-                self.style['AA'],
-                self.style['bold'],
-            )
-        else:
-            self.surface = self.original
-            self.effect = []
-            self.start = True
-        super().update(elapsed)
+    def update(self, *args):
+        elapsed = args[0]
+        up_rects = args[1]
+        if self.parent:
+            self.rect.right = self.parent.rect.right - 25
+        if not self.targeted and self.effect.ongoing():
+            self.effect.stopall()
+            pack = self.effect.backup(self.image, self.rect)
+            self.image, self.rect = pack
+        elif self.targeted:
+            self.effect.resumeall()
+        Sprite.update(self, *args)
+        self.dirty = 1 if self.targeted else 0
+        self.targeted = False
 
 
 def text_to_surface(
@@ -225,30 +256,25 @@ def text_to_surface(
     font.set_italic(italic)
     return font.render(text, AA, color)
 
-
-class Panel(Image):
+class Panel(Sprite):
 
     def __init__(
         self,
-        ref,
-        surfaceToDrawTo,
-        RGBA=(0, 0, 0, 0),
-        refill=False,
+        size,
+        RGBA=(0, 0, 0, 0)
     ):
-        super().__init__(ref, surfaceToDrawTo)
+        # call DirtySprite initializer
+        ref = pg.Surface(size, pg.SRCALPHA)
+        pg.sprite.DirtySprite.__init__(self)
+        Surface.__init__(self, ref)
         self.RGBA = RGBA
-        self.fill(RGBA)
-        self.refill = refill
+        self.image.fill(RGBA)
+        self.i = 0
 
-    def fill(self, RGBA=None):
-        if RGBA is not None:
-            self.RGBA = RGBA
-        self.surface.fill(self.RGBA)
-
-    def update(self, elapsed):
-        super().update(elapsed)
-        if self.refill:
-            self.fill()
+    def update(self, *args):
+        elapsed = args[0]
+        up_rects = args[1]
+        Sprite.update(self, *args)
 
 
 class Font(pg.font.Font):
@@ -262,8 +288,18 @@ class Font(pg.font.Font):
                 pg.font.get_default_font()),
             size)
 
+class Block(Sprite):
+    """ Bloc de couleur """
 
-class CustomButton(Button):
+    size = (38,38)
 
-    def __init__(self, text, customstyle):
-        super().__init__(text)
+    def __init__(self, color, pos, panel):
+        print(color, pos)
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.Surface(Block.size)
+        self.image.fill(color)
+        self.rect = pos
+
+    def update(self, *args):
+        super().update(*args)
+        self.dirty = 0

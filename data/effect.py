@@ -3,8 +3,7 @@
 
 import pygame as pg
 from . import constants as ct
-from .tools import Panel
-
+from .tools import Panel, text_to_surface
 
 class _Effect:
 
@@ -18,6 +17,9 @@ class _Effect:
         self.display = True
         self.done = False
         self.first_apply = True
+        self.pause = False
+        self.backup_img = None
+        self.backup_rect = None
 
     def apply(
         self,
@@ -31,6 +33,68 @@ class _Effect:
 
         pass
 
+    def stop(self):
+        pass
+
+    def resume(self):
+        pass
+
+    def backup(self):
+        return self.backup_img, self.backup_rect
+
+class TextEffect1(_Effect):
+
+    """
+    Hue variation effect and arrow index mark.
+    """
+    def __init__(self, delay, step, style, txt):
+        super().__init__(delay)
+        self.txt = txt
+        self.sign = 1
+        self.time_stacker = 0
+        self.targeted = False
+        self.arrow_txt = ''
+        self.style = style
+        self.style_hover = style.get('hover', 'default')
+
+    def apply(
+        self,
+        elapsed,
+        surface,
+        rect,
+    ):
+        if self.first_apply:
+            self.backup_img = surface.copy()
+            self.backup_rect = rect.copy()
+            self.color = self.temp_c = self.style_hover['color']
+            self.start = False
+            self.sign = 1
+            self.time_stacker = 0
+            self.first_apply = False
+        else:
+            self.arrow_txt = '+' if self.arrow_txt == '*' else '*'
+            if self.time_stacker > 300:
+                self.sign = -1*self.sign
+                self.time_stacker = 0
+            step = 1
+            self.temp_c = [x - self.sign*step for x in self.temp_c]
+            self.color = [max(0, min(x - self.sign*step, 255))
+                                    for x in self.temp_c]
+            self.time_stacker += elapsed
+        i = text_to_surface(
+                self.txt + self.arrow_txt,
+                self.style['font'],
+                self.style['size'],
+                self.color,
+                self.style['AA'],
+                self.style['bold'])
+        return (i, rect)
+
+    def stop(self):
+        self.pause = True
+
+    def resume(self):
+        self.pause = False
 
 class Shake(_Effect):
 
@@ -180,11 +244,8 @@ class FadeIn2(_Effect):
             self.done = True
         else:
             surface = self.surface_init.copy()
-            panel = pg.Surface(surface.get_size(), pg.SRCALPHA)
-            self.panel = Panel(panel, surface, (0, 0, 0, self.alpha),
-                               False)
-            self.panel.fill((0, 0, 0, self.alpha))
-            self.panel.draw()
+            self.panel = Panel(surface.get_size(), (0, 0, 0, self.alpha))
+            surface.blit(self.panel.image, (0,0))
         self.current_delay -= elapsed
         return (surface, rect)
 
@@ -215,15 +276,14 @@ class FadeOut(_Effect):
         ratio = self.current_delay / self.init_delay
         self.alpha = int(ratio * 255)
         if self.first_apply:
-            panel = pg.Surface(surface.get_size(), pg.SRCALPHA)
-            self.panel = Panel(panel, surface, (0, 0, 0, 20), False)
+            self.panel = Panel(surface.get_size(), (0, 0, 0, 20))
             self.first_apply = False
         if self.current_delay <= 0:
-            self.panel.fill((0, 0, 0, 0))
+            self.panel.image.fill((0, 0, 0, 0))
             self.done = True
         else:
-            self.panel.fill((0, 0, 0, 20))
-            self.panel.draw()
+            self.panel.image.fill((0, 0, 0, 20))
+            surface.blit(self.panel.image, (0,0))
         self.current_delay -= elapsed
         return (surface, rect)
 
@@ -289,4 +349,5 @@ EFFECTS_DICT = {
     'fadeout': FadeOut,
     'wait': Wait,
     'move': Move,
+    'txt_effect1': TextEffect1
 }

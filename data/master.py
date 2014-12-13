@@ -12,7 +12,7 @@ class Master(setup.Window):
         super().__init__()
         self.done = False  # etat du programme
         self.clock = pg.time.Clock()  # horloge du programme
-        self.fps = 120  # frequence d'update
+        self.fps = 60  # frequence d'update
         self.current_time = 0.0  # valeur du chronometre
         self.keys = pg.key.get_pressed()
         self.state_name = None
@@ -37,6 +37,8 @@ class Master(setup.Window):
             self.surface,
             self.keys,
             self.elapsed)  # maj de l'etat
+        if self.state.rects:
+            pg.draw.rect(self.surface, (255,0,0), self.state.rects[0], 1)
 
     def event_loop(self):
         """Boucle des evenements"""
@@ -55,11 +57,11 @@ class Master(setup.Window):
         while not self.done:
             self.event_loop()  # controle evenements ihm
             self.update()  # maj du prog
-            pg.display.update()  # maj de la fenetre
+            pg.display.update(self.state.rects)  # maj de la fenetre
             fps = self.clock.get_fps()
             with_fps = '{} - {:.2f} FPS'.format(self.caption, fps)
             pg.display.set_caption(with_fps)
-            self.elapsed = self.clock.tick(self.fps)
+            self.elapsed = self.clock.tick_busy_loop(self.fps)
 
     def flip_state(self):
         """Change l'etat du programme"""
