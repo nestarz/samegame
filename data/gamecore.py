@@ -259,12 +259,6 @@ class Board:
             for col in reversed(range(self.num_col)):
                 local_check(self)
                 
-            
-
-
-
-                
-
     def can_fall(self,row,col):
         """
         Check if a case/block can fall one row down, need to have an empty space between all his case
@@ -298,11 +292,12 @@ class Board:
 
     def swap(self):
         """Swap the actual case, pointed by cursor, with the one on his right, since you can only swap a case with the one on his right"""
-
-        (self.board[self.cursor.pos_row][self.cursor.pos_col],
-         self.board[self.cursor.pos_row][self.cursor.pos_col + 1]) = \
-            (self.board[self.cursor.pos_row][self.cursor.pos_col + 1],
-             self.board[self.cursor.pos_row][self.cursor.pos_col])
+        if self.board[self.cursor.pos_row][self.cursor.pos_col].can_swap \
+           and self.board[self.cursor.pos_row][self.cursor.pos_col+1].can_swap:
+            (self.board[self.cursor.pos_row][self.cursor.pos_col],
+             self.board[self.cursor.pos_row][self.cursor.pos_col + 1]) = \
+                (self.board[self.cursor.pos_row][self.cursor.pos_col + 1],
+                 self.board[self.cursor.pos_row][self.cursor.pos_col])
 
 
 class Cursor:
@@ -357,9 +352,3 @@ class Case:
             
     def __repr__(self):
         return "Prev = %r, Next = %r, Color is %r" % (self.prev,self.nex,self.color)
-    
-a = Board()
-a.generate_bad_block(0,3)
-
-a.gravity()
-print(a)
