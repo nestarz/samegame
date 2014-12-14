@@ -31,8 +31,6 @@ class Menu(t.Screen):
         sublogo.rect.y = 85
         logo.draw()
         sublogo.draw()
-        panel1.setup_effect('move', 700, (-panel1.image.get_width(),
-                                          0))
 
         panel2 = t.Panel((435 + 10, PANEL2_HEIGHT), (253, 84, 72, 190))
         menu_img = t.Image(t.text_to_surface(
@@ -48,15 +46,13 @@ class Menu(t.Screen):
         menu_img.rect.x = menu_img.rect.x - 20
         menu_img.draw()
         panel2.rect.y = PANEL1_HEIGHT
-        panel2.setup_effect('move', 700, (-panel2.image.get_width(),
-                                          0))
 
         panel3 = t.Panel((435, PANEL3_HEIGHT), (0, 0, 0, 120))
         panel3.rect.y = PANEL1_HEIGHT + PANEL2_HEIGHT
-        panel3.setup_effect('move', 700, (-panel3.image.get_width(),
-                                          0))
 
         for panel in (panel1, panel2, panel3):
+            panel.rect.x = -panel.image.get_width()
+            panel.setup_effect('move', 600, (panel.image.get_width(), 0))
             self.panels.append(panel)
             panel.add(self.sprites)
 
@@ -74,10 +70,10 @@ class Menu(t.Screen):
     def set_done(self, next):
         super().set_done(next)
         self.to_set_done = True
-        self.to_set_done_timer = 700
+        self.to_set_done_timer = 600
         for panel in self.panels:
-            panel.setup_effect('move', 700,
-                               (-panel.image.get_width(), 0), 0, True)
+            panel.setup_effect('move', 600,
+                               (-panel.image.get_width(), 0), 0)
         self.bg.setup_effect('fadeout', 1000)
 
     def check_for_input(self, keys):
