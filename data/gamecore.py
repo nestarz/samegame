@@ -45,7 +45,7 @@ class GameCore:
 
 class Board:
     """
-    Board Class, the method are
+    Board Class, all method are explained in help(Board)
     """
 
     def __init__(  
@@ -54,9 +54,18 @@ class Board:
         num_color=6,
         num_row=10,
         num_col=6,
-        ):                  
+        ):
+        """
+        Create a playable board
+
+        Set the speed, the number of color, number of row etc...
+        Call the generate_board function
+        Apply gravity
+        Create the cursor
+        """                
         self.speed = speed  # game's speed, int, the higher, the faster
-        self.pause = 0     #amount of time during which the game is frozen after a combo(i.e the board isn't going upward)
+        self.pause = 0   #amount of time during which the game is frozen after a combo
+        #               (i.e the board isn't going upward)
         self.num_color = num_color  # the number of color used in the game
         self.num_col = num_col  # width of the board
         self.num_row = num_row  # length of the board
@@ -80,8 +89,8 @@ class Board:
 
         row index start at 1 because we need a 'hidden' row
 
-        board[1][0] is bottom left, board[1][num_col] is bottom right
-        board[num_row][0] is top left, board[num_row][num_col] is top right
+        board[1][0] is bottom left, board[1][num_col-1] is bottom right
+        board[num_row-1][0] is top left, board[num_row-1][num_col-1] is top right
         """
 
         for row in range(self.num_row):
@@ -143,7 +152,8 @@ class Board:
 
     def destroy_block(self): 
         """
-        The function check if at least 3 block are lined vertically or horizontally (no diagonal), destroy them if so
+        The function check if at least 3 block are lined vertically or horizontally (no diagonal)
+        destroy them if so
         """
 
         destroy = []
@@ -215,13 +225,14 @@ class Board:
 
         return combo
     
-    def gravity(self): #to redo
+    def gravity(self):
         """
         Makes sure there is no empty space between a case and the bottom
         Bad Blocks works as unit of singles cases, so they don't fall if all cases under them are free
 
         The function works in 2 parts :
-            - Apply gravity on everything, even bad block (which is separated piece by piece during this step)
+            - Apply gravity on everything, even bad block (which is separated piece by piece during this
+            step)
             - Get the back block back together
 
         This way you get the nice illusion that the block is a unit
@@ -303,7 +314,10 @@ class Board:
             self.board[0][i] = Case(self.color[randrange(0, self.num_color)], False,False)
 
     def swap(self):
-        """Swap the actual case, pointed by cursor, with the one on his right, since you can only swap a case with the one on his right"""
+        """
+        Swap the actual case, pointed by cursor, with the one on his right
+        since you can only swap a case with the one on his right
+        """
         if self.board[self.cursor.pos_row][self.cursor.pos_col].can_swap \
            and self.board[self.cursor.pos_row][self.cursor.pos_col+1].can_swap:
             (self.board[self.cursor.pos_row][self.cursor.pos_col],
@@ -316,10 +330,11 @@ class Board:
 
 
 class Cursor:
-
-    """The cursor is an object that focuses two cases, in order to swap them
-        Create a cursor that point only one case, no need to specify the 2nd case since it's the one its right
-        You can use .move_up, .move_down, .move_left, .move_right"""
+    """
+    The cursor is an object that focuses two cases, in order to swap them
+    Create a cursor that point only one case, no need to specify the 2nd case since it's the one its right
+    You can use .move_up, .move_down, .move_left, .move_right
+    """
 
     def __init__(self, num_row, num_col): 
         self.max_row = num_row - 1
