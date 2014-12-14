@@ -4,9 +4,8 @@
 import pygame as pg
 from . import cache
 from . import constants as c
-from . import tools as t
+from .tools import Screen, Panel, BlockGFX, CursorGFX
 from .gamecore import GameCore, Cursor
-from time import sleep
 
 
 class Player:
@@ -20,12 +19,13 @@ class Player:
         self.board = board
         self.cursor = self.board.cursor
         self.keys = keys
-        self.blocks = pg.sprite.LayeredDirty()
+        self.blocks_gfx = pg.sprite.LayeredDirty()
+        self.cursor_gfx = pg.sprite.LayeredDirty()
         self.keys_move = [keys['UP'], keys[
             'DOWN'], keys['LEFT'], keys['RIGHT']]
 
 
-class Party(t.Screen):
+class Party(Screen):
 
     def __init__(self):
         super().__init__()
@@ -38,7 +38,7 @@ class Arcade(Party):
         super().__init__()
         self.name = 'arcade'
         self.next = 'home'
-        self.players = [Player(), Player()]
+        self.players = [Player()]
         self.img_boards = list()
         self.allow_input = [True for player in self.players]
         self.allow_swap = [True for player in self.players]
@@ -62,25 +62,20 @@ class Arcade(Party):
     def setup_blocks(self, screen):
         for (i, player) in enumerate(self.players):
             board = player.board
-            dest = self.img_boards[i].image
-            margin_x = 20
+            dest = self.img_boards[i]
             for row in reversed(range(board.num_row)):
                 for col in range(board.num_col):
                     if board.board[row][col].color:
-                        pos = [margin_x + (5 + 38) * col + 5, (5 + 38) *
-                             (board.num_row - row) - 30 - 5, 38, 38]
-                        color = c.COLORS_DICT[board.board[row][col].color] + (235,)
-                        block = t.Block(color, pos, dest)
-                        block.add(player.blocks)
+                        block = BlockGFX(board.board[row][col], dest)
+                        block.add(player.blocks_gfx)
 
     def setup_images(self, screen):
         HEIGHT = screen.get_rect().h
         WIDTH = screen.get_rect().w
 
-        panel = t.Panel((WIDTH - 150, HEIGHT - 110), (0, 0, 0, 210))
+        panel = Panel((WIDTH - 150, HEIGHT - 110), (0, 0, 0, 210))
         panel.rect.midbottom = screen.get_rect().midbottom
         panel.add(self.sprites)
-        margin_x = 30
         for (i, player) in enumerate(self.players):
             size = (self.margin_x +
                                 (self.case_w +
@@ -90,13 +85,15 @@ class Arcade(Party):
                                  self.margin_y) *
                                 player.board.num_row +
                                 10)
-            board = t.Panel(size, (255, 255, 255, 30))
-            board.rect.y = panel.rect.h - board.rect.h
-            board.rect.x = (panel.rect.w - board.rect.w + margin_x if i
-                            > 0 else margin_x)
-            margin_x = -margin_x
+            board = Panel(size, (255, 255, 255, 30))
+            if i == 0:
+                board.rect.bottomleft = panel.rect.bottomleft
+            else:
+                board.rect.bottomright = panel.rect.bottomright
             self.img_boards.append(board)
             board.add(self.sprites)
+            cursor = CursorGFX(player.cursor, board)
+            cursor.add(player.cursor_gfx)
 
     def check_for_input(self, keys):
         for (i, player) in enumerate(self.players):
@@ -150,7 +147,10 @@ class Arcade(Party):
             board.gravity()
             destroy = board.destroy_block()
             board.gravity()
-            player.blocks.draw(window)
+            player.blocks_gfx.update(board, elapsed, self.rects, self.killed)
+            player.cursor_gfx.update(board, elapsed, self.rects, self.killed)
+            self.rects += player.blocks_gfx.draw(window)
+            self.rects += player.cursor_gfx.draw(window)
             if destroy:  # debug only
                 print(destroy)
                 print(board)

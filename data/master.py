@@ -12,7 +12,7 @@ class Master(setup.Window):
         super().__init__()
         self.done = False  # etat du programme
         self.clock = pg.time.Clock()  # horloge du programme
-        self.fps = 2  # frequence d'update
+        self.fps = 250  # frequence d'update
         self.current_time = 0.0  # valeur du chronometre
         self.keys = pg.key.get_pressed()
         self.state_name = None
@@ -37,8 +37,8 @@ class Master(setup.Window):
             self.surface,
             self.keys,
             self.elapsed)  # maj de l'etat
-        if self.state.rects:
-            pg.draw.rect(self.surface, (255,0,0), self.state.rects[0], 1)
+        #if self.state.rects:
+        #    pg.draw.rect(self.surface, (255,0,0), self.state.rects[0], 1)
 
     def event_loop(self):
         """Boucle des evenements"""

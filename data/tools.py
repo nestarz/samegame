@@ -227,8 +227,6 @@ class Button(Sprite):
         self.setup_effect('txt_effect1', 300, 2, self.style, self.txt)
 
     def update(self, *args):
-        elapsed = args[0]
-        up_rects = args[1]
         if self.parent:
             self.rect.right = self.parent.rect.right - 25
         if not self.targeted and self.effect.ongoing():
@@ -269,11 +267,8 @@ class Panel(Sprite):
         Surface.__init__(self, ref)
         self.RGBA = RGBA
         self.image.fill(RGBA)
-        self.i = 0
 
     def update(self, *args):
-        elapsed = args[0]
-        up_rects = args[1]
         Sprite.update(self, *args)
 
 
@@ -288,18 +283,61 @@ class Font(pg.font.Font):
                 pg.font.get_default_font()),
             size)
 
-class Block(Sprite):
+class BlockGFX(Sprite):
     """ Bloc de couleur """
 
     size = (38,38)
 
-    def __init__(self, color, pos, panel):
-        print(color, pos)
+    def __init__(self, case, panel):
         pg.sprite.DirtySprite.__init__(self)
-        ref = pg.Surface(Block.size, pg.SRCALPHA)
+        ref = pg.Surface(BlockGFX.size, pg.SRCALPHA)
         Surface.__init__(self, ref)
-        self.image.fill(color)
+        self.rect.size = BlockGFX.size
+        self.rect.bottom = panel.rect.bottom - (case.pos_row*43 + 5)
+        self.rect.x = 5 + panel.rect.x + case.pos_col*43
+        self.image.fill(c.COLORS_DICT[case.color] + (245,))
+        self.case = case
+        self.pos_row = case.pos_row
+        self.pos_col = case.pos_col
 
-    def update(self, *args):
+    def move(self, board):
+        case = self.case
+        prev_rec = self.rect
+        print(43*(case.pos_col-self.pos_col), -43*(case.pos_row-self.pos_row))
+        self.rect.move_ip(0, -43*(case.pos_row-self.pos_row))
+        self.rect.move_ip(43*(case.pos_col-self.pos_col), 0)
+        if prev_rec != self.rect:
+            print("old=",prev_rec,"newrect=",self.rect)
+        self.pos_row, self.pos_col = case.pos_row, case.pos_col
+
+    def update(self, board, *args):
         Sprite.update(self,*args)
+        self.move(board)
+        self.dirty = 1
+
+class CursorGFX(Sprite):
+
+    size = (43*2,40)
+
+    def __init__(self, cursor, panel):
+        pg.sprite.DirtySprite.__init__(self)
+        ref = pg.Surface(CursorGFX.size, pg.SRCALPHA)
+        Surface.__init__(self, ref)
+        self.rect.size = CursorGFX.size
+        self.cursor = cursor
+        self.rect.bottom = panel.rect.bottom - (cursor.pos_row*43 + 4)
+        self.rect.x = 3 + panel.rect.x + cursor.pos_col*43
+        self.image.fill((255,255,255))
+        self.pos_row = cursor.pos_row
+        self.pos_col = cursor.pos_col
+
+    def move(self, board):
+        cursor = self.cursor
+        self.rect.move_ip(0, -43*(cursor.pos_row-self.pos_row))
+        self.rect.move_ip(43*(cursor.pos_col-self.pos_col), 0)
+        self.pos_row, self.pos_col = cursor.pos_row, cursor.pos_col
+
+    def update(self, board, *args):
+        Sprite.update(self,*args)
+        self.move(board)
         self.dirty = 1

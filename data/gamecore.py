@@ -48,7 +48,7 @@ class Board:
     Board Class, all method are explained in help(Board)
     """
 
-    def __init__(  
+    def __init__(
         self,
         speed=1,
         num_color=6,
@@ -62,7 +62,7 @@ class Board:
         Call the generate_board function
         Apply gravity
         Create the cursor
-        """                
+        """
         self.speed = speed  # game's speed, int, the higher, the faster
         self.pause = 0   #amount of time during which the game is frozen after a combo
         #               (i.e the board isn't going upward)
@@ -96,7 +96,7 @@ class Board:
         for row in range(self.num_row):
             self.board.append([])
             for col in range(self.num_col):
-                self.board[row].append(Case(False,False,False))
+                self.board[row].append(Case(False,False,False, row, col))
 
         i = 0
 
@@ -136,7 +136,7 @@ class Board:
 
     def top_row_empty(self):
         """
-        Check if the top line is empty case by case, return True if the top line is empty, False elsewise 
+        Check if the top line is empty case by case, return True if the top line is empty, False elsewise
         """
         return not(True in [isinstance(x.color,str) for x in self.board[self.num_row-1]])
 
@@ -147,10 +147,11 @@ class Board:
         for row in reversed(range(1,(self.num_row))):
             for col in range(self.num_col):
                 self.board[row][col] = self.board[row-1][col]
+                self.board[row][col].pos_row = row
         self.generate_hidden()
 
 
-    def destroy_block(self): 
+    def destroy_block(self):
         """
         The function check if at least 3 block are lined vertically or horizontally (no diagonal)
         destroy them if so
@@ -162,7 +163,7 @@ class Board:
             """
             Function called by destroy_block
             Check if the actual case is relevant to the precedent case :
-            If so : increment combo 
+            If so : increment combo
             If not : Destroy case if combo is >= 3  and reset combo
 
             Return the number of destroyed cases
@@ -206,7 +207,7 @@ class Board:
             combo = 1
             temp_col = False
             temp_cor = []
-            
+
 
             for row in reversed(range(1, self.num_row)):
                 combo, temp_case, temp_cor, destroy = destroy_local(
@@ -220,11 +221,11 @@ class Board:
         for line in destroy:
             for case in line:
                 if not self.board[case[0]][case[1]].color == 'bad':
-                    self.board[case[0]][case[1]] = Case(False,False,False)
+                    self.board[case[0]][case[1]] = Case(False,False,False, case[0], case[1])
                     combo += 1
 
         return combo
-    
+
     def gravity(self):
         """
         Makes sure there is no empty space between a case and the bottom
@@ -248,18 +249,19 @@ class Board:
 
             If the part on the left or right is missing, you send the column upward and you re-iterate
             through the board
-            
+
             """
             if self.board[row][col].color == 'bad':
                     if (self.board[row][col].nex and not(self.board[row][col+1].color == 'bad') \
                     or self.board[row][col].prev and not(self.board[row][col-1].color == 'bad')):
                             for temp_row in reversed(range(row,self.num_row)):
                                 self.board[temp_row][col] = deepcopy(self.board[temp_row-1][col])
-                            self.board[row][col] = Case(False,False,False)
-            
+                                self.board[temp_row][col].row = temp_row
+                            self.board[row][col] = Case(False,False,False, row, col)
+
 
         for col in range(self.num_col):  #First Routine, Makes everything fall down even Bad block
-                row = 1                  #Bad block are separated 
+                row = 1                  #Bad block are separated
                 i = 1
                 done = False
                 while row < self.num_row:
@@ -267,7 +269,8 @@ class Board:
                         done = True
                     elif done is True:
                         self.board[i][col] = self.board[row][col]
-                        self.board[row][col] = Case(False,False,False)
+                        self.board[i][col].pos_row = i
+                        self.board[row][col] = Case(False,False,False, row, col)
                         i += 1
                     else:
                         i += 1
@@ -279,7 +282,7 @@ class Board:
                 local_check(self)
             for col in reversed(range(self.num_col)):
                 local_check(self)
-                
+
     def can_fall(self,row,col):
         """
         Check if a case/block can fall one row down, need to have an empty space between all his case
@@ -301,7 +304,7 @@ class Board:
         """
 
         for i in range(0,size):
-            self.board[self.num_row-1][pos+i] = Case('bad',i!=0,i!=size-1)
+            self.board[self.num_row-1][pos+i] = Case('bad',i!=0,i!=size-1,self.num_row-1,pos+i)
 
 
 
@@ -311,7 +314,7 @@ class Board:
         """
 
         for i in range(0, self.num_col):
-            self.board[0][i] = Case(self.color[randrange(0, self.num_color)], False,False)
+            self.board[0][i] = Case(self.color[randrange(0, self.num_color)], False,False, 0, i)
 
     def swap(self):
         """
@@ -324,7 +327,8 @@ class Board:
              self.board[self.cursor.pos_row][self.cursor.pos_col + 1]) = \
                 (self.board[self.cursor.pos_row][self.cursor.pos_col + 1],
                  self.board[self.cursor.pos_row][self.cursor.pos_col])
-
+            self.board[self.cursor.pos_row][self.cursor.pos_col].pos_col = self.cursor.pos_col + 1
+            self.board[self.cursor.pos_row][self.cursor.pos_col + 1].pos_col = self.cursor.pos_col
         else:
             print("Can't swap those cases")
 
@@ -336,7 +340,7 @@ class Cursor:
     You can use .move_up, .move_down, .move_left, .move_right
     """
 
-    def __init__(self, num_row, num_col): 
+    def __init__(self, num_row, num_col):
         self.max_row = num_row - 1
         self.max_col = num_col - 1
         self.pos_row = 0
@@ -371,14 +375,15 @@ class Case:
     """
     Case Class
     """
-    def __init__(self, color, prev, nex):
+    def __init__(self, color, prev, nex, row, col):
         self.color = color
         self.nex = nex
         self.prev = prev
+        self.pos_row, self.pos_col = row, col
         if color == 'bad':
             self.can_swap = False
         else:
             self.can_swap = True
-            
+
     def __repr__(self):
         return "Prev = %r, Next = %r, Color is %r" % (self.prev,self.nex,self.color)
