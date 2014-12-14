@@ -6,6 +6,9 @@ from copy import *
 
 
 class Color:
+    """
+    Color Class
+    """
 
     def __init__(self, color, name):
         self.color = color
@@ -19,9 +22,13 @@ class Color:
 
 
 class GameCore:
-    """The heart of the game, at the moment, it only generates 1 board, but later, will generate 2 or more board, if you wish"""
+    """
+    The heart of the game, you set the speed, the number of color, the number of row
+    number of col, and the number of board here
 
-    def __init__(  # need getter, setter, later.
+    All the board are stocked in the array : all_board
+    """
+    def __init__(
         self,
         speed=1,
         num_color=6,
@@ -37,6 +44,9 @@ class GameCore:
 
 
 class Board:
+    """
+    Board Class, the method are
+    """
 
     def __init__(  
         self,
@@ -285,7 +295,9 @@ class Board:
 
 
     def generate_hidden(self):
-        """Generate the hidden row"""
+        """
+        Fill the first row with colored cases
+        """
 
         for i in range(0, self.num_col):
             self.board[0][i] = Case(self.color[randrange(0, self.num_color)], False,False)
@@ -298,6 +310,9 @@ class Board:
              self.board[self.cursor.pos_row][self.cursor.pos_col + 1]) = \
                 (self.board[self.cursor.pos_row][self.cursor.pos_col + 1],
                  self.board[self.cursor.pos_row][self.cursor.pos_col])
+
+        else:
+            print("Can't swap those cases")
 
 
 class Cursor:
