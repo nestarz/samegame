@@ -96,7 +96,7 @@ class Board:
         for row in range(self.num_row):
             self.board.append([])
             for col in range(self.num_col):
-                self.board[row].append(Case(False,False,False, row, col))
+                self.board[row].append(Case(False,False,False, self.board))
 
         i = 0
 
@@ -147,7 +147,6 @@ class Board:
         for row in reversed(range(1,(self.num_row))):
             for col in range(self.num_col):
                 self.board[row][col] = self.board[row-1][col]
-                self.board[row][col].pos_row = row
         self.generate_hidden()
 
 
@@ -221,7 +220,7 @@ class Board:
         for line in destroy:
             for case in line:
                 if not self.board[case[0]][case[1]].color == 'bad':
-                    self.board[case[0]][case[1]] = Case(False,False,False, case[0], case[1])
+                    self.board[case[0]][case[1]] = Case(False,False,False, self.board)
                     combo += 1
 
         return combo
@@ -256,8 +255,7 @@ class Board:
                     or self.board[row][col].prev and not(self.board[row][col-1].color == 'bad')):
                             for temp_row in reversed(range(row,self.num_row)):
                                 self.board[temp_row][col] = deepcopy(self.board[temp_row-1][col])
-                                self.board[temp_row][col].row = temp_row
-                            self.board[row][col] = Case(False,False,False, row, col)
+                            self.board[row][col] = Case(False,False,False, self.board)
 
 
         for col in range(self.num_col):  #First Routine, Makes everything fall down even Bad block
@@ -269,8 +267,7 @@ class Board:
                         done = True
                     elif done is True:
                         self.board[i][col] = self.board[row][col]
-                        self.board[i][col].pos_row = i
-                        self.board[row][col] = Case(False,False,False, row, col)
+                        self.board[row][col] = Case(False,False,False, self.board)
                         i += 1
                     else:
                         i += 1
@@ -304,7 +301,7 @@ class Board:
         """
 
         for i in range(0,size):
-            self.board[self.num_row-1][pos+i] = Case('bad',i!=0,i!=size-1,self.num_row-1,pos+i)
+            self.board[self.num_row-1][pos+i] = Case('bad',i!=0,i!=size-1, self.board)
 
 
 
@@ -314,7 +311,7 @@ class Board:
         """
 
         for i in range(0, self.num_col):
-            self.board[0][i] = Case(self.color[randrange(0, self.num_color)], False,False, 0, i)
+            self.board[0][i] = Case(self.color[randrange(0, self.num_color)], False,False, self.board)
 
     def swap(self):
         """
@@ -327,8 +324,8 @@ class Board:
              self.board[self.cursor.pos_row][self.cursor.pos_col + 1]) = \
                 (self.board[self.cursor.pos_row][self.cursor.pos_col + 1],
                  self.board[self.cursor.pos_row][self.cursor.pos_col])
-            self.board[self.cursor.pos_row][self.cursor.pos_col].pos_col = self.cursor.pos_col + 1
-            self.board[self.cursor.pos_row][self.cursor.pos_col + 1].pos_col = self.cursor.pos_col
+            return (self.board[self.cursor.pos_row][self.cursor.pos_col],
+                    self.board[self.cursor.pos_row][self.cursor.pos_col + 1])
         else:
             print("Can't swap those cases")
 
@@ -375,15 +372,28 @@ class Case:
     """
     Case Class
     """
-    def __init__(self, color, prev, nex, row, col):
+    def __init__(self, color, prev, nex, board):
         self.color = color
         self.nex = nex
         self.prev = prev
-        self.pos_row, self.pos_col = row, col
+        self.board = board
+        self.swap_ongoing = False
         if color == 'bad':
             self.can_swap = False
         else:
             self.can_swap = True
 
+    @property
+    def pos(self):
+        return find(self, self.board)
+
     def __repr__(self):
         return "Prev = %r, Next = %r, Color is %r" % (self.prev,self.nex,self.color)
+
+def find(c, board):
+    for i, case in enumerate(board):
+        try:
+            j = case.index(c)
+        except ValueError:
+            continue
+        return i, j

@@ -110,7 +110,9 @@ class Arcade(Party):
                 if keys[pg.K_ESCAPE]:
                     self.set_done(self.next)
             if self.allow_swap[i] and keys[player.keys['SWAP']]:
-                player.board.swap()
+                case1, case2 = player.board.swap()
+                case1.swap_ongoing = True
+                case2.swap_ongoing = True
 
             self.allow_input[i] = False
             self.allow_swap[i] = False
@@ -144,13 +146,15 @@ class Arcade(Party):
         for (i, player) in enumerate(self.players):
             board = player.board
             cursor = player.cursor
-            board.gravity()
-            destroy = board.destroy_block()
-            board.gravity()
-            player.blocks_gfx.update(board, elapsed, self.rects, self.killed)
-            player.cursor_gfx.update(board, elapsed, self.rects, self.killed)
+            player.blocks_gfx.update(elapsed, board)
+            player.cursor_gfx.update(elapsed, board)
             self.rects += player.blocks_gfx.draw(window)
             self.rects += player.cursor_gfx.draw(window)
+            board.gravity()
+            player.blocks_gfx.update(elapsed, board)
+            destroy = board.destroy_block()
+            player.blocks_gfx.update(elapsed, board)
+            board.gravity()
             if destroy:  # debug only
                 print(destroy)
                 print(board)

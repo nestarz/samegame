@@ -54,7 +54,6 @@ class Screen(State):
         self.to_set_done_timer = 0
         self.allow_input_timer = 0
         self.sprites = pg.sprite.LayeredDirty()
-        self.killed = pg.sprite.LayeredDirty()
         self.rects = []
 
     def reinitialize(self):
@@ -94,8 +93,7 @@ class Screen(State):
         self.bg.update(elapsed)
         rects1 = self.bg.draw(window)
         self.sprites.clear(window, self.bg.image)
-        self.sprites.update(elapsed, self.rects, self.killed)
-        self.killed.update(elapsed, self.rects, self.killed)
+        self.sprites.update(elapsed)
         rects2 = self.sprites.draw(window) #on affiche sur la fenetre les sprites
         self.rects = rects1 + rects2 if rects1 else rects2
         if self.to_set_done:
@@ -141,9 +139,9 @@ class Surface:
         self.rect.centerx = window.get_rect().centerx + x
         self.rect.centery = window.get_rect().centery + y
 
-    def update(self, *args):
+    def update(self, elapsed):
         if self.wait:
-            self.display = self.wait_effect.apply(args[0])
+            self.display = self.wait_effect.apply(elapsed)
             if self.wait_effect.done:
                 self.effect.remove(self.wait_effect)
                 self.wait = False
@@ -151,7 +149,7 @@ class Surface:
             for effect in self.effect:
                 if not effect.pause:
                     (self.image,
-                     self.rect) = effect.apply(args[0],
+                     self.rect) = effect.apply(elapsed,
                                                self.image,
                                                self.rect)
                     self.display = effect.display
@@ -182,21 +180,16 @@ class Sprite(pg.sprite.DirtySprite, Surface):
         pg.sprite.DirtySprite.__init__(self)
         Surface.__init__(self, *args)
 
-    def update(self, *args):
+    def update(self, elapsed):
         self.dirty = 1
-        Surface.update(self, *args)
-        up_rects = args[1]
-        killed = args[2]
-        if not self.display and not self in killed:
-            self.previous_groups = self.groups()
-            self.kill()
-            self.add(killed)
-        elif self.display and self.previous_groups:
-            self.add(*self.previous_groups)
-            self.remove(killed)
-            self.previous_groups = []
-        if self.effect:
+        Surface.update(self, elapsed)
+        if not self.display:
+            self.visible = 0
             self.dirty = 1
+        elif self.display:
+            self.visible = 1
+            if self.effect:
+                self.dirty = 1
 
 class Button(Sprite):
 
@@ -226,7 +219,7 @@ class Button(Sprite):
             self.rect.topright = self.parent.rect.topright
         self.setup_effect('txt_effect1', 300, 2, self.style, self.txt)
 
-    def update(self, *args):
+    def update(self, elapsed):
         if self.parent:
             self.rect.right = self.parent.rect.right - 25
         if not self.targeted and self.effect.ongoing():
@@ -235,7 +228,7 @@ class Button(Sprite):
             self.image, self.rect = pack
         elif self.targeted:
             self.effect.resumeall()
-        Sprite.update(self, *args)
+        Sprite.update(self, elapsed)
         self.dirty = 1 if self.targeted else 0
         self.targeted = False
 
@@ -268,8 +261,8 @@ class Panel(Sprite):
         self.RGBA = RGBA
         self.image.fill(RGBA)
 
-    def update(self, *args):
-        Sprite.update(self, *args)
+    def update(self, elapsed):
+        Sprite.update(self, elapsed)
 
 
 class Font(pg.font.Font):
@@ -287,32 +280,53 @@ class BlockGFX(Sprite):
     """ Bloc de couleur """
 
     size = (38,38)
+    INDEX = 0
+    pause = False
 
     def __init__(self, case, panel):
+        self.index = BlockGFX.INDEX
+        BlockGFX.INDEX += 1
         pg.sprite.DirtySprite.__init__(self)
         ref = pg.Surface(BlockGFX.size, pg.SRCALPHA)
         Surface.__init__(self, ref)
         self.rect.size = BlockGFX.size
-        self.rect.bottom = panel.rect.bottom - (case.pos_row*43 + 5)
-        self.rect.x = 5 + panel.rect.x + case.pos_col*43
+        self.rect.bottom = panel.rect.bottom - (case.pos[0]*43 + 5)
+        self.rect.x = 5 + panel.rect.x + case.pos[1]*43
         self.image.fill(c.COLORS_DICT[case.color] + (245,))
         self.case = case
-        self.pos_row = case.pos_row
-        self.pos_col = case.pos_col
+        self.pos = case.pos
+        self.time_stacker = 0
+        self.alive = True
 
     def move(self, board):
         case = self.case
-        prev_rec = self.rect
-        self.rect.move_ip(0, -43*(case.pos_row-self.pos_row))
-        self.rect.move_ip(43*(case.pos_col-self.pos_col), 0)
-        if prev_rec != self.rect:
-            print("old=",prev_rec,"newrect=",self.rect)
-        self.pos_row, self.pos_col = case.pos_row, case.pos_col
+        if case.pos[1]-self.pos[1] != 0 or case.pos[0]-self.pos[0] != 0:
+            self.rect.move_ip(0, -43*(case.pos[0]-self.pos[0]))
+            self.rect.move_ip(43*(case.pos[1]-self.pos[1]), 0)
+            self.setup_effect('move', 200, (-43*(case.pos[1]-self.pos[1]), 43*(case.pos[0]-self.pos[0])))
+            self.pos = case.pos
 
-    def update(self, board, *args):
-        Sprite.update(self,*args)
-        self.move(board)
+    def update(self, elapsed, board):
+        Sprite.update(self, elapsed)
+        swap_ongoing = self.case.swap_ongoing
+        if not self.case.pos:
+            if self.alive:
+                self.setup_effect('blink', 150)
+                BlockGFX.pause = True
+            self.time_kill(elapsed)
+        elif not BlockGFX.pause or swap_ongoing:
+            if swap_ongoing:
+                print(self.index)
+            self.move(board)
+            self.case.swap_ongoing = False
         self.dirty = 1
+
+    def time_kill(self, elapsed):
+        self.alive = False
+        if self.time_stacker > 900:
+            self.kill()
+            BlockGFX.pause = False
+        self.time_stacker += elapsed
 
 class CursorGFX(Sprite):
 
@@ -326,17 +340,18 @@ class CursorGFX(Sprite):
         self.cursor = cursor
         self.rect.bottom = panel.rect.bottom - (cursor.pos_row*43 + 4)
         self.rect.x = 3 + panel.rect.x + cursor.pos_col*43
-        self.image.fill((255,255,255))
+        self.image.fill((255,255,255,180))
         self.pos_row = cursor.pos_row
         self.pos_col = cursor.pos_col
 
     def move(self, board):
         cursor = self.cursor
-        self.rect.move_ip(0, -43*(cursor.pos_row-self.pos_row))
-        self.rect.move_ip(43*(cursor.pos_col-self.pos_col), 0)
-        self.pos_row, self.pos_col = cursor.pos_row, cursor.pos_col
+        if cursor.pos_row-self.pos_row != 0 or cursor.pos_col-self.pos_col != 0:
+            self.rect.move_ip(0, -43*(cursor.pos_row-self.pos_row))
+            self.rect.move_ip(43*(cursor.pos_col-self.pos_col), 0)
+            self.pos_row, self.pos_col = cursor.pos_row, cursor.pos_col
 
-    def update(self, board, *args):
-        Sprite.update(self,*args)
+    def update(self, elapsed, board):
+        Sprite.update(self, elapsed)
         self.move(board)
         self.dirty = 1
