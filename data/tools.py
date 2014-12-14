@@ -303,7 +303,6 @@ class BlockGFX(Sprite):
     def move(self, board):
         case = self.case
         prev_rec = self.rect
-        print(43*(case.pos_col-self.pos_col), -43*(case.pos_row-self.pos_row))
         self.rect.move_ip(0, -43*(case.pos_row-self.pos_row))
         self.rect.move_ip(43*(case.pos_col-self.pos_col), 0)
         if prev_rec != self.rect:
