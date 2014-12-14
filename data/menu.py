@@ -77,7 +77,7 @@ class Menu(t.Screen):
         self.to_set_done_timer = 700
         for panel in self.panels:
             panel.setup_effect('move', 700,
-                               (-panel.image.get_width(), 0), True)
+                               (-panel.image.get_width(), 0), 0, True)
         self.bg.setup_effect('fadeout', 1000)
 
     def check_for_input(self, keys):

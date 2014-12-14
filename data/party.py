@@ -146,14 +146,12 @@ class Arcade(Party):
         for (i, player) in enumerate(self.players):
             board = player.board
             cursor = player.cursor
+            board.gravity()
+            destroy = board.destroy_block()
             player.blocks_gfx.update(elapsed, board)
             player.cursor_gfx.update(elapsed, board)
             self.rects += player.blocks_gfx.draw(window)
             self.rects += player.cursor_gfx.draw(window)
-            board.gravity()
-            player.blocks_gfx.update(elapsed, board)
-            destroy = board.destroy_block()
-            player.blocks_gfx.update(elapsed, board)
             board.gravity()
             if destroy:  # debug only
                 print(destroy)

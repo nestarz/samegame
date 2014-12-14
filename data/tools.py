@@ -5,6 +5,34 @@ import pygame as pg
 from . import cache
 from . import constants as c
 
+class EffectDict(dict):
+    def resumeall(self):
+        for l in self.values():
+            l.resumeall()
+
+    def stopall(self):
+        for l in self.values():
+            l.stopall()
+
+    def ongoing(self):
+        for l in self.values():
+            if l.ongoing():
+                return True
+        return False
+
+    def backup(self, img, rect):
+        for l in self.values():
+            for e in l:
+                if not e.first_apply:
+                    return e.backup()
+        return (img, rect)
+
+    def is_empty(self):
+        for l in self.values():
+            if l:
+                return False
+        return True
+
 class EffectList(list):
 
     def resumeall(self):
@@ -111,7 +139,7 @@ class Surface:
     def __init__(self, ref):
         self.image = ref
         self.rect = self.image.get_rect()
-        self.effect = EffectList()
+        self.effectdict = EffectDict()
         self.display = True
         self.wait = False
         self.wait_effect = None
@@ -120,10 +148,12 @@ class Surface:
     def setup_effect(self, name, *args):
         from .effect import EFFECTS_DICT
         Effect = EFFECTS_DICT[name]
-        self.effect.append(Effect(*args))
+        if self.effectdict.get(name, False) == False:
+            self.effectdict[name] = EffectList()
+        self.effectdict[name].append(Effect(*args))
         if name == 'wait':
             self.wait = True
-            self.wait_effect = self.effect[-1]
+            self.wait_effect = self.effectdict[name][-1]
 
     def resize(self, w, h):
         self.image = pg.transform.scale(self.image, (int(w),
@@ -143,18 +173,19 @@ class Surface:
         if self.wait:
             self.display = self.wait_effect.apply(elapsed)
             if self.wait_effect.done:
-                self.effect.remove(self.wait_effect)
+                self.effectdict['wait'].remove(self.wait_effect)
                 self.wait = False
         if not self.wait:
-            for effect in self.effect:
-                if not effect.pause:
-                    (self.image,
-                     self.rect) = effect.apply(elapsed,
-                                               self.image,
-                                               self.rect)
-                    self.display = effect.display
-                    if effect.done:
-                        self.effect.remove(effect)
+            for n, elist in self.effectdict.items():
+                for e in elist:
+                    if not e.pause:
+                        (self.image, self.rect) = e.apply(elapsed, self.image,
+                                                           self.rect)
+                        self.display = e.display
+                        if e.done:
+                            elist.remove(e)
+                        if e.priority == 1:
+                            break
 
 
 class Image(Surface):
@@ -165,7 +196,7 @@ class Image(Surface):
         self.need_draw = True
 
     def update(self, elapsed):
-        self.need_draw = bool(self.effect) # Vrai si j'ai des effets à appliquer
+        self.need_draw = not self.effectdict.is_empty() # Vrai si j'ai des effets à appliquer
         Surface.update(self, elapsed)
 
     def draw(self, dest=None):
@@ -188,7 +219,7 @@ class Sprite(pg.sprite.DirtySprite, Surface):
             self.dirty = 1
         elif self.display:
             self.visible = 1
-            if self.effect:
+            if not self.effectdict.is_empty():
                 self.dirty = 1
 
 class Button(Sprite):
@@ -222,12 +253,12 @@ class Button(Sprite):
     def update(self, elapsed):
         if self.parent:
             self.rect.right = self.parent.rect.right - 25
-        if not self.targeted and self.effect.ongoing():
-            self.effect.stopall()
-            pack = self.effect.backup(self.image, self.rect)
+        if not self.targeted and self.effectdict.ongoing():
+            self.effectdict.stopall()
+            pack = self.effectdict.backup(self.image, self.rect)
             self.image, self.rect = pack
         elif self.targeted:
-            self.effect.resumeall()
+            self.effectdict.resumeall()
         Sprite.update(self, elapsed)
         self.dirty = 1 if self.targeted else 0
         self.targeted = False
@@ -300,11 +331,11 @@ class BlockGFX(Sprite):
 
     def move(self, board):
         case = self.case
-        if case.pos[1]-self.pos[1] != 0 or case.pos[0]-self.pos[0] != 0:
-            self.rect.move_ip(0, -43*(case.pos[0]-self.pos[0]))
-            self.rect.move_ip(43*(case.pos[1]-self.pos[1]), 0)
-            self.setup_effect('move', 200, (-43*(case.pos[1]-self.pos[1]), 43*(case.pos[0]-self.pos[0])))
-            self.pos = case.pos
+        if case.pos[1]-self.pos[1] != 0:
+            self.setup_effect('move', 200, (43*(case.pos[1]-self.pos[1]), 0), 1)
+        if case.pos[0]-self.pos[0] != 0:
+            self.setup_effect('move', 250, (0, -43*(case.pos[0]-self.pos[0])), 1)
+        self.pos = case.pos
 
     def update(self, elapsed, board):
         Sprite.update(self, elapsed)
@@ -315,15 +346,13 @@ class BlockGFX(Sprite):
                 BlockGFX.pause = True
             self.time_kill(elapsed)
         elif not BlockGFX.pause or swap_ongoing:
-            if swap_ongoing:
-                print(self.index)
             self.move(board)
             self.case.swap_ongoing = False
         self.dirty = 1
 
     def time_kill(self, elapsed):
         self.alive = False
-        if self.time_stacker > 900:
+        if self.time_stacker > 1700:
             self.kill()
             BlockGFX.pause = False
         self.time_stacker += elapsed

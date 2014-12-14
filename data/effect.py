@@ -20,6 +20,7 @@ class _Effect:
         self.pause = False
         self.backup_img = None
         self.backup_rect = None
+        self.priority = 0
 
     def apply(
         self,
@@ -301,11 +302,14 @@ class Move(_Effect):
         self,
         delay,
         distance,
+        priority=0,
         reversed_motion=False,
+
     ):
         super().__init__(delay)
         self.reversed_motion = reversed_motion
         self.distance = distance
+        self.priority = priority
 
     def step(
         self,
@@ -325,19 +329,20 @@ class Move(_Effect):
             if self.first_apply:
                 if self.reversed_motion:
                     self.init_rect = rect.move(*self.distance)
+                    self.dest_rect = rect
                 else:
                     self.init_rect = rect
-                    rect = rect.move(*self.distance)
+                    self.dest_rect = rect.move(*self.distance)
                 self.first_apply = False
-            ratio_y = self.step(elapsed, self.init_rect.y - rect.y,
+            ratio_y = self.step(elapsed, -self.init_rect.y + self.dest_rect.y,
                                 self.current_delay)
-            ratio_x = self.step(elapsed, self.init_rect.x - rect.x,
+            ratio_x = self.step(elapsed, -self.init_rect.x + self.dest_rect.x,
                                 self.current_delay)
             ratio = (ratio_x, ratio_y)
-            rect = rect.move(*ratio)
+            rect.move_ip(*ratio)
             self.current_delay -= elapsed
         elif self.current_delay <= 0:
-            rect = self.init_rect
+            rect = self.init_rect if self.reversed_motion else self.dest_rect
             self.done = True
         return (surface, rect)
 

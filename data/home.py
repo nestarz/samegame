@@ -18,9 +18,9 @@ class Home(t.Screen):
 
     def setup_images(self, screen):
         logo_img = t.Sprite(cache._cache.images['logo'].copy())
-        logo_img.setup_effect('move', 1000, (0, 25))
+        logo_img.setup_effect('move', 1000, (0, -25))
         logo_img.setup_effect('fadein1', 1600)
-        logo_img.center(screen, 0, -5)
+        logo_img.center(screen, 0, 25 - 5)
 
         sublogo_img = t.Sprite(t.text_to_surface(c.AUTHOR, 'joystix',
                                                 10, c.WHITE_RGB))
