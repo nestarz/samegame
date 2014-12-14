@@ -160,6 +160,29 @@ class Blink(_Effect):
             self.current_delay -= elapsed
         return (surface, rect)
 
+class Inflate(_Effect):
+
+    """
+    Zoom/Dezoom de la surface avec un intervalle definit.
+    """
+
+    def __init__(self, delay, step_x, step_y):
+        super().__init__(delay)
+        self.step_x, self.step_y = step_x, step_y
+
+    def apply(
+        self,
+        elapsed,
+        surface,
+        rect,
+    ):
+        if self.current_delay <= 0:
+            self.step_x, self.step_y = -self.step_x, -self.step_y
+            rect.inflate_ip(self.step_x, self.step_y)
+            self.current_delay = self.init_delay
+        elif self.current_delay > 0:
+            self.current_delay -= elapsed
+        return (surface, rect)
 
 class FadeIn1(_Effect):
 
@@ -354,5 +377,6 @@ EFFECTS_DICT = {
     'fadeout': FadeOut,
     'wait': Wait,
     'move': Move,
-    'txt_effect1': TextEffect1
+    'txt_effect1': TextEffect1,
+    'inflate': Inflate
 }

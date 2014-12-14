@@ -322,8 +322,9 @@ class BlockGFX(Sprite):
         Surface.__init__(self, ref)
         self.rect.size = BlockGFX.size
         self.rect.bottom = panel.rect.bottom - (case.pos[0]*43 + 5)
-        self.rect.x = 5 + panel.rect.x + case.pos[1]*43
+        self.rect.x = 10 + panel.rect.x + case.pos[1]*43
         self.image.fill(c.COLORS_DICT[case.color] + (245,))
+        self.image = self.image.convert()
         self.case = case
         self.pos = case.pos
         self.time_stacker = 0
@@ -332,20 +333,24 @@ class BlockGFX(Sprite):
     def move(self, board):
         case = self.case
         if case.pos[1]-self.pos[1] != 0:
-            self.setup_effect('move', 200, (43*(case.pos[1]-self.pos[1]), 0), 1)
+            self.setup_effect('move', 50, (43*(case.pos[1]-self.pos[1]), 0), 1)
         if case.pos[0]-self.pos[0] != 0:
-            self.setup_effect('move', 250, (0, -43*(case.pos[0]-self.pos[0])), 1)
+            self.setup_effect('move', 100, (0, -43*(case.pos[0]-self.pos[0])), 1)
         self.pos = case.pos
 
     def update(self, elapsed, board):
         Sprite.update(self, elapsed)
         swap_ongoing = self.case.swap_ongoing
+        if self.pos[0] == 0:
+            self.image.set_alpha(30)
+        else:
+            self.image.set_alpha(255)
         if not self.case.pos:
             if self.alive:
                 self.setup_effect('blink', 150)
                 BlockGFX.pause = True
             self.time_kill(elapsed)
-        elif not BlockGFX.pause or swap_ongoing:
+        elif not BlockGFX.pause or swap_ongoing :
             self.move(board)
             self.case.swap_ongoing = False
         self.dirty = 1
@@ -359,17 +364,17 @@ class BlockGFX(Sprite):
 
 class CursorGFX(Sprite):
 
-    size = (43*2,40)
+    size = (43*2+1,42+2)
 
     def __init__(self, cursor, panel):
         pg.sprite.DirtySprite.__init__(self)
         ref = pg.Surface(CursorGFX.size, pg.SRCALPHA)
         Surface.__init__(self, ref)
+        pg.draw.rect(self.image, (255,255,255), self.rect, 5)
         self.rect.size = CursorGFX.size
         self.cursor = cursor
-        self.rect.bottom = panel.rect.bottom - (cursor.pos_row*43 + 4)
-        self.rect.x = 3 + panel.rect.x + cursor.pos_col*43
-        self.image.fill((255,255,255,180))
+        self.rect.bottom = panel.rect.bottom - (cursor.pos_row*43 + 2)
+        self.rect.x = 7 + panel.rect.x + cursor.pos_col*43
         self.pos_row = cursor.pos_row
         self.pos_col = cursor.pos_col
 

@@ -37,6 +37,11 @@ class GameCore:
         num_board=2,
         ):
         super().__init__()
+        self.num_col = num_col
+        self.num_row = num_row
+        self.num_board = num_board
+        self.num_color = num_color
+        self.speed = speed
         self.all_board = []
         for i in range(0, num_board):
             self.all_board.append(Board(speed, num_color, num_row,
@@ -312,6 +317,7 @@ class Board:
 
         for i in range(0, self.num_col):
             self.board[0][i] = Case(self.color[randrange(0, self.num_color)], False,False, self.board)
+        return self.board[0]
 
     def swap(self):
         """
