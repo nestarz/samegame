@@ -163,6 +163,6 @@ class CharacterSelection(Menu):
         self.description = 'Choose your Hero'
 
     def setup_buttons(self, screen):
-        super().add_btn('Developper', lambda: self.set_done(self.next, speed=self.persist['speed']))
+        super().add_btn('Developper', lambda: self.set_done(self.next, speed=self.persist.get('speed',2)))
         super().add_btn('Back', lambda: self.set_done(c.SELECT_MODE))
         super().position_buttons()

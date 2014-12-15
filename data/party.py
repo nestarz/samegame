@@ -131,7 +131,7 @@ class Arcade(Party):
     def check_for_input(self, keys):
         for (i, player) in enumerate(self.players):
             if keys[pg.K_ESCAPE]:
-                self.set_done(self.previous)
+                self.set_done(self.previous, speed=self.speed)
             if player.alive:
                 self.allow_input_timer[i] += self.elapsed
                 if self.allow_input[i] and len([key for key in keys if key != 0]):
@@ -168,8 +168,8 @@ class Arcade(Party):
                 if not keys[player.keys['GENERATE']]:
                     self.allow_up_row[i] = True
 
-    def set_done(self, next):
-        super().set_done(next)
+    def set_done(self, next, **kwargs):
+        super().set_done(next, **kwargs)
         self.to_set_done = True
         self.to_set_done_timer = 0.5
         self.bg.setup_effect('fadeout', 2)

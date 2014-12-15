@@ -20,7 +20,7 @@ def main():
                   c.SELECT_MODE : menu.ModeSelection(),
                   c.SELECT_CHAR : menu.CharacterSelection(),
                   c.ARCADE : party.Arcade()}
-    master.setup_state(state_dict, c.ARCADE)
+    master.setup_state(state_dict, c.HOME)
     master.main_loop()
     master.exit()
 
