@@ -259,7 +259,7 @@ class Board:
                     if (self.board[row][col].nex and not(self.board[row][col+1].color == 'bad') \
                     or self.board[row][col].prev and not(self.board[row][col-1].color == 'bad')):
                             for temp_row in reversed(range(row,self.num_row)):
-                                self.board[temp_row][col] = deepcopy(self.board[temp_row-1][col])
+                                self.board[temp_row][col] = copy(self.board[temp_row-1][col])
                             self.board[row][col] = Case(False,False,False, self.board)
 
 
