@@ -67,8 +67,8 @@ class Menu(t.Screen):
             button.rect = button.rect.move(-25, y)
             y += 48
 
-    def set_done(self, next):
-        super().set_done(next)
+    def set_done(self, next, **kwargs):
+        super().set_done(next, **kwargs)
         self.to_set_done = True
         self.to_set_done_timer = 600
         for panel in self.panels:
@@ -146,9 +146,10 @@ class ModeSelection(Menu):
         self.description = 'Selection du Mode'
 
     def setup_buttons(self, screen):
-        super().add_btn('Story', lambda: self.set_done(c.SELECT_CHAR))
-        super().add_btn('Arcade', lambda: self.set_done(c.SELECT_CHAR))
-        super().add_btn('Versus', lambda: self.set_done(c.SELECT_CHAR))
+        super().add_btn('Easy', lambda: self.set_done(c.SELECT_CHAR, speed=1))
+        super().add_btn('Normal', lambda: self.set_done(c.SELECT_CHAR, speed=2))
+        super().add_btn('Hard', lambda: self.set_done(c.SELECT_CHAR, speed=3))
+        super().add_btn('Inferno', lambda: self.set_done(c.SELECT_CHAR, speed=4))
         super().add_btn('Back', lambda: self.set_done(c.MAIN_MENU))
         super().position_buttons()
 
@@ -162,6 +163,6 @@ class CharacterSelection(Menu):
         self.description = 'Choose your Hero'
 
     def setup_buttons(self, screen):
-        super().add_btn('Developper', lambda: self.set_done(self.next))
+        super().add_btn('Developper', lambda: self.set_done(self.next, speed=self.persist['speed']))
         super().add_btn('Back', lambda: self.set_done(c.SELECT_MODE))
         super().position_buttons()

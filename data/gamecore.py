@@ -28,7 +28,7 @@ class GameCore:
 
     All the board are stocked in the array : all_board
     """
-    speed = {1:10000, 2:7000, 3:5000}
+    speed = {1:11000, 2:8000, 3:7000, 4:5000}
 
     def __init__(
         self,

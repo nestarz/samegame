@@ -61,6 +61,7 @@ class State:
         self.done = False
         self.quit = False
         self.previous = None
+        self.persist = {}
 
     def reinitialize(self):
         self.done = False
@@ -87,8 +88,9 @@ class Screen(State):
     def reinitialize(self):
         self.__init__()
 
-    def start(self, window):
+    def start(self, window, persist):
         """Set the window"""
+        self.persist = persist
         self.setup_background(window)
         self.setup_images(window)
         self.setup_buttons(window)
@@ -106,8 +108,9 @@ class Screen(State):
     def setup_buttons(self, window):
         pass
 
-    def set_done(self, next):
+    def set_done(self, next, **kwargs):
         self.next = next
+        self.persist = kwargs
         self.to_set_done_timer = 0
 
     def update(
@@ -394,6 +397,8 @@ class BlockGFX(Sprite):
         swap_ongoing = self.case.swap_ongoing
         if self.pos[0] == 0:
             self.image.set_alpha(30)
+        elif not self.player.alive:
+            self.image.set_alpha(45)
         else:
             self.image.set_alpha(255)
         if not self.case.pos:

@@ -68,7 +68,7 @@ class Arcade(Party):
         Player.INDEX = 0
         super().reinitialize()
 
-    def start(self, screen):
+    def start(self, screen, persist):
         """ Creation des plateaux de jeu, des touches et
         attribution des plateaux de jeu aux joueurs """
 
@@ -76,8 +76,9 @@ class Arcade(Party):
         nb_col = 7
         (self.case_w, self.case_h) = (38, 38)
         (self.margin_x, self.margin_y) = (5, 5)
-        self.game = GameCore(1, nb_color, 10, nb_col, len(self.players))
-        super().start(screen)
+        self.speed = persist.get('speed', 2)
+        self.game = GameCore(self.speed, nb_color, 10, nb_col, len(self.players))
+        super().start(screen, persist)
         for (i, player) in enumerate(self.players):
             player.setup_game(self.game.all_board[i], self.img_boards[i], c.CONTROLS[i])
             self.setup_info_gfx(player)
@@ -88,14 +89,18 @@ class Arcade(Party):
         a = InfoGFX(info,  player, 0)
         a.add(player.info_gfx)
         player.info["nom"] = a
+        info = "Speed x{}".format(self.speed)
+        e = InfoGFX(info,  player, 1)
+        e.add(player.info_gfx)
+        player.info["mode"] = e
         info = ""
-        b = InfoGFX(info,  player, 1)
+        b = InfoGFX(info,  player, 2)
         b.add(player.info_gfx)
         player.info["new_row"] = b
-        c = InfoGFX(info,  player, 2)
+        c = InfoGFX(info,  player, 3)
         c.add(player.info_gfx)
         player.info["pause"] = c
-        d = InfoGFX(info,  player, 3)
+        d = InfoGFX(info,  player, 4)
         d.add(player.info_gfx)
         player.info["score"] = d
 
@@ -125,42 +130,43 @@ class Arcade(Party):
 
     def check_for_input(self, keys):
         for (i, player) in enumerate(self.players):
-            self.allow_input_timer[i] += self.elapsed
-            if self.allow_input[i] and len([key for key in keys if key != 0]):
-                if keys[player.keys['UP']]:
-                    player.cursor.move_up()
-                if keys[player.keys['DOWN']]:
-                    player.cursor.move_down()
-                if keys[player.keys['RIGHT']]:
-                    player.cursor.move_right()
-                if keys[player.keys['LEFT']]:
-                    player.cursor.move_left()
-                if keys[pg.K_ESCAPE]:
-                    self.set_done(self.previous)
-            if self.allow_swap[i] and keys[player.keys['SWAP']]:
-                case1, case2 = player.board.swap()
-                case1.swap_ongoing = True
-                case2.swap_ongoing = True
-            if self.allow_up_row[i] and keys[player.keys['GENERATE']]:
-                self.up_row(player, player.board)
+            if keys[pg.K_ESCAPE]:
+                self.set_done(self.previous)
+            if player.alive:
+                self.allow_input_timer[i] += self.elapsed
+                if self.allow_input[i] and len([key for key in keys if key != 0]):
+                    if keys[player.keys['UP']]:
+                        player.cursor.move_up()
+                    if keys[player.keys['DOWN']]:
+                        player.cursor.move_down()
+                    if keys[player.keys['RIGHT']]:
+                        player.cursor.move_right()
+                    if keys[player.keys['LEFT']]:
+                        player.cursor.move_left()
+                if self.allow_swap[i] and keys[player.keys['SWAP']]:
+                    case1, case2 = player.board.swap()
+                    case1.swap_ongoing = True
+                    case2.swap_ongoing = True
+                if self.allow_up_row[i] and keys[player.keys['GENERATE']]:
+                    self.up_row(player, player.board)
 
-            self.allow_input[i] = False
-            self.allow_swap[i] = False
-            self.allow_up_row[i] = False
+                self.allow_input[i] = False
+                self.allow_swap[i] = False
+                self.allow_up_row[i] = False
 
-            no_key_pressed = not sum(keys[key] for key in player.keys_move)
+                no_key_pressed = not sum(keys[key] for key in player.keys_move)
 
-            if self.allow_input_timer[i] > 70:
-                self.allow_input[i] = True
-                self.allow_input_timer[i] = 0
-            elif no_key_pressed:
-                self.allow_input[i] = True
-                self.allow_input_timer[i] = -170
+                if self.allow_input_timer[i] > 70:
+                    self.allow_input[i] = True
+                    self.allow_input_timer[i] = 0
+                elif no_key_pressed:
+                    self.allow_input[i] = True
+                    self.allow_input_timer[i] = -170
 
-            if not keys[player.keys['SWAP']]:
-                self.allow_swap[i] = True
-            if not keys[player.keys['GENERATE']]:
-                self.allow_up_row[i] = True
+                if not keys[player.keys['SWAP']]:
+                    self.allow_swap[i] = True
+                if not keys[player.keys['GENERATE']]:
+                    self.allow_up_row[i] = True
 
     def set_done(self, next):
         super().set_done(next)
@@ -178,8 +184,8 @@ class Arcade(Party):
                 block.add(player.blocks_gfx)
         else:
             player.alive = False
-            info = "Mort"
-            b = InfoGFX(info, player, 4)
+            info = "Game Over"
+            b = InfoGFX(info, player, 5)
             b.add(player.info_gfx)
             player.info["alive"] = b
 
