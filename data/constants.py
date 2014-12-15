@@ -47,7 +47,8 @@ PLAYER1_CONTROLS = {
     'DOWN': pg.K_DOWN,
     'LEFT': pg.K_LEFT,
     'RIGHT': pg.K_RIGHT,
-    'SWAP': pg.K_RETURN
+    'SWAP': pg.K_RETURN,
+    'GENERATE': pg.K_m
 }
 
 PLAYER2_CONTROLS = {
@@ -55,7 +56,8 @@ PLAYER2_CONTROLS = {
     'DOWN': pg.K_s,
     'LEFT': pg.K_a,
     'RIGHT': pg.K_d,
-    'SWAP': pg.K_SPACE
+    'SWAP': pg.K_SPACE,
+    'GENERATE': pg.K_r
 }
 CONTROLS = [PLAYER1_CONTROLS, PLAYER2_CONTROLS]
 # STYLES
@@ -69,7 +71,8 @@ BTN = {
         },
         "size": 18,
         "font": 'joystix',
-        "AA": 1
+        "AA": 1,
+        "bold": 0
     },
     "menu": {
         "default": {

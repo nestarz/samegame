@@ -307,22 +307,73 @@ class Font(pg.font.Font):
                 pg.font.get_default_font()),
             size)
 
+class InfoGFX(Sprite):
+
+    def __init__(
+        self,
+        txt,
+        player,
+        level
+    ):
+        self.style = c.BTN['default']
+        self.txt = txt
+        self.level = level
+        ref = text_to_surface(
+            txt,
+            self.style['font'],
+            12,
+            self.style['default']['color'],
+            self.style['AA'],
+            self.style['bold'],
+        )
+        pg.sprite.DirtySprite.__init__(self)
+        Surface.__init__(self, ref)
+        self.player = player
+        if self.player.index == 1:
+            self.rect.topright = self.player.board_gfx.rect.topright
+        else:
+            self.rect.topleft = self.player.board_gfx.rect.topleft
+
+    def change_txt(self, txt):
+        if self.txt != txt:
+            self.image = text_to_surface(
+                txt,
+                self.style['font'],
+                12,
+                self.style['default']['color'],
+                self.style['AA'],
+                self.style['bold'],
+            )
+            self.rect.size = self.image.get_rect().size
+
+    def update(self, elapsed):
+        if self.player.index == 1:
+            self.rect.right = self.player.board_gfx.rect.right + self.rect.w
+        else:
+            self.rect.left = self.player.board_gfx.rect.left - self.rect.w
+        self.rect.y = self.player.board_gfx.rect.top + self.rect.h * self.level
+        self.dirty = 1
+        Sprite.update(self, elapsed)
+
 class BlockGFX(Sprite):
     """ Bloc de couleur """
 
     size = (38,38)
     INDEX = 0
-    pause = False
+    pause = []
 
-    def __init__(self, case, panel):
+    def __init__(self, case, player):
         self.index = BlockGFX.INDEX
         BlockGFX.INDEX += 1
+        if len(BlockGFX.pause) <= player.index:
+            BlockGFX.pause.append(False)
+        self.player = player
         pg.sprite.DirtySprite.__init__(self)
         ref = pg.Surface(BlockGFX.size, pg.SRCALPHA)
         Surface.__init__(self, ref)
         self.rect.size = BlockGFX.size
-        self.rect.bottom = panel.rect.bottom - (case.pos[0]*43 + 5)
-        self.rect.x = 10 + panel.rect.x + case.pos[1]*43
+        self.rect.bottom = player.board_gfx.rect.bottom - (case.pos[0]*43 + 5)
+        self.rect.x = 10 + player.board_gfx.rect.x + case.pos[1]*43
         self.image.fill(c.COLORS_DICT[case.color] + (245,))
         self.image = self.image.convert()
         self.case = case
@@ -348,9 +399,9 @@ class BlockGFX(Sprite):
         if not self.case.pos:
             if self.alive:
                 self.setup_effect('blink', 150)
-                BlockGFX.pause = True
+                BlockGFX.pause[self.player.index] = True
             self.time_kill(elapsed)
-        elif not BlockGFX.pause or swap_ongoing :
+        elif not BlockGFX.pause[self.player.index] or swap_ongoing :
             self.move(board)
             self.case.swap_ongoing = False
         self.dirty = 1
@@ -359,7 +410,7 @@ class BlockGFX(Sprite):
         self.alive = False
         if self.time_stacker > 1700:
             self.kill()
-            BlockGFX.pause = False
+            BlockGFX.pause[self.player.index] = False
         self.time_stacker += elapsed
 
 class CursorGFX(Sprite):

@@ -4,7 +4,7 @@
 import pygame as pg
 from . import cache
 from . import constants as c
-from .tools import Screen, Panel, BlockGFX, CursorGFX
+from .tools import Screen, Panel, BlockGFX, CursorGFX, InfoGFX
 from .gamecore import GameCore, Cursor
 
 
@@ -14,6 +14,7 @@ class Player:
 
     def __init__(self):
         Player.INDEX += 1
+        self.index = Player.INDEX
         self.hidden_timer = 0
 
     def setup_game(self, board, board_gfx, keys):
@@ -21,10 +22,15 @@ class Player:
         self.cursor = self.board.cursor
         self.keys = keys
         self.board_gfx = board_gfx
+        self.pause = 0
         self.blocks_gfx = pg.sprite.LayeredDirty()
         self.cursor_gfx = pg.sprite.LayeredDirty()
+        self.info_gfx = pg.sprite.LayeredDirty()
+        self.info = {}
         cursor = CursorGFX(self.cursor, board_gfx)
         cursor.add(self.cursor_gfx)
+        self.alive = True
+        self.score = 0
         self.setup_blocks()
         self.keys_move = [keys['UP'], keys[
             'DOWN'], keys['LEFT'], keys['RIGHT']]
@@ -34,7 +40,7 @@ class Player:
         for row in reversed(range(board.num_row)):
             for col in range(board.num_col):
                 if board.board[row][col].color:
-                    block = BlockGFX(board.board[row][col], self.board_gfx)
+                    block = BlockGFX(board.board[row][col], self)
                     block.add(self.blocks_gfx)
 
 class Party(Screen):
@@ -50,12 +56,17 @@ class Arcade(Party):
         super().__init__()
         self.name = 'arcade'
         self.next = 'home'
-        self.players = [Player()]
+        self.players = [Player(), Player()]
         self.img_boards = list()
         self.allow_input = [True for player in self.players]
         self.allow_swap = [True for player in self.players]
         self.allow_input_timer = [0
                                   for player in self.players]
+        self.allow_up_row = [True for player in self.players]
+
+    def reinitialize(self):
+        Player.INDEX = 0
+        super().reinitialize()
 
     def start(self, screen):
         """ Creation des plateaux de jeu, des touches et
@@ -69,6 +80,24 @@ class Arcade(Party):
         super().start(screen)
         for (i, player) in enumerate(self.players):
             player.setup_game(self.game.all_board[i], self.img_boards[i], c.CONTROLS[i])
+            self.setup_info_gfx(player)
+            print("Player {} : {}".format(i+1, c.CONTROLS[i]))
+
+    def setup_info_gfx(self, player):
+        info = "Player {}".format(player.index)
+        a = InfoGFX(info,  player, 0)
+        a.add(player.info_gfx)
+        player.info["nom"] = a
+        info = ""
+        b = InfoGFX(info,  player, 1)
+        b.add(player.info_gfx)
+        player.info["new_row"] = b
+        c = InfoGFX(info,  player, 2)
+        c.add(player.info_gfx)
+        player.info["pause"] = c
+        d = InfoGFX(info,  player, 3)
+        d.add(player.info_gfx)
+        player.info["score"] = d
 
     def setup_images(self, screen):
         HEIGHT = screen.get_rect().h
@@ -107,14 +136,17 @@ class Arcade(Party):
                 if keys[player.keys['LEFT']]:
                     player.cursor.move_left()
                 if keys[pg.K_ESCAPE]:
-                    self.set_done(self.next)
+                    self.set_done(self.previous)
             if self.allow_swap[i] and keys[player.keys['SWAP']]:
                 case1, case2 = player.board.swap()
                 case1.swap_ongoing = True
                 case2.swap_ongoing = True
+            if self.allow_up_row[i] and keys[player.keys['GENERATE']]:
+                self.up_row(player, player.board)
 
             self.allow_input[i] = False
             self.allow_swap[i] = False
+            self.allow_up_row[i] = False
 
             no_key_pressed = not sum(keys[key] for key in player.keys_move)
 
@@ -127,6 +159,8 @@ class Arcade(Party):
 
             if not keys[player.keys['SWAP']]:
                 self.allow_swap[i] = True
+            if not keys[player.keys['GENERATE']]:
+                self.allow_up_row[i] = True
 
     def set_done(self, next):
         super().set_done(next)
@@ -134,15 +168,40 @@ class Arcade(Party):
         self.to_set_done_timer = 0.5
         self.bg.setup_effect('fadeout', 2)
 
-    def game_event(self, elapsed, player, board):
-        if player.hidden_timer > 5000:
+    def up_row(self, player, board):
+        if board.top_row_empty():
             board.up()
+            player.cursor.move_up()
             cases = board.generate_hidden()
             for c in cases:
-                block = BlockGFX(c, player.board_gfx)
+                block = BlockGFX(c, player)
                 block.add(player.blocks_gfx)
-            player.hidden_timer = 0
-        player.hidden_timer += elapsed
+        else:
+            player.alive = False
+            info = "Mort"
+            b = InfoGFX(info, player, 4)
+            b.add(player.info_gfx)
+            player.info["alive"] = b
+
+    def game_event(self, elapsed, player, board, destroy):
+        if player.alive:
+            player.pause += destroy*1000
+            info = "Pause={}s".format(str(int((player.pause)/600)))
+            player.info['pause'].change_txt(info)
+            info = "Up in {:.0f}s".format(int(self.game.speed + player.pause - player.hidden_timer)/600)
+            player.info['new_row'].change_txt(info)
+            if destroy:
+                player.score += destroy
+                info = "Score={:.0f}".format(player.score)
+                player.info['score'].change_txt(info)
+            if player.pause > 0:
+                player.pause -= elapsed
+            elif player.hidden_timer > self.game.speed:
+                self.up_row(player, board)
+                player.hidden_timer = 0
+            else:
+                player.pause = 0
+                player.hidden_timer += elapsed
 
     def update(
         self,
@@ -159,10 +218,9 @@ class Arcade(Party):
             destroy = board.destroy_block()
             player.blocks_gfx.update(elapsed, board)
             player.cursor_gfx.update(elapsed, board)
+            player.info_gfx.update(elapsed)
             self.rects += player.cursor_gfx.draw(window)
             self.rects += player.blocks_gfx.draw(window)
+            self.rects += player.info_gfx.draw(window)
             board.gravity()
-            self.game_event(elapsed, player, board)
-            if destroy:  # debug only
-                print(destroy)
-                print(board)
+            self.game_event(elapsed, player, board, destroy)
