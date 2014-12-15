@@ -8,19 +8,19 @@ from .tools import Panel, text_to_surface
 class _Effect:
 
     """
-    Base de chaque effet applicable a une surface.
+    Base of each effect
     """
 
     def __init__(self, delay):
-        self.init_delay = delay
-        self.current_delay = self.init_delay
-        self.display = True
-        self.done = False
+        self.init_delay = delay #time duration of effect
+        self.current_delay = self.init_delay #remaining time before effect ending
+        self.display = True #False=img will not be displayed
+        self.done = False #effect is done
         self.first_apply = True
-        self.pause = False
-        self.backup_img = None
-        self.backup_rect = None
-        self.priority = 0
+        self.pause = False #True=effect will not apply
+        self.backup_img = None #img initial
+        self.backup_rect = None #rect initial
+        self.priority = 0 #1=other effects will wait until end of this one
 
     def apply(
         self,
@@ -29,18 +29,21 @@ class _Effect:
         rect,
     ):
         """
-        Met a jour l'effet et l'applique a la surface.
+        Update effect and applies it to the surface and rect.
         """
 
         pass
 
     def stop(self):
+        """ Stop of the current effect """
         pass
 
     def resume(self):
+        """ Resume of the current effect """
         pass
 
     def backup(self):
+        """ Return initial surface and rect """
         return self.backup_img, self.backup_rect
 
 class TextEffect1(_Effect):
@@ -100,7 +103,7 @@ class TextEffect1(_Effect):
 class Shake(_Effect):
 
     """
-    Fait vibrer la surface.
+    Vibrates the surface
     """
 
     def __init__(self, delay):
@@ -122,7 +125,7 @@ class Shake(_Effect):
 class Wait(_Effect):
 
     """
-    Attend un certain temps avant d'afficher la surface.
+    Waiting for a time before displaying the surface
     """
 
     def __init__(self, delay):
@@ -141,7 +144,7 @@ class Wait(_Effect):
 class Blink(_Effect):
 
     """
-    Scintillement de la surface avec un intervalle definit.
+    Sparkling surface with an interval defines
     """
 
     def __init__(self, delay):
@@ -163,7 +166,7 @@ class Blink(_Effect):
 class Inflate(_Effect):
 
     """
-    Zoom/Dezoom de la surface avec un intervalle definit.
+    Zoom / Zoom out the surface with an interval defines
     """
 
     def __init__(self, delay, step_x, step_y):
@@ -294,7 +297,6 @@ class FadeOut(_Effect):
     ):
         """
         Applique une surface transparente (alpha:20) sur la surface
-        A MODIFIER pour tenir compte de self.alpha
         """
 
         ratio = self.current_delay / self.init_delay
@@ -315,10 +317,8 @@ class FadeOut(_Effect):
 class Move(_Effect):
 
     """
-    Deplace la surface dans une direction et durant un temps definit.
+    Deplace la surface sur une distance et durant un temps definit.
     Le deplacement se base uniquement sur la duree de l'effet.
-    A modifier pour permettre de decider du point d'arrive/depart,
-    de la vitesse et ne plus dependre des fps.
     """
 
     def __init__(

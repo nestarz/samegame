@@ -115,9 +115,9 @@ class Menu(t.Screen):
 
     @arrow_index.setter
     def arrow_index(self, value):
-        """On cap l'index du curseur au nombre de choix"""
+        """On cap l'index du curseur au nombre de choix + 1"""
 
-        if value in range(0, 5):
+        if value in range(0, len(self.buttons)+1):
             self.__arrow_index = value
 
 

@@ -6,21 +6,26 @@ from . import cache
 from . import constants as c
 
 class EffectDict(dict):
+    """ Dictionary which contains effect """
     def resumeall(self):
+        """ Resume all effects in the dict """
         for l in self.values():
             l.resumeall()
 
     def stopall(self):
+        """ Stop all effects in the dict """
         for l in self.values():
             l.stopall()
 
     def ongoing(self):
+        """ Is one effect or more is ongoing ? """
         for l in self.values():
             if l.ongoing():
                 return True
         return False
 
     def backup(self, img, rect):
+        """ Return initial surface and rect stored in effects """
         for l in self.values():
             for e in l:
                 if not e.first_apply:
@@ -28,13 +33,14 @@ class EffectDict(dict):
         return (img, rect)
 
     def is_empty(self):
+        """ Check if there is effect in the dict """
         for l in self.values():
             if l:
                 return False
         return True
 
 class EffectList(list):
-
+    """ List which contains effect """
     def resumeall(self):
         for e in self:
             e.resume()
@@ -56,7 +62,7 @@ class EffectList(list):
         return (img, rect)
 
 class State:
-
+    """Base class for all game states"""
     def __init__(self):
         self.done = False
         self.quit = False
@@ -71,7 +77,7 @@ class State:
 
 
 class Screen(State):
-
+    """ Base class for all screen of the game """
     def __init__(self):
         super().__init__()
         self.name = ''
@@ -86,6 +92,7 @@ class Screen(State):
         self.rects = []
 
     def reinitialize(self):
+        """ Reset screen to init """
         self.__init__()
 
     def start(self, window, persist):
@@ -103,15 +110,18 @@ class Screen(State):
         self.bg.setup_effect('fadein2', 1000) #'ll apply effect fadein during 1s
 
     def setup_images(self, window):
+        """ Setting up all images of the screen """
         pass
 
     def setup_buttons(self, window):
+        """ Setting up all buttons of the screen """
         pass
 
     def set_done(self, next, **kwargs):
-        self.next = next
-        self.persist = kwargs
-        self.to_set_done_timer = 0
+        """ Setting up the end of the screen. """
+        self.next = next #name of the next screen
+        self.persist = kwargs #dict of persistent variable through screen flipping
+        self.to_set_done_timer = 0 #time until screen flipping is 0
 
     def update(
         self,

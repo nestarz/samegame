@@ -7,17 +7,22 @@ from . import cache
 
 
 class Master(setup.Window):
+    """
+    Control class for entire project.  Contains the game loop, and contains
+    the event_loop which passes events to States as needed.  Logic for flipping
+    states is also found here.
+    """
 
     def __init__(self):
-        super().__init__()
+        super().__init__() # init de la fenetre et de pygame
         self.done = False  # etat du programme
         self.clock = pg.time.Clock()  # horloge du programme
         self.fps = 120  # frequence d'update
         self.current_time = 0.0  # valeur du chronometre
-        self.keys = pg.key.get_pressed()
-        self.state_name = None
-        self.state_dict = {}
-        self.elapsed = 0.0
+        self.keys = pg.key.get_pressed() # evenements clavier/souris
+        self.state_name = None # nom de l'ecran
+        self.state_dict = {} # ecrans du jeu
+        self.elapsed = 0.0 # temps depuis dernière update
 
     def setup_state(self, state_dict, initial_state):
         self.state_dict = state_dict
