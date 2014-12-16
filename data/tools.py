@@ -405,6 +405,8 @@ class BlockGFX(Sprite):
     def update(self, elapsed, board):
         Sprite.update(self, elapsed)
         swap_ongoing = self.case.swap_ongoing
+        if self.case in self.player.board.destroy:
+            self.move(board)
         if self.pos[0] == 0:
             self.image.set_alpha(30)
         elif not self.player.alive:

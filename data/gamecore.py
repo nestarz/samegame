@@ -77,6 +77,7 @@ class Board:
         self.num_col = num_col  # width of the board
         self.num_row = num_row  # length of the board
         self.size = (self.num_row, self.num_col)
+        self.destroy = []
         self.color = [  # VALUES MUST BE IN THE CONSTANTS COLORS_DICT!!
             'blue',
             'green',
@@ -157,7 +158,7 @@ class Board:
         self.generate_hidden()
 
 
-    def destroy_block(self):
+    def check_destroy(self):
         """
         The function check if at least 3 block are lined vertically or horizontally (no diagonal)
         destroy them if so
@@ -222,13 +223,17 @@ class Board:
             if combo >= 3:
                 destroy.append(temp_cor)
 
-        combo = 0
+        self.destroy = destroy
+        return len(destroy) > 1
 
-        for line in destroy:
+    def destroy_block(self):
+        combo = 0
+        for line in self.destroy:
             for case in line:
                 if not self.board[case[0]][case[1]].color == 'bad':
                     self.board[case[0]][case[1]] = Case(False,False,False, self.board)
                     combo += 1
+        self.destroy = []
 
         return combo
 

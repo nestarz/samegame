@@ -131,7 +131,7 @@ class Arcade(Party):
     def check_for_input(self, keys):
         for (i, player) in enumerate(self.players):
             if keys[pg.K_ESCAPE]:
-                self.set_done(self.previous, speed=self.speed)
+                self.set_done(c.SELECT_CHAR, speed=self.speed)
             if player.alive:
                 self.allow_input_timer[i] += self.elapsed
                 if self.allow_input[i] and len([key for key in keys if key != 0]):
@@ -221,12 +221,13 @@ class Arcade(Party):
             board = player.board
             cursor = player.cursor
             board.gravity()
-            destroy = board.destroy_block()
+            board.check_destroy()
             player.blocks_gfx.update(elapsed, board)
             player.cursor_gfx.update(elapsed, board)
             player.info_gfx.update(elapsed)
             self.rects += player.cursor_gfx.draw(window)
             self.rects += player.blocks_gfx.draw(window)
             self.rects += player.info_gfx.draw(window)
+            destroy = board.destroy_block()
             board.gravity()
             self.game_event(elapsed, player, board, destroy)
