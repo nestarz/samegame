@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import pygame as pg
-from . import cache
-from . import constants as c
-from . import tools as t
+from .. import cache
+from .. import constants as c
+from ..screen import Screen
 
-
-class Home(t.Screen):
+class Home(Screen):
 
     """ Enfant de l'objet State """
 
@@ -17,7 +16,7 @@ class Home(t.Screen):
         self.next = c.MAIN_MENU
 
     def setup_images(self, screen):
-        logo_img = t.Sprite(cache._cache.images['logo'].copy())
+        logo_img = Sprite(cache._cache.images['logo'].copy())
         logo_img.setup_effect('move', 1000, (0, -25))
         logo_img.setup_effect('fadein1', 1600)
         logo_img.center(screen, 0, 25 - 5)

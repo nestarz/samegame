@@ -3,7 +3,7 @@
 
 import pygame as pg
 from . import setup
-from . import cache
+from .cache import cache
 
 
 class Master(setup.Window):
@@ -15,9 +15,10 @@ class Master(setup.Window):
 
     def __init__(self):
         super().__init__() # init de la fenetre et de pygame
+        cache.load()
         self.done = False  # etat du programme
         self.clock = pg.time.Clock()  # horloge du programme
-        self.fps = 120  # frequence d'update
+        self.fps = 200  # frequence d'update
         self.current_time = 0.0  # valeur du chronometre
         self.keys = pg.key.get_pressed() # evenements clavier/souris
         self.state_name = None # nom de l'ecran

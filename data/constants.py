@@ -8,39 +8,6 @@ SCREEN_HEIGHT = 574
 SCREEN_WIDTH = 1024
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
-# STATES NAME
-HOME = "home"
-ARCADE = "arcade"
-VERSUS = "versus"
-SELECT_MODE = "mode_selection"
-SELECT_CHAR = "character_selection"
-MAIN_MENU = "main_menu"
-
-# COLOR RGB
-GREEN_RGB = (60, 191, 63)
-YELLOW_RGB = (255, 215, 0)
-RED_RGB = (255, 0, 0)
-BLACK_RGB = (0, 0, 0)
-WHITE_RGB = (255, 255, 255)
-ORANGE_RGB = (255, 69, 0)
-GREY_RGB = (170, 170, 170)
-PINK_RGB = (240, 240, 240)
-BLUE_RGB = (66, 169, 188)
-PURPLE_RGB = (156, 82, 181)
-MAROON_RGB = (118, 93, 48)
-COLORS_DICT = {
-    "blue": BLUE_RGB,
-    "green": GREEN_RGB,
-    "orange": ORANGE_RGB,
-    "grey": GREY_RGB,
-    "purple": PURPLE_RGB,
-    "yellow": YELLOW_RGB,
-    "pink": PINK_RGB,
-    "maroon": MAROON_RGB,
-    "white": WHITE_RGB,
-    "red": RED_RGB,
-    "black": BLACK_RGB
-}
 # CONTROLS
 PLAYER1_CONTROLS = {
     'UP': pg.K_UP,
@@ -60,33 +27,93 @@ PLAYER2_CONTROLS = {
     'GENERATE': pg.K_r
 }
 CONTROLS = [PLAYER1_CONTROLS, PLAYER2_CONTROLS]
-# STYLES
-BTN = {
-    "default": {
-        "default": {
-            "color": (255, 255, 255)
-        },
-        "hover": {
-            "color": (253, 84, 72)
-        },
-        "size": 18,
-        "font": 'joystix',
-        "AA": 1,
-        "bold": 0
-    },
-    "menu": {
-        "default": {
-            "color": (255, 255, 255)
-        },
-        "hover": {
-            "color": (253, 84, 72)
-        },
-        "size": 27,
-        "font": 'joystix',
-        "AA": 1,
-        "bold": 0
-    }
+
+# STATES NAME
+HOME = "home"
+ARCADE = "arcade"
+VERSUS = "versus"
+SELECT_MODE = "mode_selection"
+SELECT_CHAR = "character_selection"
+MAIN_MENU = "main_menu"
+
+# STATES DESCRIPTION
+MAIN_MENU_DESCRIPTION = "Main Menu"
+SELECT_MODE_DESCRIPTION = "Select your level"
+SELECT_CHAR_DESCRIPTION = "Choose your hero"
+
+# GFX_NAME
+LOGOGFXNAME = 'logo'
+
+## TEXT
+SUBLOGOTEXT = AUTHOR
+# BTN TEXT
+BTN_TEXT_CONTINUE = "Continue"
+BTN_TEXT_NEWGAME = "New Game"
+BTN_TEXT_LOADGAME = "Load Game"
+BTN_TEXT_BACK = "Back"
+BTN_TEXT_QUIT = "Quit"
+BTN_TEXT_EASY = "Easy"
+BTN_TEXT_NORMAL = "Normal"
+BTN_TEXT_HARD = "Hard"
+BTN_TEXT_INFERNO = "Inferno"
+BTN_TEXT_DEV = "Developper"
+
+# FONT
+FONT1 = 'joystix'
+FONT2 = 'larabiefont'
+
+# COLOR RGB
+GREEN_RGB = (60, 191, 63)
+YELLOW_RGB = (255, 215, 0)
+RED_RGB = (255, 0, 0)
+BLACK_RGB = (0, 0, 0)
+WHITE_RGB = (255, 255, 255)
+ORANGE_RGB = (253, 84, 72)
+GREY_RGB = (170, 170, 170)
+PINK_RGB = (240, 240, 240)
+BLUE_RGB = (66, 169, 188)
+PURPLE_RGB = (156, 82, 181)
+MAROON_RGB = (118, 93, 48)
+COLORS_DICT = {
+    "blue": BLUE_RGB,
+    "green": GREEN_RGB,
+    "orange": ORANGE_RGB,
+    "grey": GREY_RGB,
+    "purple": PURPLE_RGB,
+    "yellow": YELLOW_RGB,
+    "pink": PINK_RGB,
+    "maroon": MAROON_RGB,
+    "white": WHITE_RGB,
+    "red": RED_RGB,
+    "black": BLACK_RGB
 }
+
+# STYLES
+DEFAULT_BTN_STYLE = {
+    "default": {
+        "color": (255, 255, 255)
+    },
+    "hover": {
+        "color": (253, 84, 72)
+    },
+    "size": 18,
+    "font": 'joystix',
+    "AA": 1,
+    "bold": 0
+}
+MENU_BTN_STYLE = {
+    "default": {
+        "color": (255, 255, 255)
+    },
+    "hover": {
+        "color": (253, 84, 72)
+    },
+    "size": 27,
+    "font": 'joystix',
+    "AA": 1,
+    "bold": 0
+}
+
 
 # DIRECTIONS
 STATIC = (0, 0)

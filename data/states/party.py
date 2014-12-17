@@ -4,7 +4,8 @@
 import pygame as pg
 from . import cache
 from . import constants as c
-from .tools import Screen, Panel, BlockGFX, CursorGFX, InfoGFX
+from .screen import Screen
+from .tools import Panel, BlockGFX, CursorGFX, InfoGFX
 from .gamecore import GameCore, Cursor
 
 
