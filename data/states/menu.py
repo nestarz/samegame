@@ -218,9 +218,7 @@ class LevelSelection(Menu):
         self.description = c.SELECT_LEVEL_DESCRIPTION
 
     def setup_buttons(self):
-        super().add_btn(c.BTN_TEXT_EASY, lambda: self.set_done(self.next, speed=1))
-        super().add_btn(c.BTN_TEXT_NORMAL, lambda: self.set_done(self.next, speed=2))
-        super().add_btn(c.BTN_TEXT_HARD, lambda: self.set_done(self.next, speed=3))
-        super().add_btn(c.BTN_TEXT_INFERNO, lambda: self.set_done(self.next, speed=4))
+        for speed, name in c.MODE_NAME.items():
+            super().add_btn(name, lambda: self.set_done(self.next, speed=speed))
         super().add_btn(c.BTN_TEXT_BACK, lambda: self.set_done(c.SELECT_MODE))
         super().position_buttons()

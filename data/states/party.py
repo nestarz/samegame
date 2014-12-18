@@ -34,7 +34,10 @@ class Arcade(Party):
         self.name = c.ARCADE
         self.next = c.HOME
 
-    def start(self, screen, persist):
+    def start(self, window, persist):
+
+        # Call the parent class (Screen) start function
+        super().start(window, persist)
 
         # Game constants
         # Get speed/player if passed in args with previous screens
@@ -61,18 +64,10 @@ class Arcade(Party):
         for player in self.players:
             player.add_information(name, info)
 
-    def setup_information(self, player):
+    def setup_information(self):
 
-        info = "Player {}".format(player.index)
-        info = "Speed x{}".format(self.speed)
-
-        # Create useful information box for multiple usage
-        self.add_information('nom', player_id)
-        self.add_information('mode', mode_id)
-        self.add_information('new_row')
-        self.add_information('pause')
-        self.add_information('score')
-
+        # Create useful information box for global game
+        self.add_information('mode', self.speed)
 
     def setup_panel(self, screen):
 
@@ -106,4 +101,4 @@ class Arcade(Party):
         super().update(window, keys, elapsed)
         self.timer += elapsed
         for player in self.players:
-            player.update(window, keys, elapsed)
+            self.rects += player.update(window, keys, elapsed)

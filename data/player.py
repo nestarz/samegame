@@ -21,18 +21,18 @@ class Player:
         self.hidden_timer = 0
 
     def setup_game(self, board):
+        self.alive = True
+        self.actions = {}
+        self.info_dict = {}
+        self.pause = 0
+        self.score = 0
         self.board = board
         self.cursor = self.board.cursor
         self.key = Keys(c.CONTROLS[self.index])
-        self.pause = 0
         self.board_group = pg.sprite.LayeredDirty()
         self.block_group = pg.sprite.LayeredDirty()
         self.cursor_group = pg.sprite.LayeredDirty()
-        self.info_gfx = pg.sprite.LayeredDirty()
-        self.actions = {}
-        self.info = {}
-        self.alive = True
-        self.score = 0
+        self.info_group = pg.sprite.LayeredDirty()
         self.setup_board()
         self.setup_blocks()
         self.setup_cursor()
@@ -57,6 +57,22 @@ class Player:
         self.cursor_gfx = CursorGFX(self.cursor, self.board_gfx)
         self.cursor_gfx.add(self.cursor_group)
 
+    def add_information(self, name, info=''):
+        self.info_dict[name] = InfoGFX(name, info)
+        self.info_dict[name].add(self.info_group)
+
+    def update_information(self, name, info=''):
+        self.info_dict[name].update_information(info)
+
+    def setup_information(self):
+        info_p = "{}: {}".format(self.index, c.PLAYER_NAME[self.index])
+        info_s = "{}".format(c.MODE_NAME[self.speed])
+        self.add_information('nom', info_p)
+        self.add_information('mode', info_s)
+        self.add_information('new_row')
+        self.add_information('pause')
+        self.add_information('score')
+
     def setup_input(self):
         self.actions[self.key.UP] = lambda: cursor.move_up()
         self.actions[self.key.DOWN] = lambda: cursor.move_down()
@@ -66,17 +82,7 @@ class Player:
         self.actions[self.key.GENERATE] = lambda: board.geneate()
 
     def check_input(self):
-        self.actions[self.key.UP] = lambda: cursor.move_up()
-        self.actions[self.key.DOWN] = lambda: cursor.move_down()
-        self.actions[self.key.RIGHT] = lambda: cursor.move_right()
-        self.actions[self.key.LEFT] = lambda: cursor.move_left()
-
-    def add_information(self, name, info=''):
-        self.info_list[name] = InfoGFX(name, info)
-        self.info_list[name].add(self.info_group)
-
-    def update_information(self, name, info=''):
-        self.info_list[name].update_information(info)
+        pass
 
     def swap(self):
         case1, case2 = self.board.swap()
@@ -95,9 +101,9 @@ class Player:
 
     @property
     def new_row_timer(self):
-        return int((self.game.speed + self.pause - self.hidden_timer)/600)
+        return int((self.board.speed + self.pause - self.hidden_timer)/600)
 
-    def game_event(self, elapsed, player, board, destroy):
+    def game_event(self, elapsed, destroy):
         if destroy:
             self.pause += destroy*1000 #x blocks = x secondes
             self.score += destroy #x blocks = x points
@@ -110,7 +116,7 @@ class Player:
 
         if self.pause > 0:
             self.pause -= elapsed
-        elif self.hidden_timer > self.game.speed:
+        elif self.hidden_timer > self.board.speed:
             self.up_row()
             self.hidden_timer = 0
         else:
@@ -118,14 +124,22 @@ class Player:
             self.pause = 0
 
     def update(self, window, keys, elapsed):
+
         self.board.gravity()
         self.board.check_destroy()
-        self.blocks_gfx.update(elapsed, board)
-        self.cursor_gfx.update(elapsed, board)
-        self.info_gfx.update(elapsed)
-        self.rects += self.cursor_gfx.draw(window)
-        self.rects += self.blocks_gfx.draw(window)
-        self.rects += self.info_gfx.draw(window)
+
+        self.block_group.update(elapsed, self.board)
+        self.cursor_group.update(elapsed, self.board)
+        self.info_group.update(elapsed)
+
+        rects = []
+        rects += self.cursor_group.draw(window)
+        rects += self.block_group.draw(window)
+        rects += self.info_group.draw(window)
+
         destroy = self.board.destroy_block()
         self.board.gravity()
-        self.game_event(elapsed, player, board, destroy)
+
+        self.game_event(elapsed, destroy)
+
+        return self.rects

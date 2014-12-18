@@ -66,6 +66,16 @@ BTN_TEXT_DEV = "Developper"
 BTN_TEXT_1P = "1Player"
 BTN_TEXT_2P = "2Player"
 
+#PARTY TEXT
+PLAYER_NAME = {0: "P1", 1: "P2"}
+SPEED = {1:11000, 2:8000, 3:7000, 4:5000}
+MODE_NAME = {
+    SPEED[1]: BTN_TEXT_EASY,
+    SPEED[2]: BTN_TEXT_NORMAL,
+    SPEED[3]: BTN_TEXT_HARD,
+    SPEED[4]: BTN_TEXT_INFERNO
+}
+
 # FONT
 FONT1 = 'joystix'
 FONT2 = 'larabiefont'

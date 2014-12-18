@@ -28,7 +28,6 @@ class GameCore:
 
     All the board are stocked in the array : boards
     """
-    speed = {1:11000, 2:8000, 3:7000, 4:5000}
 
     def __init__(
         self,
@@ -73,7 +72,7 @@ class Board:
         Apply gravity
         Create the cursor
         """
-        self.speed = GameCore.speed[speed]  # game's speed, int, the higher, the faster
+        self.speed = speed  # game's speed, int, the higher, the faster
         self.pause = 0   #amount of time during which the game is frozen after a combo
         #               (i.e the board isn't going upward)
         self.num_color = num_color  # the number of color used in the game
