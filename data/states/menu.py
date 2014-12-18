@@ -188,7 +188,7 @@ class Main(Menu):
     def setup_buttons(self):
         super().add_btn(c.BTN_TEXT_NEWGAME, lambda: self.set_done(self.next))
         #super().add_btn(c.BTN_TEXT_CONTINUE, lambda: self.set_done(self.next))
-        super().add_btn(c.BTN_TEXT_LOADGAME, lambda: self.set_done(self.next))
+        #super().add_btn(c.BTN_TEXT_LOADGAME, lambda: self.set_done(self.next))
         super().add_btn(c.BTN_TEXT_QUIT, lambda: self.set_done(c.HOME))
         super().position_buttons()
 
