@@ -26,7 +26,7 @@ class GameCore:
     The heart of the game, you set the speed, the number of color, the number of row
     number of col, and the number of board here
 
-    All the board are stocked in the array : all_board
+    All the board are stocked in the array : boards
     """
     speed = {1:11000, 2:8000, 3:7000, 4:5000}
 
@@ -35,8 +35,7 @@ class GameCore:
         speed=1,
         num_color=6,
         num_row=10,
-        num_col=10,
-        num_board=2,
+        num_col=10
         ):
         super().__init__()
         self.num_col = num_col
@@ -44,10 +43,13 @@ class GameCore:
         self.num_board = num_board
         self.num_color = num_color
         self.speed = GameCore.speed[speed]
-        self.all_board = []
-        for i in range(0, num_board):
-            self.all_board.append(Board(speed, num_color, num_row,
-                                  num_col))
+        self.boards = []
+
+    def generate_board(self):
+        """ Generate new board, stock and return it """
+        board = Board(speed, num_color, num_row, num_col)
+        self.boards.append(board)
+        return board
 
 
 class Board:

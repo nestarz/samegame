@@ -2,140 +2,103 @@
 # -*- coding: utf-8 -*-
 
 import pygame as pg
-from . import cache
-from . import constants as c
-from .screen import Screen
-from .tools import Panel, BlockGFX, CursorGFX, InfoGFX
-from .gamecore import GameCore, Cursor
+from .. import cache
+from .. import constants as c
+from ..screen import Screen
+from ..graphics.sprites import Panel, BlockGFX, CursorGFX, InfoGFX
+from ..gamecore import GameCore, Cursor
+from ..player import Player
 
-
-class Player:
-
-    INDEX = 0
-
-    def __init__(self):
-        Player.INDEX += 1
-        self.index = Player.INDEX
-        self.hidden_timer = 0
-
-    def setup_game(self, board, board_gfx, keys):
-        self.board = board
-        self.cursor = self.board.cursor
-        self.keys = keys
-        self.board_gfx = board_gfx
-        self.pause = 0
-        self.blocks_gfx = pg.sprite.LayeredDirty()
-        self.cursor_gfx = pg.sprite.LayeredDirty()
-        self.info_gfx = pg.sprite.LayeredDirty()
-        self.info = {}
-        cursor = CursorGFX(self.cursor, board_gfx)
-        cursor.add(self.cursor_gfx)
-        self.alive = True
-        self.score = 0
-        self.setup_blocks()
-        self.keys_move = [keys['UP'], keys[
-            'DOWN'], keys['LEFT'], keys['RIGHT']]
-
-    def setup_blocks(self):
-        board = self.board
-        for row in reversed(range(board.num_row)):
-            for col in range(board.num_col):
-                if board.board[row][col].color:
-                    block = BlockGFX(board.board[row][col], self)
-                    block.add(self.blocks_gfx)
 
 class Party(Screen):
 
     def __init__(self):
+
+        # Call the parent class (Screen) constructor
         super().__init__()
+
+        # Time since party start
         self.timer = 0
 
+        # List that contains players objects
+        self.players = []
 
 class Arcade(Party):
 
     def __init__(self):
-        super().__init__()
-        self.name = 'arcade'
-        self.next = 'home'
-        self.players = [Player(), Player()]
-        self.img_boards = list()
-        self.allow_input = [True for player in self.players]
-        self.allow_swap = [True for player in self.players]
-        self.allow_input_timer = [0
-                                  for player in self.players]
-        self.allow_up_row = [True for player in self.players]
 
-    def reinitialize(self):
-        Player.INDEX = 0
-        super().reinitialize()
+        # Call the parent class (Party) constructor
+        super().__init__()
+
+        # Set screen name and next default screen
+        self.name = c.ARCADE
+        self.next = c.HOME
 
     def start(self, screen, persist):
-        """ Creation des plateaux de jeu, des touches et
-        attribution des plateaux de jeu aux joueurs """
 
-        nb_color = 6
-        nb_col = 7
-        (self.case_w, self.case_h) = (38, 38)
-        (self.margin_x, self.margin_y) = (5, 5)
-        self.speed = persist.get('speed', 2)
-        self.game = GameCore(self.speed, nb_color, 10, nb_col, len(self.players))
-        super().start(screen, persist)
-        for (i, player) in enumerate(self.players):
-            player.setup_game(self.game.all_board[i], self.img_boards[i], c.CONTROLS[i])
-            self.setup_info_gfx(player)
-            print("Player {} : {}".format(i+1, c.CONTROLS[i]))
+        # Game constants
+        SPEED = persist.get('speed', 1)
+        NB_PLAYER = persist.get('nb_player', 1)
+        NB_COLOR = 6
+        NB_ROW = 10
+        NB_COL = 7
 
-    def setup_info_gfx(self, player):
+        # Set players
+        self.players = [Player(i) for i in range(NB_PLAYER)]
+
+        # Set GameCore
+        self.game = GameCore(SPEED, NB_COLOR, NB_ROW, NB_COL)
+
+        # Generate logic then graphic board for each player
+        for player in self.players:
+            board = self.generate_board()
+            gfx_board = self.setup_board(board)
+            player.setup_game(board, gfx_board)
+
+    def add_information(self, name, info=''):
+        for player in self.players:
+            sprite = InfoGFX(name, info)
+            sprite.add(player.info_group)
+
+    def setup_information(self, player):
+
         info = "Player {}".format(player.index)
-        a = InfoGFX(info,  player, 0)
-        a.add(player.info_gfx)
-        player.info["nom"] = a
         info = "Speed x{}".format(self.speed)
-        e = InfoGFX(info,  player, 1)
-        e.add(player.info_gfx)
-        player.info["mode"] = e
-        info = ""
-        b = InfoGFX(info,  player, 2)
-        b.add(player.info_gfx)
-        player.info["new_row"] = b
-        c = InfoGFX(info,  player, 3)
-        c.add(player.info_gfx)
-        player.info["pause"] = c
-        d = InfoGFX(info,  player, 4)
-        d.add(player.info_gfx)
-        player.info["score"] = d
 
-    def setup_images(self, screen):
+        self.add_information('nom', player_id)
+        self.add_information('mode', mode_id)
+        self.add_information('new_row')
+        self.add_information('pause')
+        self.add_information('score')
+
+
+    def setup_panel(self, screen):
+
+        # Window size
         HEIGHT = screen.get_rect().h
         WIDTH = screen.get_rect().w
 
+        # Create panel that will contain boards
         panel = Panel((WIDTH - 150, HEIGHT - 110), (0, 0, 0, 210))
-        panel.rect.midbottom = screen.get_rect().midbottom
-        panel.add(self.sprites)
-        for (i, player) in enumerate(self.players):
-            size = (self.margin_x +
-                                (self.case_w +
-                                 self.margin_x) *
-                                self.game.num_col + 10, self.margin_y +
-                                (self.case_h +
-                                 self.margin_y) *
-                                self.game.num_row +
-                                10)
-            board = Panel(size, (255, 255, 255, 30))
-            if i == 0:
-                board.rect.bottomleft = panel.rect.bottomleft
-            else:
-                board.rect.bottomright = panel.rect.bottomright
-            self.img_boards.append(board)
-            board.add(self.sprites)
+        panel.rect.midbottom = screen.get_rect().midbottom + panel.rect.h
+        panel.setup_effect('move', 2000, (-panel.rect.h, 0))
+        panel.add(self.panels_group)
 
-    def check_for_input(self, keys):
+    def setup_board(self, board):
+
+        # Create graphic board thanks to logic board
+        board = BoardGFX(board)
+        board.setup_effect('fadein', 1500)
+        board.add(self.boards_group)
+        return board
+
+    def check_input(self, keys):
         for (i, player) in enumerate(self.players):
             if keys[pg.K_ESCAPE]:
                 self.set_done(c.SELECT_CHAR, speed=self.speed)
             if player.alive:
-                self.allow_input_timer[i] += self.elapsed
-                if self.allow_input[i] and len([key for key in keys if key != 0]):
+                player.allow_input_timer += self.elapsed
+                if player.allow_input and len([key for key in keys if key != 0]):
                     if keys[player.keys['UP']]:
                         player.cursor.move_up()
                     if keys[player.keys['DOWN']]:
@@ -144,30 +107,30 @@ class Arcade(Party):
                         player.cursor.move_right()
                     if keys[player.keys['LEFT']]:
                         player.cursor.move_left()
-                if self.allow_swap[i] and keys[player.keys['SWAP']]:
+                if player.allow_swap and keys[player.keys['SWAP']]:
                     case1, case2 = player.board.swap()
                     case1.swap_ongoing = True
                     case2.swap_ongoing = True
-                if self.allow_up_row[i] and keys[player.keys['GENERATE']]:
+                if player.allow_up_row and keys[player.keys['GENERATE']]:
                     self.up_row(player, player.board)
 
-                self.allow_input[i] = False
-                self.allow_swap[i] = False
-                self.allow_up_row[i] = False
+                player.allow_input = False
+                player.allow_swap = False
+                player.allow_up_row = False
 
                 no_key_pressed = not sum(keys[key] for key in player.keys_move)
 
-                if self.allow_input_timer[i] > 70:
-                    self.allow_input[i] = True
-                    self.allow_input_timer[i] = 0
+                if player.allow_input_timer > 70:
+                    player.allow_input = True
+                    player.allow_input_timer = 0
                 elif no_key_pressed:
-                    self.allow_input[i] = True
-                    self.allow_input_timer[i] = -170
+                    player.allow_input = True
+                    player.allow_input_timer = -170
 
                 if not keys[player.keys['SWAP']]:
-                    self.allow_swap[i] = True
+                    player.allow_swap = True
                 if not keys[player.keys['GENERATE']]:
-                    self.allow_up_row[i] = True
+                    player.allow_up_row = True
 
     def set_done(self, next, **kwargs):
         super().set_done(next, **kwargs)

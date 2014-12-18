@@ -13,7 +13,8 @@ class Window():
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
         self.caption = c.NAME
-        self.surface = pygame.display.set_mode(c.SCREEN_SIZE, pg.DOUBLEBUF)
+        # Open a window on the screen
+        self.surface = pygame.display.set_mode(c.SCREEN_SIZE, pg.HWSURFACE | pg.DOUBLEBUF)
         pygame.display.set_caption(self.caption)
         self.screen = pygame.display.get_surface()
 

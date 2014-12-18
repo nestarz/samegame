@@ -3,10 +3,13 @@ from pygame import locals as pg
 
 # GAME CONFIG
 NAME = "SAMEGAME"
-AUTHOR = "Mathieu Seurin & Elias Rhouzlane"
+AUTHOR = "Mathieu Seurin", "Elias Rhouzlane"
 SCREEN_HEIGHT = 574
 SCREEN_WIDTH = 1024
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
+
+# TIME CONSTANTS
+BG_FADE_TIME = 1500
 
 # CONTROLS
 PLAYER1_CONTROLS = {
@@ -28,24 +31,27 @@ PLAYER2_CONTROLS = {
 }
 CONTROLS = [PLAYER1_CONTROLS, PLAYER2_CONTROLS]
 
-# STATES NAME
+# STATES NAME (SAME AS STATES'S BACKGROUND FILENAME)
 HOME = "home"
 ARCADE = "arcade"
 VERSUS = "versus"
 SELECT_MODE = "mode_selection"
+SELECT_LEVEL = "level_selection"
 SELECT_CHAR = "character_selection"
 MAIN_MENU = "main_menu"
 
 # STATES DESCRIPTION
 MAIN_MENU_DESCRIPTION = "Main Menu"
-SELECT_MODE_DESCRIPTION = "Select your level"
+SELECT_MODE_DESCRIPTION = "Select your mode"
+SELECT_LEVEL_DESCRIPTION = "Choose your skill"
 SELECT_CHAR_DESCRIPTION = "Choose your hero"
 
 # GFX_NAME
 LOGOGFXNAME = 'logo'
 
 ## TEXT
-SUBLOGOTEXT = AUTHOR
+SUBLOGO_TEXT = "Mathieu Seurin & Rhouzlane Elias"
+START_TEXT = 'Press Start Button'
 # BTN TEXT
 BTN_TEXT_CONTINUE = "Continue"
 BTN_TEXT_NEWGAME = "New Game"
@@ -57,6 +63,8 @@ BTN_TEXT_NORMAL = "Normal"
 BTN_TEXT_HARD = "Hard"
 BTN_TEXT_INFERNO = "Inferno"
 BTN_TEXT_DEV = "Developper"
+BTN_TEXT_1P = "1Player"
+BTN_TEXT_2P = "2Player"
 
 # FONT
 FONT1 = 'joystix'
@@ -90,24 +98,16 @@ COLORS_DICT = {
 
 # STYLES
 DEFAULT_BTN_STYLE = {
-    "default": {
-        "color": (255, 255, 255)
-    },
-    "hover": {
-        "color": (253, 84, 72)
-    },
+    "color1": (255, 255, 255),
+    "color2": (253, 84, 72),
     "size": 18,
     "font": 'joystix',
     "AA": 1,
     "bold": 0
 }
 MENU_BTN_STYLE = {
-    "default": {
-        "color": (255, 255, 255)
-    },
-    "hover": {
-        "color": (253, 84, 72)
-    },
+    "color1": (255, 255, 255),
+    "color2": (253, 84, 72),
     "size": 27,
     "font": 'joystix',
     "AA": 1,

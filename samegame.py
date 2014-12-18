@@ -2,7 +2,7 @@
 """SameGame : Untitled Project"""
 # ==============================================================================
 __author__  = "Seurin Mathieu and Rhouzlane Elias"
-__version__ = "2.0"
+__version__ = "2.1"
 __date__    = "2014-14-12"
 # ==============================================================================
 #!/bin/python3
@@ -17,7 +17,7 @@ def main():
     state_dict = {c.HOME : home.Home(),
                   c.MAIN_MENU : menu.Main(),
                   c.SELECT_MODE : menu.ModeSelection(),
-                  c.SELECT_CHAR : menu.CharacterSelection(),
+                  c.SELECT_LEVEL : menu.LevelSelection(),
                   c.ARCADE : party.Arcade()}
     #initalise les écrans du jeu et définit l'écran principal
     master.setup_state(state_dict, c.HOME)

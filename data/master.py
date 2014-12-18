@@ -63,7 +63,7 @@ class Master(setup.Window):
         while not self.done:
             self.event_loop()  # controle evenements ihm
             self.update()  # maj du prog
-            pg.display.update(self.state.rects)  # maj de la fenetre
+            pg.display.flip()  # maj de la fenetre
             fps = self.clock.get_fps()
             with_fps = '{} - {:.2f} FPS'.format(self.caption, fps)
             pg.display.set_caption(with_fps)

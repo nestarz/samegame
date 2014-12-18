@@ -5,66 +5,83 @@ import pygame as pg
 from .. import cache
 from .. import constants as c
 from ..screen import Screen
+from ..graphics.gfx import Image
+from ..graphics.sprites import Sprite
+from ..tools import render_text
 
 class Home(Screen):
 
-    """ Enfant de l'objet State """
+    """ Intro scene """
 
     def __init__(self):
+        # Call the parent class (Screen) constructor
         super().__init__()
+
+        # Set screen name (defined in constants.py)
         self.name = c.HOME
+
+        # Set default next screen name
         self.next = c.MAIN_MENU
 
-    def setup_images(self, screen):
-        logo_img = Sprite(cache._cache.images['logo'].copy())
-        logo_img.setup_effect('move', 1000, (0, -25))
-        logo_img.setup_effect('fadein1', 1600)
-        logo_img.center(screen, 0, 25 - 5)
+    def start(self, window, persist):
+        super().start(window, persist)
+        self.setup_images(window)
+        self.setup_input()
 
-        sublogo_img = t.Sprite(t.text_to_surface(c.AUTHOR, 'joystix',
-                                                10, c.WHITE_RGB))
-        sublogo_img.setup_effect('wait', 600)
-        sublogo_img.setup_effect('fadein1', 1500, True)
-        sublogo_img.center(screen, 0, 30)
+    def setup_images(self, window):
+        """ Setup raw images used for home """
 
-        text1 = 'Press Start Button'
-        img = t.Image(t.text_to_surface(text1, 'joystix', 20,
-                                        c.WHITE_RGB), screen)
-        start_img = pg.Surface(img.image.get_size(), pg.SRCALPHA)
-        start_img.fill((0, 0, 0, 255))
-        start_img.blit(img.image, img.rect)
-        start_img = t.Sprite(start_img)
-        start_img.setup_effect('blink', 500)
-        start_img.setup_effect('wait', 500)
-        start_img.center(screen, 0, 220)
+        # Panels constants
+        MOVE_EFFECT_NAME = 'move'
+        FADE_EFFECT_NAME = 'fade_alpha'
+        WAIT_EFFECT_NAME = 'wait'
+        BLINK_EFFECT_NAME = 'blink'
+        FONT_SIZE = 20
 
-        for img in [start_img, logo_img, sublogo_img]:
+        window_rect = window.get_rect()
+        # Create/decorate first panel sprite with logo and sublogo
+        logo_img = Sprite(Image(c.LOGOGFXNAME))
+        logo_img.setup_effect(MOVE_EFFECT_NAME, 1000, (0, -30))
+        #logo_img.setup_effect(FADE_EFFECT_NAME, 1600)
+        logo_img.rect.center = window_rect.center
+        logo_img.rect.move_ip(0, 25)
+
+        # Create/decorate first panel sprite with logo and sublogo
+        sublogo_img = Sprite(render_text(c.SUBLOGO_TEXT))
+        sublogo_img.setup_effect(WAIT_EFFECT_NAME, 800)
+        #sublogo_img.setup_effect(FADE_EFFECT_NAME, 1500)
+        sublogo_img.rect.center = window_rect.center
+        sublogo_img.rect.move_ip(0, 30)
+
+        # Create/decorate first panel sprite with logo and sublogo
+        start_img = Sprite(render_text(c.START_TEXT, FONT_SIZE, bg_color=c.BLACK_RGB))
+        start_img.setup_effect(BLINK_EFFECT_NAME, 500)
+        start_img.setup_effect(WAIT_EFFECT_NAME, 1200)
+        start_img.rect.centerx = window_rect.centerx
+        start_img.rect.y = window_rect.bottom - 90
+
+        # Add images to General Sprite DirtyLayer Group (sprites)
+        for img in (start_img, logo_img, sublogo_img):
             img.add(self.sprites)
 
-    def set_done(self, next):
-        super().set_done(next)
-        self.to_set_done = True
-        self.to_set_done_timer = 500
-        self.bg.setup_effect('fadeout', 1000)
+    def set_done(self, next, **kwargs):
+
+        # Call parent class (Screen) set_done function
+        # Pass in next screen's name to display and
+        # persistant data through kwargs dictionary
+        super().set_done(next, **kwargs)
+
+        # Set a countdown before state flip and apply effects
+        # on sprites, with same duration as countdown
+        self.final_countdown = 1000
         for spr in self.sprites:
-            spr.setup_effect('fadeout', 2000)
+            distance = (0, spr.rect.h)
+            #spr.setup_effect('fadeout', self.final_countdown)
+            #spr.setup_effect('move', self.final_countdown, distance)
 
-    def check_for_input(self, keys):
-        self.allow_input_timer += self.elapsed
+    def setup_input(self):
+        """ Setup event related action for menu navigation """
 
-        # j'augmente a chaque fois le timer
-        # du temps passe depuis le dernier tick
-
-        if self.allow_input:
-            if keys[pg.K_RETURN]:
-                self.allow_input_timer = 0
-                self.set_done(self.next)
-        self.allow_input = False
-        if not keys[pg.K_RETURN] and self.allow_input_timer > 900:
-
-            # si le temps passe dans la home
-            # est superieur a 3 seconde alors
-            # j'autorise la personne a passer
-            # l'intro
-
-            self.allow_input = True
+        # Each of self.action item is a function
+        # which start when key (like K_RETURN) is pressed.
+        self.actions[pg.K_RETURN] = lambda: self.set_done(self.next)

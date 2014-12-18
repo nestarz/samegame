@@ -2,30 +2,48 @@
 # -*- coding: utf-8 -*-
 
 import pygame as pg
-from . import constants as c
-from .tools import Panel, Image, render_text
-from .screen import Screen
+from .. import constants as c
+from ..tools import render_text
+from ..graphics.gfx import Image
+from ..graphics.sprites import Panel, Button
+from ..screen import Screen
 
 
 class Menu(Screen):
+
     """Base class for all menu"""
 
     def __init__(self):
         # Call the parent class (Screen) constructor
         super().__init__()
 
+        # Panel that will contain menu options
+        self.option_panel = None
+
+        # List that will contain menu options sprites
+        self.option_list = []
+
         # Groups that will contain menu sprites
         self.panels = pg.sprite.LayeredDirty()
         self.buttons = pg.sprite.LayeredDirty()
 
         # Dictionary that will contain action for user event
-        self.action = {}
+        self.actions = {}
 
-    def setup_panels(self, screen):
+        # Position of arrow, which focus button (0=first button)
+        self.arrow_index = 0
+
+    def start(self, window, persist):
+        super().start(window, persist)
+        self.setup_panels(window)
+        self.setup_buttons()
+        self.setup_input()
+
+    def setup_panels(self, window):
         """ Setup raw panels used for menu options """
 
         # Panels constants
-        HEIGHT = screen.get_rect().h
+        HEIGHT = window.get_height()
         PANEL1_HEIGHT = HEIGHT / 5
         PANEL2_HEIGHT = HEIGHT / 13
         PANEL3_HEIGHT = HEIGHT - (PANEL1_HEIGHT + PANEL2_HEIGHT)
@@ -38,21 +56,22 @@ class Menu(Screen):
         panel1 = Panel(PANEL_WIDTH, PANEL1_HEIGHT, PANEL_COLOR1, ALPHA)
         logo = Image(c.LOGOGFXNAME)
         logo.rect.centerx, logo.rect.y = panel1.rect.centerx, 30
-        sublogo = render_text(c.SUBLOGOTEXT, c.FONT1, 10)
+        sublogo = Image(render_text(c.SUBLOGO_TEXT))
         sublogo.rect.centerx, sublogo.rect.y = panel1.rect.centerx, 85
-        logo.draw(panel1); sublogo.draw(panel1)
+        logo.draw(panel1.image); sublogo.draw(panel1.image)
 
         # Create/decorate second panel sprite with state description
         ALPHA = 190
-        panel2 = Panel(PANELWIDTH + 10, PANEL2_HEIGHT, PANEL_COLOR2, ALPHA)
-        desc = render_text(self.description, c.FONT2, 23)
+        panel2 = Panel(PANEL_WIDTH + 10, PANEL2_HEIGHT, PANEL_COLOR2, ALPHA)
+        desc = Image(render_text(self.description, 22, c.WHITE_RGB, c.FONT2, 1))
         desc.rect.midright = panel2.rect.midright
         desc.rect.x = desc.rect.x - 20
-        desc.draw(panel2)
+        desc.draw(panel2.image)
 
         # Create/decorate third panel sprite which'll contain choice option
         ALPHA = 120
         panel3 = Panel(PANEL_WIDTH, PANEL3_HEIGHT, c.BLACK_RGB, ALPHA)
+        self.option_panel = panel3
 
         # Position pannels; Panels are next above each other
         panel1.rect.y = 0
@@ -70,16 +89,17 @@ class Menu(Screen):
             panel.setup_effect(EFFECT_TYPE, EFFECT_DURATION, DISTANCE)
             panel.add(self.panels)
 
-    def setup_buttons(self, screen):
+    def setup_buttons(self):
         """ Creating buttons """
 
         pass # Button creation is done by child menu
 
     def add_btn(self, text, callback):
         style = c.MENU_BTN_STYLE
-        parent = self.panels[2]
+        parent = self.option_panel
         btn = Button(text, style, callback, parent)
         btn.add(self.buttons)
+        self.option_list.append(btn)
 
     def position_buttons(self):
         """ Place buttons on the right panel """
@@ -90,7 +110,7 @@ class Menu(Screen):
         # Move each buttons above each other with
         # defined margin (MARGIN_X, MARGIN_Y)
         pos_y = 0 + MARGIN_Y
-        pos_x = 0 + MARGIX_X
+        pos_x = 0 + MARGIN_X
         for button in self.buttons:
             button.rect.move_ip(pos_x, pos_y)
             pos_y += button.rect.h + MARGIN_Y
@@ -104,56 +124,57 @@ class Menu(Screen):
         super().set_done(next, **kwargs)
 
         # Set a countdown before state flip and apply effects
-        # on panels sprites with same or less duration as countdown
-        self.final_countdown = 600
+        # on panels sprites, with same or less duration as countdown
+        self.final_countdown = c.BG_FADE_TIME
         for i, p in enumerate(self.panels):
             EFFECT_TYPE = 'move'
-            EFFECT_DURATION = self.final_countdown - i*10
+            EFFECT_DURATION = 600 + i*10
             DISTANCE = (-p.image.get_width(), 0)
             p.setup_effect(EFFECT_TYPE, EFFECT_DURATION, DISTANCE)
 
     def move_arrow(self, direction):
         """ Move arrow to focus screen's button """
 
-        NB_BTN = len(self.buttons) # Button amount on screen
+        # Warn button he will no more being targeted by the user
+        button = self.option_list[self.arrow_index]
+        button.targeted = False
+
+        NB_BTN = len(self.option_list) # Button amount on screen
         i = self.arrow_index # Arrow position
 
         # Update arrow index as it never exceeds the number of button
-        self.arrow_index = max(0, min(i+direction, NB_BTN))
+        index = i+direction if -1 < i+direction < NB_BTN else NB_BTN-1-i
+        self.arrow_index = index
 
-        # Warn button he is targeted by the user
-        button = self.buttons[self.arrow_index]
+        # Select focused button and warn he is targeted by the user
+        button = self.option_list[self.arrow_index]
         button.targeted = True
 
         # Update action to add "press Return handling" with button
         # callback action when pressed. Nb: button.press is a method
-        self.action[pg.K_RETURN] = lambda: button.press()
+        self.actions[pg.K_RETURN] = lambda: button.press()
 
-    def setup_input_action(self):
+    def setup_input(self):
         """ Setup event related action for menu navigation """
+
+        # We warn first button he is focus
+        button = self.option_list[self.arrow_index]
+        button.targeted = True
 
         # K_UP is assigned to move arrow upward and
         # K_DOWN is assigned to move arrow downward
-        self.action[pg.K_UP] = lambda: self.move_arrow(1)
-        self.action[pg.K_DOWN] = lambda: self.move_arrow(-1)
+        self.actions[pg.K_UP] = lambda: self.move_arrow(-1)
+        self.actions[pg.K_DOWN] = lambda: self.move_arrow(+1)
 
         # Each of self.action item is a function
         # which start when key (like K_RETURN) is pressed.
-        button = self.buttons[self.arrow_index]
-        self.action[pg.K_RETURN] = lambda: button.press()
+        button = self.option_list[self.arrow_index]
+        self.actions[pg.K_RETURN] = lambda: button.press()
 
-    def check_for_input(self, keys, elapsed):
-        """ Check for user events """
-
-        # Check 70ms after last key press if self.actions keys
-        # are pressed then launches the corresponding action
-        if self.input_timer > 70:
-            for index, function in dic.items():
-                if keys[index]:
-                    actions[index]()
-                    self.input_timer = 0
-        self.input_timer += elapsed
-
+    def update(self, *args):
+        super().update(*args)
+        self.sprites.add(*self.panels)
+        self.sprites.add(*self.buttons)
 
 class Main(Menu):
 
@@ -164,10 +185,10 @@ class Main(Menu):
         self.back = c.HOME
         self.description = c.MAIN_MENU_DESCRIPTION
 
-    def setup_buttons(self, screen):
-        super().add_btn(c.BTN_TEXT_CONTINUE, lambda: self.set_done(c.SELECT_MODE))
-        super().add_btn(c.BTN_TEXT_NEWGAME, lambda: self.set_done(c.SELECT_MODE))
-        super().add_btn(c.BTN_TEXT_LOADGAME, lambda: self.set_done(c.SELECT_MODE))
+    def setup_buttons(self):
+        super().add_btn(c.BTN_TEXT_NEWGAME, lambda: self.set_done(self.next))
+        #super().add_btn(c.BTN_TEXT_CONTINUE, lambda: self.set_done(self.next))
+        super().add_btn(c.BTN_TEXT_LOADGAME, lambda: self.set_done(self.next))
         super().add_btn(c.BTN_TEXT_QUIT, lambda: self.set_done(c.HOME))
         super().position_buttons()
 
@@ -177,29 +198,29 @@ class ModeSelection(Menu):
     def __init__(self):
         super().__init__()
         self.name = c.SELECT_MODE
-        self.next = c.SELECT_CHAR
+        self.next = c.SELECT_LEVEL
         self.back = c.MAIN_MENU
         self.description = c.SELECT_MODE_DESCRIPTION
 
-    def setup_buttons(self, screen):
-        super().add_btn(c.BTN_TEXT_EASY, lambda: self.set_done(c.SELECT_CHAR, speed=1))
-        super().add_btn(c.BTN_TEXT_NORMAL, lambda: self.set_done(c.SELECT_CHAR, speed=2))
-        super().add_btn(c.BTN_TEXT_HARD, lambda: self.set_done(c.SELECT_CHAR, speed=3))
-        super().add_btn(c.BTN_TEXT_INFERNO, lambda: self.set_done(c.SELECT_CHAR, speed=4))
+    def setup_buttons(self):
+        super().add_btn(c.BTN_TEXT_1P, lambda: self.set_done(self.next, nb_player=1))
+        super().add_btn(c.BTN_TEXT_2P, lambda: self.set_done(self.next, nb_player=2))
         super().add_btn(c.BTN_TEXT_BACK, lambda: self.set_done(c.MAIN_MENU))
         super().position_buttons()
 
-
-class CharacterSelection(Menu):
+class LevelSelection(Menu):
 
     def __init__(self):
         super().__init__()
-        self.name = c.SELECT_CHAR
+        self.name = c.SELECT_LEVEL
         self.next = c.ARCADE
         self.back = c.SELECT_MODE
-        self.description = c.SELECT_CHAR_DESCRIPTION
+        self.description = c.SELECT_LEVEL_DESCRIPTION
 
-    def setup_buttons(self, screen):
-        super().add_btn(c.BTN_TEXT_DEV, lambda: self.set_done(self.next, speed=self.persist.get('speed',2)))
+    def setup_buttons(self):
+        super().add_btn(c.BTN_TEXT_EASY, lambda: self.set_done(self.next, speed=1))
+        super().add_btn(c.BTN_TEXT_NORMAL, lambda: self.set_done(self.next, speed=2))
+        super().add_btn(c.BTN_TEXT_HARD, lambda: self.set_done(self.next, speed=3))
+        super().add_btn(c.BTN_TEXT_INFERNO, lambda: self.set_done(self.next, speed=4))
         super().add_btn(c.BTN_TEXT_BACK, lambda: self.set_done(c.SELECT_MODE))
         super().position_buttons()
