@@ -52,9 +52,8 @@ class Arcade(Party):
 
         # Generate logic then graphic board for each player
         for player in self.players:
-            board = self.generate_board()
-            gfx_board = self.setup_board(board)
-            player.setup_game(board, gfx_board)
+            board = self.game.generate_board()
+            player.setup_game(board)
 
     def add_information(self, name, info=''):
 
@@ -89,7 +88,7 @@ class Arcade(Party):
 
     def setup_input(self):
 
-        # General input handling, game inputs are set in player object
+        # General input handling, game inputs arnt set here but in player object
         self.actions[pg.K_ESCAPE] = lambda: self.set_done(c.SELECT_CHAR, speed=self.speed)
 
     def set_done(self, next, **kwargs):

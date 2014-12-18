@@ -40,17 +40,18 @@ class GameCore:
         super().__init__()
         self.num_col = num_col
         self.num_row = num_row
-        self.num_board = num_board
         self.num_color = num_color
-        self.speed = GameCore.speed[speed]
+        self.speed = speed
         self.boards = []
 
     def generate_board(self):
         """ Generate new board, stock and return it """
-        board = Board(speed, num_color, num_row, num_col)
+        board = Board(self.speed, self.num_color, self.num_row, self.num_col)
         self.boards.append(board)
         return board
 
+    def num_board(self):
+        return len(self.boards)
 
 class Board:
     """

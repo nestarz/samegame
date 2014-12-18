@@ -132,7 +132,8 @@ class InfoGFX(Sprite):
 class BlockGFX(Sprite):
     """ Bloc de couleur """
 
-    size = (38,38)
+    W, H = 38, 38
+    size = (W,H)
     INDEX = 0
     pause = []
 
@@ -230,8 +231,8 @@ class BoardGFX(Sprite):
     def __init__(self, board):
 
         # Calcul board size based on block size and board dimensions
-        w = BoardGFX.MARGIN_X + (BoardGFX.MARGIN_X + Block.w) * board.num_col
-        h = BoardGFX.MARGIN_Y + (BoardGFX.MARGIN_Y + Block.h) * board.num_row
+        w = BoardGFX.MARGIN_X + (BoardGFX.MARGIN_X + BlockGFX.W) * board.num_col
+        h = BoardGFX.MARGIN_Y + (BoardGFX.MARGIN_Y + BlockGFX.H) * board.num_row
 
         # Create surface that will welcome our board
         ref = pg.Surface((w, h), pg.HWSURFACE | pg.SRCALPHA)
