@@ -29,14 +29,7 @@ class Button(Sprite):
     ):
         self.style = style
         self.txt = txt
-        ref = render_text(
-            txt,
-            self.style['size'],
-            self.style['color1'],
-            self.style['font'],
-            self.style.get('AA', 0),
-            self.style.get('bold',False)
-        )
+        ref = render_text(txt, style=self.style)
         pg.sprite.DirtySprite.__init__(self)
         SuperSurface.__init__(self, ref)
         self.callback = callback
@@ -45,7 +38,8 @@ class Button(Sprite):
         self.pause_text_effect = False
         if self.parent:
             self.rect.topright = self.parent.rect.topright
-        self.setup_effect('text_effect', 300, 2, self.style, self.txt)
+        WITH_ARROW = True
+        self.setup_effect('hue_text_effect', 300, 2, style, txt, WITH_ARROW)
 
     def press(self):
         self.callback()
@@ -54,10 +48,10 @@ class Button(Sprite):
         if self.parent:
             self.rect.right = self.parent.rect.right - 25
         if not self.targeted and not self.pause_text_effect:
-            self.pause_effect('text_effect')
+            self.pause_effect('hue_text_effect')
             self.pause_text_effect = True
         elif self.targeted and self.pause_text_effect:
-            self.resume_effect('text_effect')
+            self.resume_effect('hue_text_effect')
             self.pause_text_effect = False
         Sprite.update(self, elapsed)
         self.dirty = 1
@@ -83,23 +77,18 @@ class Panel(Sprite):
 
 class InfoGFX(Sprite):
 
+    MARGIN_H = 0
+
     def __init__(
         self,
         txt,
         player,
         level
     ):
-        self.style = c.BTN['default']
+        self.style = c.DEFAULT_BTN_STYLE
         self.txt = txt
         self.level = level
-        ref = text_to_surface(
-            txt,
-            self.style['font'],
-            12,
-            self.style['default']['color'],
-            self.style['AA'],
-            self.style['bold'],
-        )
+        ref = render_text(txt, 12, style=self.style)
         pg.sprite.DirtySprite.__init__(self)
         SuperSurface.__init__(self, ref)
         self.player = player
@@ -110,15 +99,9 @@ class InfoGFX(Sprite):
 
     def change_txt(self, txt):
         if self.txt != txt:
-            self.image = text_to_surface(
-                txt,
-                self.style['font'],
-                12,
-                self.style['default']['color'],
-                self.style['AA'],
-                self.style['bold'],
-            )
+            self.image = render_text(txt, 12, style=self.style)
             self.rect.size = self.image.get_rect().size
+            self.txt = txt
 
     def update(self, elapsed):
         if self.player.index == 1:

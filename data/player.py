@@ -36,6 +36,7 @@ class Player:
         self.setup_board()
         self.setup_blocks()
         self.setup_cursor()
+        self.setup_information()
         self.setup_input()
 
     def setup_board(self):
@@ -58,7 +59,7 @@ class Player:
         self.cursor_gfx.add(self.cursor_group)
 
     def add_information(self, name, info=''):
-        self.info_dict[name] = InfoGFX(name, info)
+        self.info_dict[name] = InfoGFX(name, info, self.board_gfx)
         self.info_dict[name].add(self.info_group)
 
     def update_information(self, name, info=''):
@@ -66,7 +67,7 @@ class Player:
 
     def setup_information(self):
         info_p = "{}: {}".format(self.index, c.PLAYER_NAME[self.index])
-        info_s = "{}".format(c.MODE_NAME[self.speed])
+        info_s = "{}".format(c.MODE_NAME[self.board.speed])
         self.add_information('nom', info_p)
         self.add_information('mode', info_s)
         self.add_information('new_row')

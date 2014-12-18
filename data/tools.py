@@ -16,15 +16,29 @@ class Font(pg.font.Font):
 
 def render_text(
     text,
-    size=10,
-    color=c.WHITE_RGB,
-    name=c.FONT1,
-    AA=0,
-    bold=False,
-    italic=False,
+    size=None,
+    color=None,
+    name=None,
+    AA=None,
+    bold=None,
+    italic=None,
     **kwargs
 ):
+    style = kwargs.get('style', {})
+    if not size:
+        size = style.get('size', 10)
+    if not color:
+        color = style.get('color1', c.WHITE_RGB)
+    if not name:
+        name = style.get('name', c.FONT1)
+    if not AA:
+        AA = style.get('AA', 0)
+    if not bold:
+        bold = style.get('bold', False)
+    if not italic:
+        italic = style.get('italic', False)
+    bg_color = kwargs.get('bg_color', style.get('bg_color', None))
     font = Font(name, size)
     font.set_bold(bold)
     font.set_italic(italic)
-    return font.render(text, AA, color, kwargs.get('bg_color', None))
+    return font.render(text, AA, color, bg_color)

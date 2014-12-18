@@ -41,7 +41,7 @@ class Arcade(Party):
 
         # Game constants
         # Get speed/player if passed in args with previous screens
-        SPEED = persist.get('speed', 1)
+        SPEED = persist.get('speed', c.SPEED[1])
         NB_PLAYER = persist.get('nb_player', 1)
         NB_COLOR = 6
         NB_ROW = 10

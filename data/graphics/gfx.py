@@ -145,23 +145,24 @@ class EffectObject:
                 'fadeout': FadeOut,
                 'wait': Wait,
                 'move': Move,
-                'text_effect': TextEffect,
+                'hue_text_effect': HueTextEffect,
                 'inflate': Inflate
             }[name]
         except KeyError:
             raise AccessEffectError(name)
 
-class TextEffect(EffectObject):
+class HueTextEffect(EffectObject):
 
     """
     Hue variation effect and arrow index mark.
     """
-    def __init__(self, delay, step, style, txt):
+    def __init__(self, delay, step, style, txt, arrow=False):
         super().__init__(delay)
         self.txt = txt
         self.sign = 1
         self.time_stacker = 0
         self.targeted = False
+        self.arrow = arrow
         self.arrow_txt = ''
         self.style = style
 
@@ -183,7 +184,8 @@ class TextEffect(EffectObject):
         elif self.pause:
             return self.backup_img, self.backup_rect
         else:
-            self.arrow_txt = '+' if self.arrow_txt == '*' else '*'
+            if self.arrow:
+                self.arrow_txt = '+' if self.arrow_txt == '*' else '*'
             if self.time_stacker > 300:
                 self.sign = -1*self.sign
                 self.time_stacker = 0
@@ -192,13 +194,8 @@ class TextEffect(EffectObject):
             self.color = [max(0, min(x - self.sign*step, 255))
                                     for x in self.temp_c]
             self.time_stacker += elapsed
-        i = render_text(
-                self.txt + self.arrow_txt,
-                self.style['size'],
-                self.color,
-                self.style['font'],
-                self.style.get('AA', 0),
-                self.style.get('bold',False))
+        txt = self.txt + self.arrow_txt
+        i = render_text(txt, self.style['size'], self.color, style=self.style)
         return (i, rect)
 
     def stop(self):
