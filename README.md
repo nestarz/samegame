@@ -1,10 +1,5 @@
 SameGame
 ========
-
-
-----------
-
-
 ### **THE MEP TEAM**
 
 * SEURIN Mathieu
