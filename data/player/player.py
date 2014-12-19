@@ -27,6 +27,7 @@ class Player:
         self.block_group = pg.sprite.LayeredDirty()
         self.cursor_group = pg.sprite.LayeredDirty()
         self.information_group = pg.sprite.LayeredDirty()
+        # Ordre des draw
         self.all_groups = (self.board_group,
                             self.cursor_group,
                             self.block_group,
