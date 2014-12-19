@@ -6,7 +6,7 @@ from .. import cache
 from .. import constants as c
 from ..screen import Screen
 from ..graphics.gfx import Image
-from ..graphics.sprites import Sprite
+from ..graphics.general_sprites import Sprite
 from ..tools import render_text
 
 class Home(Screen):

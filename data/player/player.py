@@ -1,7 +1,8 @@
 import pygame as pg
 from .. import cache
 from .. import constants as c
-from ..graphics.sprites import Panel, BoardGFX, BlockGFX, CursorGFX, InformationGFX
+from ..graphics.general_sprites import Panel
+from ..graphics.party_sprites import BoardGFX, BlockGFX, CursorGFX, InformationGFX
 from ..gamecore import GameCore, Cursor
 from ..player.player_tools import *
 
@@ -79,6 +80,12 @@ class Player:
         # to do easy update
         self.add_information(NameInformation(self))
         self.add_information(ModeInformation(self))
+        self.add_information(CustomInformation(self, '====='))
+        self.add_information(CustomInformation(self, 'Controls'))
+        for c, k in self.key.controls.items():
+            text = '{}:{}'.format(c, self.key.name(k))
+            self.add_information(CustomInformation(self, text))
+        self.add_information(CustomInformation(self, '====='))
         self.add_information(UpInformation(self))
         self.add_information(PauseInformation(self))
         self.add_information(ScoreInformation(self))

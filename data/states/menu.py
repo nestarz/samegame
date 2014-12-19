@@ -5,7 +5,7 @@ import pygame as pg
 from .. import constants as c
 from ..tools import render_text
 from ..graphics.gfx import Image
-from ..graphics.sprites import Panel, Button
+from ..graphics.general_sprites import Panel, Button
 from ..screen import Screen
 
 
@@ -222,6 +222,7 @@ class LevelSelection(Menu):
 
     def setup_buttons(self):
         for speed, name in c.MODE_NAME.items():
-            super().add_btn(name, lambda: self.set_done(self.next, speed=speed))
+            nb = self.persist.get('nb_player', 1)
+            super().add_btn(name, lambda: self.set_done(self.next, nb_player=nb, speed=speed))
         super().add_btn(c.BTN_TEXT_BACK, lambda: self.set_done(c.SELECT_MODE))
         super().position_buttons()

@@ -3,78 +3,10 @@
 
 import pygame as pg
 from .gfx import SuperSurface, Image
+from .general_sprites import Sprite
 from ..cache import cache
 from ..tools import render_text
 from .. import constants as c
-
-class Sprite(pg.sprite.DirtySprite, SuperSurface):
-    def __init__(self, surface):
-        pg.sprite.DirtySprite.__init__(self)
-        if isinstance(surface, Image):
-            SuperSurface.__init__(self, surface.image)
-        else:
-            SuperSurface.__init__(self, surface)
-
-    def update(self, elapsed):
-        SuperSurface.update(self, elapsed)
-        self.dirty = 1
-
-class Button(Sprite):
-
-    def __init__(
-        self,
-        txt,
-        style=c.DEFAULT_BTN_STYLE,
-        callback=None,
-        parent=None
-    ):
-        self.style = style
-        self.txt = txt
-        ref = render_text(txt, style=self.style)
-        pg.sprite.DirtySprite.__init__(self)
-        SuperSurface.__init__(self, ref)
-        self.callback = callback
-        self.parent = parent
-        self.targeted = False
-        self.pause_text_effect = False
-        if self.parent:
-            self.rect.topright = self.parent.rect.topright
-        WITH_ARROW = True
-        self.setup_effect('hue_text_effect', 300, 2, style, txt, WITH_ARROW)
-
-    def press(self):
-        self.callback()
-
-    def update(self, elapsed):
-        if self.parent:
-            self.rect.right = self.parent.rect.right - 25
-        if not self.targeted and not self.pause_text_effect:
-            self.pause_effect('hue_text_effect')
-            self.pause_text_effect = True
-        elif self.targeted and self.pause_text_effect:
-            self.resume_effect('hue_text_effect')
-            self.pause_text_effect = False
-        Sprite.update(self, elapsed)
-        self.dirty = 1
-
-class Panel(Sprite):
-
-    def __init__(
-        self,
-        width,
-        height,
-        RGB=(0, 0, 0),
-        alpha=255
-    ):
-        # call DirtySprite initializer
-        ref = pg.Surface((width, height), pg.HWSURFACE | pg.SRCALPHA)
-        pg.sprite.DirtySprite.__init__(self)
-        SuperSurface.__init__(self, ref)
-        self.RGBA = RGB + (alpha,)
-        self.image.fill(self.RGBA)
-
-    def update(self, elapsed):
-        Sprite.update(self, elapsed)
 
 class InformationGFX(Sprite):
 
@@ -86,19 +18,20 @@ class InformationGFX(Sprite):
         self.height = sum([spr.rect.h for spr in player.information_group])
         self.style = information_obj.style
         self.text = information_obj.text
-        ref = render_text(self.text, 12, style=self.style)
+        self.size = information_obj.size
+        ref = render_text(self.text, self.size, style=self.style)
         SuperSurface.__init__(self, ref)
         self.position_information(player.board_gfx)
 
     def position_information(self, board_gfx):
-        RECT_PLAYER_1 = board_gfx.rect.right
-        RECT_PLAYER_2 = board_gfx.rect.left - self.rect.w
+        RECT_PLAYER_1 = board_gfx.rect.right + 10
+        RECT_PLAYER_2 = board_gfx.rect.left - self.rect.w - 10
         self.rect.x = RECT_PLAYER_2 if self.index else RECT_PLAYER_1
         self.rect.y = board_gfx.rect.top + self.rect.h + self.height + 10
 
     def change_text(self, text):
         if self.text != text:
-            self.image = render_text(text, 12, style=self.style)
+            self.image = render_text(text, self.size, style=self.style)
             self.rect.size = self.image.get_rect().size
             self.text = text
 
@@ -111,18 +44,30 @@ class InformationGFX(Sprite):
 
 class CursorGFX(Sprite):
 
-    size = (43*2+1,42+2)
+    SIZE = (43*2+1,42+2)
 
     def __init__(self, cursor, board_gfx):
+
+        # call DirtySprite initializer
         pg.sprite.DirtySprite.__init__(self)
-        ref = pg.Surface(CursorGFX.size, pg.HWSURFACE | pg.SRCALPHA)
+
+        # Create SuperSurface with CursorGFX size
+        ref = pg.Surface(CursorGFX.SIZE, pg.HWSURFACE | pg.SRCALPHA)
         SuperSurface.__init__(self, ref)
+
+        # Draw a rect with white 5px border size (not filled)
         pg.draw.rect(self.image, (255,255,255), self.rect, 5)
         self.image = self.image.convert()
-        self.rect.size = CursorGFX.size
+
+        # Reference to logic cursor
         self.cursor = cursor
+
+        # Deep copy cursor position
+        # Its not a reference to cursor positon, in order to handle move
         self.pos_row = cursor.pos_row
         self.pos_col = cursor.pos_col
+
+        # Positionning cursor relative to board
         self.position(board_gfx)
 
     def position(self, surface):

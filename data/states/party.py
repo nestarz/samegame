@@ -5,7 +5,8 @@ import pygame as pg
 from .. import cache
 from .. import constants as c
 from ..screen import Screen
-from ..graphics.sprites import Panel, BlockGFX, CursorGFX, InformationGFX
+from ..graphics.general_sprites import Panel
+from ..graphics.party_sprites import BlockGFX, CursorGFX, InformationGFX
 from ..gamecore import GameCore, Cursor
 from ..player.player import Player
 
@@ -74,7 +75,7 @@ class Arcade(Party):
         # Panel constants
         PANEL_COLOR = c.BLACK_RGB
         PANEL_ALPHA = 200
-        PANEL_WIDTH = WIDTH - 150
+        PANEL_WIDTH = WIDTH - 70
         PANEL_HEIGHT = HEIGHT - 110
 
         # Create panel that will contain boards

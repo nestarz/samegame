@@ -32,7 +32,7 @@ def render_text(
     if not name:
         name = style.get('name', c.FONT1)
     if not AA:
-        AA = style.get('AA', 0)
+        AA = style.get('AA', 1)
     if not bold:
         bold = style.get('bold', False)
     if not italic:
