@@ -41,4 +41,6 @@ def render_text(
     font = Font(name, size)
     font.set_bold(bold)
     font.set_italic(italic)
-    return font.render(text, AA, color, bg_color)
+    image = font.render(text, AA, color, bg_color)
+    image = image.convert_alpha()
+    return image

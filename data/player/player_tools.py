@@ -8,14 +8,18 @@ class Keys:
         self.DOWN = controls['DOWN']
         self.RIGHT = controls['RIGHT']
         self.LEFT = controls['LEFT']
+        self.MOVE = (self.UP, self.DOWN, self.RIGHT, self.LEFT)
         self.SWAP = controls['SWAP']
         self.GENERATE = controls['GENERATE']
 
     def name(self, k):
         AZERTY_CONTROLS = {'w':'z', 'q':'a', 'right shift': 'shift'}
         name = pg.key.name(k)
-        name = name.replace(name, AZERTY_CONTROLS.get(name, name))
+        name = name.replace(name, AZERTY_CONTROLS.get(name, name)).upper()
         return name
+
+    def count_pressed(self, keys):
+        return len([key for index, key in enumerate(keys) if key != 0 and index in self.controls.values()])
 
 class PlayerInformation:
     def __init__(self, player):

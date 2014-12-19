@@ -13,6 +13,9 @@ class Player:
         self.index = index
         self.actions = {}
         self.alive = True
+        self.allow_input = False
+        self.allow_generate = False
+        self.allow_swap = False
         self.up_timer = 0
         self.pause_timer = 0
         self.input_timer = 0
@@ -83,7 +86,7 @@ class Player:
         self.add_information(CustomInformation(self, '-------'))
         self.add_information(CustomInformation(self, 'Controls'))
         for c, k in self.key.controls.items():
-            text = '{}:{}'.format(c, self.key.name(k))
+            text = '{}={}'.format(c, self.key.name(k))
             self.add_information(CustomInformation(self, text))
         self.add_information(CustomInformation(self, '-------'))
         self.add_information(UpInformation(self))
@@ -101,14 +104,36 @@ class Player:
     def check_input(self, keys, elapsed):
         """ Check for user events """
 
+        self.input_timer += elapsed
+        nb_pressed = self.key.count_pressed(keys)
+
         # Check 70ms after last key press if self.actions keys
         # are pressed then launches the corresponding action
-        if self.input_timer > 300:
+        if nb_pressed:
             for index, function in self.actions.items():
                 if keys[index]:
-                    function()
-                    self.input_timer = 0
-        self.input_timer += elapsed
+                    if index in self.key.MOVE and self.allow_input:
+                        function()
+                    if index == self.key.SWAP and self.allow_swap:
+                        function()
+                    if index == self.key.GENERATE and self.allow_generate:
+                        function()
+
+        self.allow_input = False
+        self.allow_swap = False
+        self.allow_generate = False
+
+        if self.input_timer > 65:
+            self.allow_input = True
+            self.input_timer = 0
+        elif nb_pressed == 0:
+            self.allow_input = True
+            self.input_timer = -170
+
+        if not keys[self.key.SWAP]:
+            self.allow_swap = True
+        if not keys[self.key.GENERATE]:
+            self.allow_generate = True
 
     def swap(self):
 

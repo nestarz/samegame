@@ -20,7 +20,7 @@ def main():
                   c.SELECT_LEVEL : menu.LevelSelection(),
                   c.ARCADE : party.Arcade()}
     #initalise les écrans du jeu et définit l'écran principal
-    master.setup_state(state_dict, c.ARCADE)
+    master.setup_state(state_dict, c.HOME)
     master.main_loop() #lancement du jeu et de la boucle principale
     master.exit() #sortie du jeu
 
