@@ -82,18 +82,18 @@ class InformationGFX(Sprite):
         pg.sprite.DirtySprite.__init__(self)
         player = information_obj.player
         self.information_obj = information_obj
-        self.right = bool(player.index)
+        self.index = player.index
         self.height = sum([spr.rect.h for spr in player.information_group])
         self.style = information_obj.style
         self.text = information_obj.text
         ref = render_text(self.text, 12, style=self.style)
         SuperSurface.__init__(self, ref)
+        self.position_information(player.board_gfx)
 
     def position_information(self, board_gfx):
-        if self.right:
-            self.rect.right = board_gfx.rect.right + self.rect.w
-        else:
-            self.rect.left = board_gfx.rect.left - self.rect.w
+        RECT_PLAYER_1 = board_gfx.rect.right
+        RECT_PLAYER_2 = board_gfx.rect.left - self.rect.w
+        self.rect.x = RECT_PLAYER_2 if self.index else RECT_PLAYER_1
         self.rect.y = board_gfx.rect.top + self.rect.h + self.height + 10
 
     def change_text(self, text):
@@ -103,9 +103,9 @@ class InformationGFX(Sprite):
             self.text = text
 
     def update(self, elapsed, player):
-        self.position_information(player.board_gfx)
         self.information_obj.update()
         self.change_text(self.information_obj.text)
+        self.position_information(player.board_gfx)
         self.dirty = 1
         Sprite.update(self, elapsed)
 
@@ -349,7 +349,9 @@ class BoardGFX(Sprite):
     def position(self, panel):
         # Position board
         self.rect.bottom = panel.rect.bottom
-        self.rect.x = panel.rect.left + 10 if self.index else panel.rect.right - self.rect.w - 10
+        RECT_PLAYER_1 = panel.rect.left + 10
+        RECT_PLAYER_2 = panel.rect.right - self.rect.w - 10
+        self.rect.x = RECT_PLAYER_2 if self.index else RECT_PLAYER_1
 
     def get_frozen_col(self, col):
         # Return the blocks in a frozen col

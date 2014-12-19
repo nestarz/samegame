@@ -26,12 +26,12 @@ class CustomInformation(PlayerInformation):
 class NameInformation(PlayerInformation):
     def __init__(self, player):
         super().__init__(player)
-        self.text = '{}: {}'.format(player.index, player.name)
+        self.text = 'Nom={}'.format(player.name)
 
 class ModeInformation(PlayerInformation):
     def __init__(self, player):
         super().__init__(player)
-        self.text = '{}'.format(c.MODE_NAME[player.board.speed])
+        self.text = 'Mode={}'.format(c.MODE_NAME[player.board.speed])
 
 class ScoreInformation(PlayerInformation):
     def __init__(self, player):
@@ -46,7 +46,7 @@ class UpInformation(PlayerInformation):
 
     def update(self):
         #pause_timer = int(self.player.pause_timer/600)
-        up_timer = int(self.player.up_timer/1000)
+        up_timer = int((self.player.board.speed-self.player.up_timer)/1000)
         self.text = 'UP={:.0f}'.format(up_timer)
 
 class PauseInformation(PlayerInformation):

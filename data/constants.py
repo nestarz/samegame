@@ -15,21 +15,20 @@ DYING_TIMER = 1700
 
 # CONTROLS
 PLAYER1_CONTROLS = {
-    'UP': pg.K_UP,
-    'DOWN': pg.K_DOWN,
-    'LEFT': pg.K_LEFT,
-    'RIGHT': pg.K_RIGHT,
-    'SWAP': pg.K_RETURN,
-    'GENERATE': pg.K_m
-}
-
-PLAYER2_CONTROLS = {
     'UP': pg.K_w,
     'DOWN': pg.K_s,
     'LEFT': pg.K_a,
     'RIGHT': pg.K_d,
     'SWAP': pg.K_SPACE,
     'GENERATE': pg.K_r
+}
+PLAYER2_CONTROLS = {
+    'UP': pg.K_UP,
+    'DOWN': pg.K_DOWN,
+    'LEFT': pg.K_LEFT,
+    'RIGHT': pg.K_RIGHT,
+    'SWAP': pg.K_RETURN,
+    'GENERATE': pg.K_m
 }
 CONTROLS = {0: PLAYER1_CONTROLS, 1: PLAYER2_CONTROLS}
 
