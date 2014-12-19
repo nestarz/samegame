@@ -83,12 +83,12 @@ class Player:
         # to do easy update
         self.add_information(NameInformation(self))
         self.add_information(ModeInformation(self))
-        self.add_information(CustomInformation(self, '-------'))
+        self.add_information(CustomInformation(self, ' '))
         self.add_information(CustomInformation(self, 'Controls'))
         for c, k in self.key.controls.items():
             text = '{}={}'.format(c, self.key.name(k))
             self.add_information(CustomInformation(self, text))
-        self.add_information(CustomInformation(self, '-------'))
+        self.add_information(CustomInformation(self, ' '))
         self.add_information(UpInformation(self))
         self.add_information(PauseInformation(self))
         self.add_information(ScoreInformation(self))
@@ -107,15 +107,18 @@ class Player:
         self.input_timer += elapsed
         nb_pressed = self.key.count_pressed(keys)
 
-        # Check 70ms after last key press if self.actions keys
-        # are pressed then launches the corresponding action
+        # If key are pressed then try to launches the corresponding action
         if nb_pressed:
+            # For each actions, check if corresponding is pressed
             for index, function in self.actions.items():
                 if keys[index]:
+                    # If move key pressed, move the case if allowed to
                     if index in self.key.MOVE and self.allow_input:
                         function()
+                    # If swap key pressed, swap the case if allowed to
                     if index == self.key.SWAP and self.allow_swap:
                         function()
+                    # If generate key pressed, generate a row if allowed to
                     if index == self.key.GENERATE and self.allow_generate:
                         function()
 
@@ -146,6 +149,7 @@ class Player:
         game_over = not self.board.top_row_empty()
 
         if game_over and self.alive:
+            self.add_information(CustomInformation(self, ' '))
             self.add_information(GameOverInformation(self))
             self.alive = False
         else:
