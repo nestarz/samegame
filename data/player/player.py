@@ -56,7 +56,6 @@ class Player:
                 if board.board[row][col].color:
                     block = BlockGFX(board.board[row][col], self)
                     block.add(self.block_group)
-                    self.board_gfx.array[block.pos[0]][block.pos[1]] = block
 
     def setup_cursor(self):
 
@@ -107,8 +106,6 @@ class Player:
 
         # Order to logic board to swap case focused by cursor (internal process)
         case1, case2 = self.board.swap()
-        case1.on_swap = True
-        case2.on_swap = True
 
     def up_row(self):
 
@@ -125,7 +122,6 @@ class Player:
             for case in cases:
                 block = BlockGFX(case, self)
                 block.add(self.block_group)
-                self.board_gfx.array[case.pos[0]][case.pos[1]] = block
 
     @property
     def new_row_timer(self):

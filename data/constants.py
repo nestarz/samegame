@@ -48,6 +48,7 @@ SELECT_CHAR_DESCRIPTION = "Choose your hero"
 
 # GFX_NAME
 LOGOGFXNAME = 'logo'
+BOARD_GFX_NAME = {0: 'board1', 1: 'board2'}
 
 ## TEXT
 SUBLOGO_TEXT = "Mathieu Seurin & Rhouzlane Elias"

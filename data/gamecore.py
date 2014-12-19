@@ -397,6 +397,7 @@ class Case:
         self.board = board
         self.on_swap = False
         self.dying = False
+        self.frozen = False
         if color == 'bad':
             self.can_swap = False
         else:

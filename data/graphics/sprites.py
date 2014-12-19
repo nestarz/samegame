@@ -3,6 +3,7 @@
 
 import pygame as pg
 from .gfx import SuperSurface, Image
+from ..cache import cache
 from ..tools import render_text
 from .. import constants as c
 
@@ -202,72 +203,96 @@ class BlockGFX(Sprite):
         self.color_update()
         if self.alive and not self.case.dying:
             self.case.dying = self.is_block_dying(dying_blocks)
-            if self.case.on_swap or not self.frozen:
+            if self.case.on_swap or not self.case.frozen:
                 self.move(player.board)
-            elif self.case.dying and self.frozen:
+            elif self.case.dying and self.case.frozen:
                 self.move(player.board)
         elif self.dying_timer < 0:
             self.case.dying = False
             self.alive = False
             self.kill()
-            player.board_gfx.array[self.pos[0]][self.pos[1]] = None
         elif self.case.dying:
             self.dying_timer -= elapsed
 
 class BoardGFX(Sprite):
 
-    MARGIN_X = 5
-    MARGIN_Y = 5
+    # Padding inside board
+    PADDING_X = 5
+    PADDING_Y = 5
+
+    # Color of our board
     COLOR = (0, 0, 0, 250)
+
+    # Image of our board
+    IMG_FILENAME = c.BOARD_GFX_NAME
 
     def __init__(self, board, index, panel):
 
+        # Board have an index which allow us to place our board on panel
         self.index = index
 
         # Calcul board size based on block size and board dimensions
-        w = BoardGFX.MARGIN_X + (BoardGFX.MARGIN_X + BlockGFX.W) * board.num_col
-        h = BoardGFX.MARGIN_Y + (BoardGFX.MARGIN_Y + BlockGFX.H) * board.num_row
+        w = BoardGFX.PADDING_X + (BoardGFX.PADDING_X + BlockGFX.W) * board.num_col
+        h = BoardGFX.PADDING_Y + (BoardGFX.PADDING_Y + BlockGFX.H) * board.num_row
+
+        # Get image of board
+        # ref = cache.get_image(BoardGFX.IMG_FILENAME[self.index])
+        ref = pg.Surface((w, h), pg.HWSURFACE | pg.SRCALPHA)
 
         # Create surface that will welcome our board
-        ref = pg.Surface((w, h), pg.HWSURFACE | pg.SRCALPHA)
         pg.sprite.DirtySprite.__init__(self)
         SuperSurface.__init__(self, ref)
 
+        # Crow image to BoardGFX size
+        # self.rect.size = w, h
+
         # Poisiton board
         self.position(panel)
+
         # Fill our board image with board color
         self.image.fill(BoardGFX.COLOR)
-        # Array that will contain gfx block
-        self.array = [[False for c in line] for line in board]
+
+        # Reference to logic board for mapping cases
+        self.board = board
+
         # Array that contain frozen blocks by col
         self.frozen_cases = {}
+
         # Array that contain freeze timer by col
         self.freeze_timer = {}
 
     def __iter__(self):
+        # Allow to iter in BoardGFX and his blocks (BlockGFX)
         return self.array.__iter__()
 
     def position(self, panel):
         # Position board
         self.rect.bottom = panel.rect.bottom
-        self.rect.x = panel.rect.left if self.index else panel.rect.right - self.rect.w
+        self.rect.x = panel.rect.left + 10 if self.index else panel.rect.right - self.rect.w - 10
 
-    def get_frozen_col(self):
-        return self.frozen_cases.get(col, [])
+    def get_frozen_col(self, col):
+        # Return the blocks in a frozen col
+        return self.frozen_blocks.get(col, [])
 
     def freeze_col(self, col, duration):
+        # Each case of a col will be frozen during "duration" ms
         self.frozen_cases[col] = []
-        for line in self.array:
+        for line in self.board:
+            # If case is not empty, then I freeze the block and add a timer
             if line[col]:
                 line[col].frozen = True
                 self.freeze_timer[col] = duration
                 self.frozen_cases[col].append(line[col])
 
     def defreeze_col(self, col):
+        # Each case in the col will be defreeze except if the case is dying
         for case in self.frozen_cases[col]:
-            case.frozen = False
+            if not case.dying:
+                case.frozen = False
 
     def freeze_update(self, elapsed):
+        # Each existing timer will be update
+        # if timer done => defreeze the col
         for col, timer in self.freeze_timer.items():
             if timer < 0:
                 self.freeze_timer[col] = 0
@@ -278,5 +303,7 @@ class BoardGFX(Sprite):
     def update(self, elapsed, panel):
         # Position board
         self.position(panel)
+        # Update the sprite (apply effects if needed)
         Sprite.update(self, elapsed)
+        # Update blocks state by col
         self.freeze_update(elapsed)
