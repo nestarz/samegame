@@ -66,6 +66,8 @@ class Arcade(Party):
             board = self.game.generate_board()
             player.setup_game(board, self.panel)
 
+        self.setup_input()
+
     def setup_panel(self, screen):
 
         # Window size
@@ -88,7 +90,7 @@ class Arcade(Party):
     def setup_input(self):
 
         # General input handling, game inputs arnt set here but in player object
-        self.actions[pg.K_ESCAPE] = lambda: self.set_done(c.SELECT_CHAR, speed=self.speed)
+        self.actions[pg.K_ESCAPE] = lambda: self.set_done(c.SELECT_LEVEL, speed=self.game.speed)
 
     def set_done(self, next, **kwargs):
 

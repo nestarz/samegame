@@ -80,12 +80,12 @@ class Player:
         # to do easy update
         self.add_information(NameInformation(self))
         self.add_information(ModeInformation(self))
-        self.add_information(CustomInformation(self, '====='))
+        self.add_information(CustomInformation(self, '-------'))
         self.add_information(CustomInformation(self, 'Controls'))
         for c, k in self.key.controls.items():
             text = '{}:{}'.format(c, self.key.name(k))
             self.add_information(CustomInformation(self, text))
-        self.add_information(CustomInformation(self, '====='))
+        self.add_information(CustomInformation(self, '-------'))
         self.add_information(UpInformation(self))
         self.add_information(PauseInformation(self))
         self.add_information(ScoreInformation(self))
