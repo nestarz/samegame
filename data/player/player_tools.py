@@ -46,7 +46,7 @@ class NameInformation(PlayerInformation):
 class ModeInformation(PlayerInformation):
     def __init__(self, player):
         super().__init__(player)
-        self.text = 'Mode={}'.format(c.MODE_NAME[player.board.speed])
+        self.text = 'Mode={}'.format(c.MODE_NAME_DICT[player.board.speed])
 
 class ScoreInformation(PlayerInformation):
     def __init__(self, player):

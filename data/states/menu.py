@@ -221,7 +221,7 @@ class LevelSelection(Menu):
         self.description = c.SELECT_LEVEL_DESCRIPTION
 
     def setup_buttons(self):
-        for speed, name in c.MODE_NAME.items():
+        for speed, name in c.MODE_NAME_TUPLE:
             nb = self.persist.get('nb_player', 1)
             super().add_btn(name, lambda: self.set_done(self.next, nb_player=nb, speed=speed))
         super().add_btn(c.BTN_TEXT_BACK, lambda: self.set_done(c.SELECT_MODE))
