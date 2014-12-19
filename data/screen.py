@@ -36,7 +36,7 @@ class Screen(State):
 
         self.final_countdown = 0
         self.input_timer = 0
-        self.sprites = pg.sprite.LayeredDirty()
+        self.all_groups = ()
         self.rects = []
 
     def reinitialize(self):
@@ -54,6 +54,11 @@ class Screen(State):
         self.bg = Image(img_name) #create background to apply on window
         self.bg.resize(*window.get_size()) #resize bg to window size
         self.bg.setup_effect('fadein', Screen.BG_FADE_TIME) #'ll apply effect fadein during 1s
+
+    def do_action(self, index):
+        """Lance l'action du boutton ciblé par par l'index"""
+        if index in range(0, len(self.buttons)):
+            self.buttons[index].callback()
 
     def set_done(self, next, **kwargs):
         """ Setting up the end of the screen. """
@@ -74,28 +79,24 @@ class Screen(State):
                     self.input_timer = 0
         self.input_timer += elapsed
 
-    def update(
-        self,
-        window,
-        keys,
-        elapsed,
-    ):
+    def draw(self, window):
+        rect = self.bg.draw(window) #draw only if effects apply
+        if rect: self.rects.append(rect)
+        for group in self.all_groups:
+            self.rects += group.draw(window) #get rects where sprites have blitted
+
+    def clear(self, window):
+        for group in self.all_groups:
+            group.clear(window, self.bg.image)
+            break
+
+    def update(self, window, keys, elapsed):
+        self.rects = []
         self.elapsed = elapsed #on récup le temps passé depuis le dernier up
         self.check_input(keys, elapsed) #on check les evenements de l'user
         self.bg.update(elapsed)
-        rect = self.bg.draw(window)
-        self.sprites.clear(window, self.bg.image)
-        self.sprites.update(elapsed)
-        self.rects = self.sprites.draw(window) #on affiche sur la fenetre les sprites
-        if rect:
-            self.rects.append(rect)
         if self.final_countdown:
             #si on a demandé à ce que l'event se termine
             #on up puis check le timer de fin
             self.final_countdown -= self.elapsed
             self.done = max(0, self.final_countdown) == 0
-
-    def do_action(self, index):
-        """Lance l'action du boutton ciblé par par l'index"""
-        if index in range(0, len(self.buttons)):
-            self.buttons[index].callback()

@@ -5,9 +5,9 @@ import pygame as pg
 from .. import cache
 from .. import constants as c
 from ..screen import Screen
-from ..graphics.sprites import Panel, BlockGFX, CursorGFX, InfoGFX
+from ..graphics.sprites import Panel, BlockGFX, CursorGFX, InformationGFX
 from ..gamecore import GameCore, Cursor
-from ..player import Player
+from ..player.player import Player
 
 
 class Party(Screen):
@@ -22,6 +22,12 @@ class Party(Screen):
 
         # List that contains players objects
         self.players = []
+
+        # Groups that will contain panel
+        self.panel_group = pg.sprite.LayeredDirty()
+
+        # Add groups to all_groups tuple
+        self.all_groups = (self.panel_group,)
 
 class Arcade(Party):
 
@@ -38,11 +44,12 @@ class Arcade(Party):
 
         # Call the parent class (Screen) start function
         super().start(window, persist)
+        self.setup_panel(window)
 
         # Game constants
         # Get speed/player if passed in args with previous screens
         SPEED = persist.get('speed', c.SPEED[1])
-        NB_PLAYER = persist.get('nb_player', 1)
+        NB_PLAYER = persist.get('nb_player', 2)
         NB_COLOR = 6
         NB_ROW = 10
         NB_COL = 7
@@ -56,30 +63,26 @@ class Arcade(Party):
         # Generate logic then graphic board for each player
         for player in self.players:
             board = self.game.generate_board()
-            player.setup_game(board)
-
-    def add_information(self, name, info=''):
-
-        # Each player will set the new information box
-        for player in self.players:
-            player.add_information(name, info)
-
-    def setup_information(self):
-
-        # Create useful information box for global game
-        self.add_information('mode', self.speed)
+            player.setup_game(board, self.panel)
 
     def setup_panel(self, screen):
 
         # Window size
         HEIGHT = screen.get_rect().h
         WIDTH = screen.get_rect().w
+        RECT = screen.get_rect()
+        # Panel constants
+        PANEL_COLOR = c.BLACK_RGB
+        PANEL_ALPHA = 200
+        PANEL_WIDTH = WIDTH - 150
+        PANEL_HEIGHT = HEIGHT - 110
 
         # Create panel that will contain boards
-        panel = Panel((WIDTH - 150, HEIGHT - 110), (0, 0, 0, 210))
-        panel.rect.midbottom = screen.get_rect().midbottom + panel.rect.h
-        panel.setup_effect('move', 2000, (-panel.rect.h, 0))
-        panel.add(self.panels_group)
+        self.panel = Panel(PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR, PANEL_ALPHA)
+        self.panel.rect.midbottom = RECT.midbottom
+        #self.panel.rect.move_ip(0, self.panel.rect.h)
+        #self.panel.setup_effect('move', 2000, (0, -self.panel.rect.h))
+        self.panel.add(self.panel_group)
 
     def setup_input(self):
 
@@ -98,7 +101,10 @@ class Arcade(Party):
         self.final_countdown = c.BG_FADE_TIME
 
     def update(self, window, keys, elapsed):
+        super().clear(window)
         super().update(window, keys, elapsed)
-        self.timer += elapsed
+        self.panel_group.update(elapsed)
+        self.all_groups = (self.panel_group,)
         for player in self.players:
-            self.rects += player.update(window, keys, elapsed)
+            self.all_groups += player.update(self.panel, keys, elapsed)
+        super().draw(window)

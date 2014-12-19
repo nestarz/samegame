@@ -42,6 +42,12 @@ class SuperSurface:
                 if e.priority == 1 and not e.pause:
                     break
 
+        # If effects will apply we should draw our image
+        # Then, we check if there is no empty list effect
+        # in our dictionnary of effect (effect_dict)
+        self.dirty = 0
+        for l in self.effect_dict.values():
+            if l: self.dirty = 1; break
 
 class Image(SuperSurface):
     """ Is not a sprite ! Usefull for once upon time blit and background """
@@ -66,13 +72,6 @@ class Image(SuperSurface):
         # Image isn't a Sprite, so we must update rect manually
         self.rect = self.image.get_rect()
 
-        # If effects will apply we should draw our image
-        # Then, we check if there is no empty list effect
-        # in our dictionnary of effect (effect_dict)
-        self.dirty = 0
-        for l in self.effect_dict.values():
-            if l: self.dirty = 1; break
-
         # Call the parent class (SuperSurface) constructor
         # with time elapsed since previous game update
         SuperSurface.update(self, elapsed)
@@ -83,7 +82,6 @@ class Image(SuperSurface):
         # or if force option is up then we will draw it
         if (self.visible and self.dirty) or force:
             dest.blit(self.image, self.rect)
-
             # Return rect where image have been drawn
             return self.rect
 

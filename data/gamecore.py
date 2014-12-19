@@ -93,6 +93,9 @@ class Board:
         self.gravity()
         self.cursor = Cursor(num_row, num_col)
 
+    def __iter__(self):
+        return self.board.__iter__()
+
     def generate_board(self):
         """Generate a board, of num_col*num_row case, filled with 24 colored case, rest is set to False
         6 different color by default
@@ -226,7 +229,7 @@ class Board:
                 destroy.append(temp_cor)
 
         self.destroy = destroy
-        return len(destroy) > 1
+        return destroy, sum([len(_) for _ in destroy])
 
     def destroy_block(self):
         combo = 0
@@ -392,7 +395,8 @@ class Case:
         self.nex = nex
         self.prev = prev
         self.board = board
-        self.swap_ongoing = False
+        self.on_swap = False
+        self.dying = False
         if color == 'bad':
             self.can_swap = False
         else:
@@ -406,9 +410,9 @@ class Case:
         return "Prev = %r, Next = %r, Color is %r" % (self.prev,self.nex,self.color)
 
 def find(c, board):
-    for i, case in enumerate(board):
+    for i, line in enumerate(board):
         try:
-            j = case.index(c)
+            j = line.index(c)
         except ValueError:
             continue
         return i, j

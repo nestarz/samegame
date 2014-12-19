@@ -23,6 +23,9 @@ class Home(Screen):
         # Set default next screen name
         self.next = c.MAIN_MENU
 
+        self.sprites = pg.sprite.LayeredDirty()
+        self.all_groups = (self.sprites,)
+
     def start(self, window, persist):
         super().start(window, persist)
         self.setup_images(window)
@@ -85,3 +88,9 @@ class Home(Screen):
         # Each of self.action item is a function
         # which start when key (like K_RETURN) is pressed.
         self.actions[pg.K_RETURN] = lambda: self.set_done(self.next)
+
+    def update(self, window, keys, elapsed):
+        super().clear(window)
+        super().update(window, keys, elapsed)
+        self.sprites.update(elapsed)
+        super().draw(window)

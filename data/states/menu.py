@@ -26,6 +26,7 @@ class Menu(Screen):
         # Groups that will contain menu sprites
         self.panels = pg.sprite.LayeredDirty()
         self.buttons = pg.sprite.LayeredDirty()
+        self.all_groups = (self.panels, self.buttons)
 
         # Dictionary that will contain action for user event
         self.actions = {}
@@ -171,10 +172,12 @@ class Menu(Screen):
         button = self.option_list[self.arrow_index]
         self.actions[pg.K_RETURN] = lambda: button.press()
 
-    def update(self, *args):
-        super().update(*args)
-        self.sprites.add(*self.panels)
-        self.sprites.add(*self.buttons)
+    def update(self, window, keys, elapsed):
+        super().clear(window)
+        super().update(window, keys, elapsed)
+        self.panels.update(elapsed)
+        self.buttons.update(elapsed)
+        super().draw(window)
 
 class Main(Menu):
 
