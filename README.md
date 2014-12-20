@@ -6,6 +6,11 @@ SameGame
 * RHOUZLANE Elias
 * ECOFFET Paul
 
+# Pré-requis
+
+* Python 3.x ([Lien](https://www.python.org/downloads/))
+* Pygame 1.9.x ([Lien](http://www.lfd.uci.edu/~gohlke/pythonlibs/#pygame))
+
 # Description
 
 Projet proposé par Monsieur CHRISTOPHE SCHLICK dans le cadre de l'enseignement de programmation en Licence 3 MIASHS à l'Université de Bordeaux.
