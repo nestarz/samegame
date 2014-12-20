@@ -15,7 +15,8 @@ class Keys:
     def name(self, k):
         AZERTY_CONTROLS = {'w':'z', 'q':'a', 'right shift': 'shift'}
         name = pg.key.name(k)
-        name = name.replace(name, AZERTY_CONTROLS.get(name, name)).upper()
+        if c.AZERTY_MODE == 1:
+            name = name.replace(name, AZERTY_CONTROLS.get(name, name)).upper()
         return name
 
     def count_pressed(self, keys):
