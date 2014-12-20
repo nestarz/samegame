@@ -16,6 +16,7 @@ class Player:
         self.allow_input = False
         self.allow_generate = False
         self.allow_swap = False
+        self.timer = 0
         self.up_timer = 0
         self.pause_timer = 0
         self.input_timer = 0
@@ -89,6 +90,8 @@ class Player:
             text = '{}={}'.format(c, self.key.name(k))
             self.add_information(CustomInformation(self, text))
         self.add_information(CustomInformation(self, ' '))
+        self.add_information(TimeInformation(self))
+        self.add_information(CustomInformation(self, ' '))
         self.add_information(UpInformation(self))
         self.add_information(PauseInformation(self))
         self.add_information(ScoreInformation(self))
@@ -108,7 +111,7 @@ class Player:
         nb_pressed = self.key.count_pressed(keys)
 
         # If key are pressed then try to launches the corresponding action
-        if nb_pressed:
+        if nb_pressed > 0:
             # For each actions, check if corresponding is pressed
             for index, function in self.actions.items():
                 if keys[index]:
@@ -152,7 +155,7 @@ class Player:
             self.add_information(CustomInformation(self, ' '))
             self.add_information(GameOverInformation(self))
             self.alive = False
-        else:
+        elif self.alive:
             self.board.up()
             self.cursor.move_up()
             cases = self.board.generate_hidden()
@@ -165,9 +168,15 @@ class Player:
         return int((self.board.speed + self.pause_timer - self.up_timer)/600)
 
     def game_event(self, elapsed, destroy):
+
+        # Update general timer (until player loose)
+        self.timer += elapsed
+
+        # Update score and pause if cases destroyed
         if destroy:
             self.pause_timer += destroy*1000 #x blocks = x secondes
             self.score += destroy #x blocks = x points
+            
         if self.pause_timer > 0:
             self.pause_timer -= elapsed
         elif self.up_timer > self.board.speed:
@@ -178,16 +187,18 @@ class Player:
             self.pause_timer = 0
 
     def update(self, panel, keys, elapsed):
+        destroyed = []
+        nb_destroyed = 0
         if self.alive:
             self.check_input(keys, elapsed)
-        self.board.gravity()
-        destroyed, nb_destroyed = self.board.check_destroy()
+            self.board.gravity()
+            destroyed, nb_destroyed = self.board.check_destroy()
         self.board_group.update(elapsed, panel)
         self.information_group.update(elapsed, self)
         self.block_group.update(elapsed, self, destroyed)
         self.cursor_group.update(elapsed, self)
         if self.alive:
             self.game_event(elapsed, nb_destroyed)
-        self.board.destroy_block()
-        self.board.gravity()
+            self.board.destroy_block()
+            self.board.gravity()
         return self.all_groups

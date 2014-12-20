@@ -56,6 +56,15 @@ class ScoreInformation(PlayerInformation):
     def update(self):
         self.text = 'Score={:.0f}'.format(self.player.score)
 
+class TimeInformation(PlayerInformation):
+    def __init__(self, player):
+        super().__init__(player)
+        self.size = 20
+
+    def update(self):
+        timer = int((self.player.timer)/1000)
+        self.text = 'T={:.0f}'.format(timer)
+        
 class UpInformation(PlayerInformation):
     def __init__(self, player):
         super().__init__(player)
