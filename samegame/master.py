@@ -14,16 +14,16 @@ class Master(setup.Window):
     """
 
     def __init__(self):
-        super().__init__() # init de la fenetre et de pygame
+        super().__init__()  # init de la fenetre et de pygame
         cache.load()
-        self.done = False  # etat du programme
-        self.clock = pg.time.Clock()  # horloge du programme
-        self.fps = 200  # frequence d'update
-        self.current_time = 0.0  # valeur du chronometre
-        self.keys = pg.key.get_pressed() # evenements clavier/souris
-        self.state_name = None # nom de l'ecran
-        self.state_dict = {} # ecrans du jeu
-        self.elapsed = 0.0 # temps depuis dernière update
+        self.done = False
+        self.clock = pg.time.Clock()
+        self.fps = 200
+        self.current_time = 0.0
+        self.keys = pg.key.get_pressed()
+        self.state_name = None
+        self.state_dict = {}
+        self.elapsed = 0.0
 
     def setup_state(self, state_dict, initial_state):
         self.state_dict = state_dict
@@ -34,17 +34,15 @@ class Master(setup.Window):
     def update(self):
         """Met a jour le programme"""
 
-        self.current_time = pg.time.get_ticks()  # maj du chronometre
-        if self.state.quit:  # prog doit se terminer?
-            self.done = True  # le prog est termine
+        self.current_time = pg.time.get_ticks()
+        if self.state.quit:
+            self.done = True
         elif self.state.done:
-            self.flip_state()  # changement d'etat
+            self.flip_state()
         self.state.update(
             self.surface,
             self.keys,
-            self.elapsed)  # maj de l'etat
-        #if self.state.rects:
-        #    pg.draw.rect(self.surface, (255,0,0), self.state.rects[0], 1)
+            self.elapsed)
 
     def event_loop(self):
         """Boucle des evenements"""
@@ -61,9 +59,9 @@ class Master(setup.Window):
         """Boucle principale du programme"""
 
         while not self.done:
-            self.event_loop()  # controle evenements ihm
-            self.update()  # maj du prog
-            pg.display.update(self.state.rects)  # maj de la fenetre
+            self.event_loop()
+            self.update()
+            pg.display.update(self.state.rects)
             fps = self.clock.get_fps()
             with_fps = '{} - {:.2f} FPS'.format(self.caption, fps)
             pg.display.set_caption(with_fps)

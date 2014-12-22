@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import pygame as pg
-from .. import constants as c
-from ..tools import render_text
-from ..graphics.gfx import Image
-from ..graphics.general_sprites import Panel, Button
-from ..screen import Screen
+import samegame.constants as c
+from samegame.tools import render_text
+from samegame.graphics.gfx import Image
+from samegame.graphics.general_sprites import Panel, Button
+from samegame.screen import Screen
 
 
 class Menu(Screen):
@@ -59,7 +59,8 @@ class Menu(Screen):
         logo.rect.centerx, logo.rect.y = panel1.rect.centerx, 30
         sublogo = Image(render_text(c.SUBLOGO_TEXT))
         sublogo.rect.centerx, sublogo.rect.y = panel1.rect.centerx, 85
-        logo.draw(panel1.image); sublogo.draw(panel1.image)
+        logo.draw(panel1.image)
+        sublogo.draw(panel1.image)
 
         # Create/decorate second panel sprite with state description
         ALPHA = 190
@@ -92,8 +93,7 @@ class Menu(Screen):
 
     def setup_buttons(self):
         """ Creating buttons """
-
-        pass # Button creation is done by child menu
+        pass  # Button creation is done by child menu
 
     def add_btn(self, text, callback):
         style = c.MENU_BTN_STYLE
@@ -104,7 +104,6 @@ class Menu(Screen):
 
     def position_buttons(self):
         """ Place buttons on the right panel """
-
         MARGIN_Y = 15
         MARGIN_X = -25
 
@@ -118,8 +117,7 @@ class Menu(Screen):
 
     def set_done(self, next, **kwargs):
         """ Prepare the stop of the state and start a countdown """
-
-        # Call parent class (Screen) set_done function
+        # Call parent class (Screen) set_done function       ###TODO### In the docstring?
         # Pass in next screen's name to display and
         # persistant data through kwargs dictionary
         super().set_done(next, **kwargs)
@@ -136,15 +134,14 @@ class Menu(Screen):
     def move_arrow(self, direction):
         """ Move arrow to focus screen's button """
 
-        # Warn button he will no more being targeted by the user
+        # Warn button he will no more being targeted by the user TODO What?
         button = self.option_list[self.arrow_index]
         button.targeted = False
-
-        NB_BTN = len(self.option_list) # Button amount on screen
-        i = self.arrow_index # Arrow position
+        nb_btn = len(self.option_list)
+        i = self.arrow_index
 
         # Update arrow index as it never exceeds the number of button
-        index = i+direction if -1 < i+direction < NB_BTN else NB_BTN-1-i
+        index = i+direction if -1 < i+direction < nb_btn else nb_btn-1-i
         self.arrow_index = index
 
         # Select focused button and warn he is targeted by the user
@@ -179,6 +176,7 @@ class Menu(Screen):
         self.buttons.update(elapsed)
         super().draw(window)
 
+
 class Main(Menu):
 
     def __init__(self):
@@ -210,6 +208,7 @@ class ModeSelection(Menu):
         super().add_btn(c.BTN_TEXT_2P, lambda: self.set_done(self.next, nb_player=2))
         super().add_btn(c.BTN_TEXT_BACK, lambda: self.set_done(c.MAIN_MENU))
         super().position_buttons()
+
 
 class LevelSelection(Menu):
 

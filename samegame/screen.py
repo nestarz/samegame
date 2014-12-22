@@ -1,9 +1,9 @@
 #!/bin/python3
 # -*- coding: utf-8 -*-
 
-import pygame as pg
 from . import constants as c
 from .graphics.gfx import Image
+
 
 class State:
     """Base class for all game states"""
@@ -50,21 +50,21 @@ class Screen(State):
 
     def setup_background(self, window):
         """Set background and its effects"""
-        img_name = self.name #retrieve bg_img from cache
-        self.bg = Image(img_name) #create background to apply on window
-        self.bg.resize(*window.get_size()) #resize bg to window size
-        self.bg.setup_effect('fadein', Screen.BG_FADE_TIME) #'ll apply effect fadein during 1s
+        img_name = self.name
+        self.bg = Image(img_name)
+        self.bg.resize(*window.get_size())
+        self.bg.setup_effect('fadein', Screen.BG_FADE_TIME)
 
     def do_action(self, index):
         """Lance l'action du boutton ciblé par par l'index"""
         if index in range(0, len(self.buttons)):
             self.buttons[index].callback()
 
-    def set_done(self, next, **kwargs):
+    def set_done(self, next_, **kwargs):
         """ Setting up the end of the screen. """
-        self.next = next #name of the next screen
-        self.persist = kwargs #dict of persistent variable through screen flipping
-        self.final_countdown = 0 #time until screen will flip is 0
+        self.next = next_
+        self.persist = kwargs
+        self.final_countdown = 0
         self.bg.setup_effect('fadeout', Screen.BG_FADE_TIME)
 
     def check_input(self, keys, elapsed):
@@ -80,10 +80,11 @@ class Screen(State):
         self.input_timer += elapsed
 
     def draw(self, window):
-        rect = self.bg.draw(window) #draw only if effects apply
-        if rect: self.rects.append(rect)
+        rect = self.bg.draw(window)  # draw only if effects apply
+        if rect:
+            self.rects.append(rect)
         for group in self.all_groups:
-            self.rects += group.draw(window) #get rects where sprites have blitted
+            self.rects.extend(group.draw(window))  # get rects where sprites have blitted
 
     def clear(self, window):
         for group in self.all_groups:
@@ -92,11 +93,9 @@ class Screen(State):
 
     def update(self, window, keys, elapsed):
         self.rects = []
-        self.elapsed = elapsed #on récup le temps passé depuis le dernier up
-        self.check_input(keys, elapsed) #on check les evenements de l'user
+        self.elapsed = elapsed
+        self.check_input(keys, elapsed)
         self.bg.update(elapsed)
         if self.final_countdown:
-            #si on a demandé à ce que l'event se termine
-            #on up puis check le timer de fin
             self.final_countdown -= self.elapsed
             self.done = max(0, self.final_countdown) == 0

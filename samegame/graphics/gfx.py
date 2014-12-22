@@ -6,6 +6,7 @@ from ..cache import cache
 from .. import constants as c
 from ..tools import render_text
 
+
 class SuperSurface:
 
     def __init__(self, surface):
@@ -47,9 +48,12 @@ class SuperSurface:
         # in our dictionnary of effect (effect_dict)
         self.dirty = 0
         for l in self.effect_dict.values():
-            if l: self.dirty = 1; break
+            if l:
+                self.dirty = 1
+                break
 
-class Image(SuperSurface):
+
+class Image(SuperSurface):  # TODO : Docstring not explicit enough
     """ Is not a sprite ! Usefull for once upon time blit and background """
 
     def __init__(self, image):
@@ -87,13 +91,13 @@ class Image(SuperSurface):
 
 
 #########################
-
 # Effects
 
-class AccessEffectError(Exception): pass
+class AccessEffectError(Exception):
+    pass
+
 
 class EffectObject:
-
     """
     Base of each effect
     """
@@ -149,6 +153,7 @@ class EffectObject:
         except KeyError:
             raise AccessEffectError(name)
 
+
 class HueTextEffect(EffectObject):
 
     """
@@ -190,7 +195,7 @@ class HueTextEffect(EffectObject):
             step = 1
             self.temp_c = [x - self.sign*step for x in self.temp_c]
             self.color = [max(0, min(x - self.sign*step, 255))
-                                    for x in self.temp_c]
+                          for x in self.temp_c]
             self.time_stacker += elapsed
         txt = self.txt + self.arrow_txt
         i = render_text(txt, self.style['size'], self.color, style=self.style)
@@ -202,8 +207,8 @@ class HueTextEffect(EffectObject):
     def resume(self):
         self.pause = False
 
-class Shake(EffectObject):
 
+class Shake(EffectObject):
     """
     Vibrates the surface
     """
@@ -221,7 +226,6 @@ class Shake(EffectObject):
 
 
 class Wait(EffectObject):
-
     """
     Waiting for a time before displaying the surface
     """
@@ -241,7 +245,6 @@ class Wait(EffectObject):
 
 
 class Blink(EffectObject):
-
     """
     Sparkling surface with an interval defines
     """
@@ -258,8 +261,8 @@ class Blink(EffectObject):
             self.current_delay -= elapsed
         return (surface, rect)
 
-class Inflate(EffectObject):
 
+class Inflate(EffectObject):
     """
     Zoom / Zoom out the surface with an interval defines
     """
@@ -278,8 +281,8 @@ class Inflate(EffectObject):
             self.current_delay -= elapsed
         return (surface, rect)
 
-class FadeAlpha(EffectObject):
 
+class FadeAlpha(EffectObject):
     """
     Fait varier de maniere decroissante la transparence de la surface
     en fonction de la duree restante de l'effet. Lorsque l'effet est
@@ -361,17 +364,20 @@ class Fade(EffectObject):
         self.current_delay -= elapsed
         return (surface, rect)
 
+
 class FadeIn(Fade):
     def apply(self, *args):
         ratio = max(0, self.current_delay) / self.init_delay
         self.alpha = int(ratio * 255)
         return super().apply(*args)
 
+
 class FadeOut(Fade):
     def apply(self, *args):
         ratio = max(0, self.current_delay) / self.init_delay
         self.alpha = 255-int(ratio * 255)
         return super().apply(*args)
+
 
 class Move(EffectObject):
 

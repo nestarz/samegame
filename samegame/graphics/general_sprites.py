@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import pygame as pg
-from .gfx import SuperSurface, Image
-from ..cache import cache
-from ..tools import render_text
-from .. import constants as c
+from samegame.graphics.gfx import SuperSurface, Image
+from samegame.tools import render_text
+from samegame import constants as c
+
 
 class Sprite(pg.sprite.DirtySprite, SuperSurface):
     def __init__(self, surface):
@@ -18,6 +18,7 @@ class Sprite(pg.sprite.DirtySprite, SuperSurface):
     def update(self, elapsed):
         SuperSurface.update(self, elapsed)
         self.dirty = 1
+
 
 class Button(Sprite):
 
@@ -56,6 +57,7 @@ class Button(Sprite):
             self.pause_text_effect = False
         Sprite.update(self, elapsed)
         self.dirty = 1
+
 
 class Panel(Sprite):
 

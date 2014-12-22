@@ -1,15 +1,12 @@
 import pygame as pg
-from .. import cache
-from .. import constants as c
-from ..graphics.general_sprites import Panel
-from ..graphics.party_sprites import BoardGFX, BlockGFX, CursorGFX, InformationGFX
-from ..gamecore import GameCore, Cursor
-from ..player.player_tools import *
+import samegame.constants as c
+from samegame.graphics.party_sprites import BoardGFX, BlockGFX, CursorGFX, InformationGFX
+from samegame.player.player_tools import *
+
 
 class Player:
-
     def __init__(self, index):
-        assert index in [0,1]
+        assert index in [0, 1]
         self.index = index
         self.actions = {}
         self.alive = True
@@ -34,10 +31,10 @@ class Player:
         self.information_group = pg.sprite.LayeredDirty()
         # Ordre des draw
         self.all_groups = (self.board_group,
-                            self.cursor_group,
-                            self.block_group,
-                            self.cursor_group,
-                            self.information_group)
+                           self.cursor_group,
+                           self.block_group,
+                           self.cursor_group,
+                           self.information_group)
         self.setup_board(panel)
         self.setup_blocks()
         self.setup_cursor()
@@ -46,7 +43,7 @@ class Player:
 
     def setup_board(self, panel):
 
-        # Create graphic board thanks to logic board
+        # Create graphic board thanks to logic board BIG TODO: ALL this comm in docstrings
         # Then add this board to LayeredDirty group
         self.board_gfx = BoardGFX(self.board, self.index, panel)
         self.board_gfx.setup_effect('fadein', 1500)
@@ -86,8 +83,8 @@ class Player:
         self.add_information(ModeInformation(self))
         self.add_information(CustomInformation(self, ' '))
         self.add_information(CustomInformation(self, 'Controls'))
-        for c, k in self.key.controls.items():
-            text = '{}={}'.format(c, self.key.name(k))
+        for c_, k in self.key.controls.items():  # TODO c and k not explicit enough
+            text = '{}={}'.format(c_, self.key.name(k))
             self.add_information(CustomInformation(self, text))
         self.add_information(CustomInformation(self, ' '))
         self.add_information(TimeInformation(self))
@@ -112,16 +109,12 @@ class Player:
 
         # If key are pressed then try to launches the corresponding action
         if nb_pressed > 0:
-            # For each actions, check if corresponding is pressed
             for index, function in self.actions.items():
                 if keys[index]:
-                    # If move key pressed, move the case if allowed to
                     if index in self.key.MOVE and self.allow_input:
                         function()
-                    # If swap key pressed, swap the case if allowed to
                     if index == self.key.SWAP and self.allow_swap:
                         function()
-                    # If generate key pressed, generate a row if allowed to
                     if index == self.key.GENERATE and self.allow_generate:
                         function()
 
@@ -174,9 +167,8 @@ class Player:
 
         # Update score and pause if cases destroyed
         if destroy:
-            self.pause_timer += destroy*1000 #x blocks = x secondes
-            self.score += destroy #x blocks = x points
-            
+            self.pause_timer += destroy*1000  # x blocks = x secondes
+            self.score += destroy  # x blocks = x points
         if self.pause_timer > 0:
             self.pause_timer -= elapsed
         elif self.up_timer > self.board.speed:

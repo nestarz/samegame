@@ -35,7 +35,7 @@ class GameCore:
         num_color=6,
         num_row=10,
         num_col=10
-        ):
+    ):
         super().__init__()
         self.num_col = num_col
         self.num_row = num_row
@@ -52,6 +52,7 @@ class GameCore:
     def num_board(self):
         return len(self.boards)
 
+
 class Board:
     """
     Board Class, all method are explained in help(Board)
@@ -63,7 +64,7 @@ class Board:
         num_color=6,
         num_row=10,
         num_col=6,
-        ):
+    ):
         """
         Create a playable board
 
@@ -71,23 +72,28 @@ class Board:
         Call the generate_board function
         Apply gravity
         Create the cursor
+
+        speed - game's speed, int, the higher, the faster
+        num_color - the number of color used in the game
+        num_row - length of the board
+        num_col - width of the board
         """
-        self.speed = speed  # game's speed, int, the higher, the faster
-        self.pause = 0   #amount of time during which the game is frozen after a combo
-        #               (i.e the board isn't going upward)
-        self.num_color = num_color  # the number of color used in the game
-        self.num_col = num_col  # width of the board
-        self.num_row = num_row  # length of the board
+        self.speed = speed
+        self.pause = 0   # amount of time during which the game is frozen after a combo
+                         # (i.e no new line added)
+        self.num_color = num_color
+        self.num_col = num_col
+        self.num_row = num_row
         self.size = (self.num_row, self.num_col)
         self.destroy = []
-        self.color = [  # VALUES MUST BE IN THE CONSTANTS COLORS_DICT!!
+        self.color = [  # VALUES MUST BE IN THE CONSTANTS COLORS_DICT!! TODO What?
             'blue',
             'green',
             'orange',
             'grey',
             'purple',
             'yellow',
-            ]
+        ]
         self.board = []
         self.generate_board()
         self.gravity()
@@ -97,8 +103,9 @@ class Board:
         return self.board.__iter__()
 
     def generate_board(self):
-        """Generate a board, of num_col*num_row case, filled with 24 colored case, rest is set to False
-        6 different color by default
+        """
+        Generate a board, of num_col*num_row case, filled with 24 colored case,
+        rest is set to False 6 different color by default
 
         row index start at 1 because we need a 'hidden' row
 
@@ -109,7 +116,7 @@ class Board:
         for row in range(self.num_row):
             self.board.append([])
             for col in range(self.num_col):
-                self.board[row].append(Case(False,False,False, self.board))
+                self.board[row].append(Case(False, False, False, self.board))
 
         i = 0
 
@@ -118,8 +125,8 @@ class Board:
             col = randrange(0, self.num_col)
 
             if self.board[row][col].color is False:
-                self.board[row][col].color = self.color[randrange(0,
-                        self.num_color)]
+                self.board[row][col].color = self.color[randrange(
+                    0, self.num_color)]
                 i += 1
 
         self.generate_hidden()
@@ -127,7 +134,7 @@ class Board:
 
     def __str__(self):
         case_length = len(max(self.color))
-        a = '*'+ '-' * (case_length + 1) * self.num_col + '*\n'
+        a = '*' + '-' * (case_length + 1) * self.num_col + '*\n'
         string = ''
 
         for row in reversed(range(self.num_row)):
@@ -149,19 +156,20 @@ class Board:
 
     def top_row_empty(self):
         """
-        Check if the top line is empty case by case, return True if the top line is empty, False elsewise
+        Check if the top line is empty case by case
+
+        return True if the top line is empty, False elsewise
         """
-        return not(True in [isinstance(x.color,str) for x in self.board[self.num_row-1]])
+        return not(True in [isinstance(x.color, str) for x in self.board[self.num_row-1]])
 
     def up(self):
         """
         All rows are going upward, and generate a new hidden line
         """
-        for row in reversed(range(1,(self.num_row))):
+        for row in reversed(range(1, self.num_row)):
             for col in range(self.num_col):
                 self.board[row][col] = self.board[row-1][col]
         self.generate_hidden()
-
 
     def check_destroy(self):
         """
@@ -198,7 +206,6 @@ class Board:
                     destroy.append(temp_cor)
 
                 combo = 1
-                temp_core = [(row, col)]
                 temp_case = False
 
             return(combo, temp_case, temp_cor, destroy)
@@ -217,9 +224,7 @@ class Board:
 
         for col in range(self.num_col):  # check per column
             combo = 1
-            temp_col = False
             temp_cor = []
-
 
             for row in reversed(range(1, self.num_row)):
                 combo, temp_case, temp_cor, destroy = destroy_local(
@@ -236,7 +241,7 @@ class Board:
         for line in self.destroy:
             for case in line:
                 if not self.board[case[0]][case[1]].color == 'bad':
-                    self.board[case[0]][case[1]] = Case(False,False,False, self.board)
+                    self.board[case[0]][case[1]] = Case(False, False, False, self.board)
                     combo += 1
         self.destroy = []
 
@@ -245,11 +250,12 @@ class Board:
     def gravity(self):
         """
         Makes sure there is no empty space between a case and the bottom
-        Bad Blocks works as unit of singles cases, so they don't fall if all cases under them are free
+        Bad Blocks works as unit of singles cases, so they don't fall if all
+        cases under them are free
 
         The function works in 2 parts :
-            - Apply gravity on everything, even bad block (which is separated piece by piece during this
-            step)
+            - Apply gravity on everything, even bad block (which is separated piece by piece
+                during this step)
             - Get the back block back together
 
         This way you get the nice illusion that the block is a unit
@@ -263,20 +269,22 @@ class Board:
             You do this by checking if there is an other part of the bad block on his left (prev)
             or on his right (next)
 
-            If the part on the left or right is missing, you send the column upward and you re-iterate
-            through the board
-
+            If the part on the left or right is missing, you send the column upward and
+            you re-iterate through the board
             """
             if self.board[row][col].color == 'bad':
-                    if (self.board[row][col].nex and not(self.board[row][col+1].color == 'bad') \
-                    or self.board[row][col].prev and not(self.board[row][col-1].color == 'bad')):
-                            for temp_row in reversed(range(row,self.num_row)):
-                                self.board[temp_row][col] = copy(self.board[temp_row-1][col])
-                            self.board[row][col] = Case(False,False,False, self.board)
+                    if (self.board[row][col].nex
+                            and not(self.board[row][col+1].color == 'bad')
+                            or self.board[row][col].prev
+                            and not(self.board[row][col-1].color == 'bad')):
+                        for temp_row in reversed(range(row, self.num_row)):
+                            self.board[temp_row][col] = copy(self.board[temp_row-1][col])
+                        self.board[row][col] = Case(False, False, False, self.board)
 
-
-        for col in range(self.num_col):  #First Routine, Makes everything fall down even Bad block
-                row = 1                  #Bad block are separated
+        #First Routine, Makes everything fall down even Bad block
+        #Bad block are separated
+        for col in range(self.num_col):
+                row = 1
                 i = 1
                 done = False
                 while row < self.num_row:
@@ -284,22 +292,23 @@ class Board:
                         done = True
                     elif done is True:
                         self.board[i][col] = self.board[row][col]
-                        self.board[row][col] = Case(False,False,False, self.board)
+                        self.board[row][col] = Case(False, False, False, self.board)
                         i += 1
                     else:
                         i += 1
                     row += 1
 
-
-        for row in range(1,self.num_row):      #Get the bad blocks together
+        #Get the bad blocks together
+        for row in range(1, self.num_row):
             for col in range(self.num_col):
                 local_check(self)
             for col in reversed(range(self.num_col)):
                 local_check(self)
 
-    def can_fall(self,row,col):
+    def can_fall(self, row, col):
         """
-        Check if a case/block can fall one row down, need to have an empty space between all his case
+        Check if a case/block can fall one row down, need to have an empty space
+        between all his case
         """
         Done = False
         while not Done:
@@ -311,24 +320,20 @@ class Board:
                 Done = True
         return True
 
-
     def generate_bad_block(self, pos, size):
         """
         Create a 'blocker' case, suppose to bother you during the game
         """
-
-        for i in range(0,size):
-            self.board[self.num_row-1][pos+i] = Case('bad',i!=0,i!=size-1, self.board)
-
-
+        for i in range(0, size):
+            self.board[self.num_row-1][pos+i] = Case('bad', i != 0, i != size - 1, self.board)
 
     def generate_hidden(self):
         """
         Fill the first row with colored cases
         """
-
         for i in range(0, self.num_col):
-            self.board[0][i] = Case(self.color[randrange(0, self.num_color)], False,False, self.board)
+            self.board[0][i] = Case(self.color[randrange(0, self.num_color)], False, False,
+                                    self.board)
         return self.board[0]
 
     def swap(self):
@@ -351,7 +356,8 @@ class Board:
 class Cursor:
     """
     The cursor is an object that focuses two cases, in order to swap them
-    Create a cursor that point only one case, no need to specify the 2nd case since it's the one its right
+    Create a cursor that point only one case, no need to specify the 2nd case
+    since it's the one its right
     You can use .move_up, .move_down, .move_left, .move_right
     """
 
@@ -408,7 +414,7 @@ class Case:
         return find(self, self.board)
 
     def __repr__(self):
-        return "Prev = %r, Next = %r, Color is %r" % (self.prev,self.nex,self.color)
+        return "Prev = %r, Next = %r, Color is %r" % (self.prev, self.nex, self.color)
 
 def find(c, board):
     for i, line in enumerate(board):

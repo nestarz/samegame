@@ -2,6 +2,7 @@ import pygame as pg
 from . import constants as c
 from .cache import cache
 
+
 class Font(pg.font.Font):
 
     def __init__(self, name, size):
@@ -13,6 +14,7 @@ class Font(pg.font.Font):
 
         # Create pygame font object with our loaded font
         super().__init__(font, size)
+
 
 def render_text(
     text,

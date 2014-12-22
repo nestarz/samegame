@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import pygame as pg
-from .. import cache
-from .. import constants as c
-from ..screen import Screen
-from ..graphics.general_sprites import Panel
-from ..graphics.party_sprites import BlockGFX, CursorGFX, InformationGFX
-from ..gamecore import GameCore, Cursor
-from ..player.player import Player
+import samegame.cache
+import samegame.constants as c
+from samegame.screen import Screen
+from samegame.graphics.general_sprites import Panel
+from samegame.graphics.party_sprites import BlockGFX, CursorGFX, InformationGFX
+from samegame.gamecore import GameCore, Cursor
+from samegame.player.player import Player
 
 
-class Party(Screen):
+class Game(Screen):
 
     def __init__(self):
 
@@ -30,7 +30,8 @@ class Party(Screen):
         # Add groups to all_groups tuple
         self.all_groups = (self.panel_group,)
 
-class Arcade(Party):
+
+class Arcade(Game):
 
     def __init__(self):
 

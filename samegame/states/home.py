@@ -1,13 +1,13 @@
 #!/bin/python3
 # -*- coding: utf-8 -*-
-
 import pygame as pg
-from .. import cache
-from .. import constants as c
-from ..screen import Screen
-from ..graphics.gfx import Image
-from ..graphics.general_sprites import Sprite
-from ..tools import render_text
+
+import samegame.constants as c
+from samegame.graphics.general_sprites import Sprite
+from samegame.graphics.gfx import Image
+from samegame.screen import Screen
+from samegame.tools import render_text
+
 
 class Home(Screen):
 
@@ -36,7 +36,7 @@ class Home(Screen):
 
         # Panels constants
         MOVE_EFFECT_NAME = 'move'
-        FADE_EFFECT_NAME = 'fade_alpha'
+        FADE_EFFECT_NAME = 'fade_alpha'  # WARNING: Unused, why ? TODO
         WAIT_EFFECT_NAME = 'wait'
         BLINK_EFFECT_NAME = 'blink'
         FONT_SIZE = 20
@@ -78,7 +78,7 @@ class Home(Screen):
         # on sprites, with same duration as countdown
         self.final_countdown = 1000
         for spr in self.sprites:
-            distance = (0, spr.rect.h)
+            distance = (0, spr.rect.h)  # WARNING : UNUSED, WHY? TODO
             #spr.setup_effect('fadeout', self.final_countdown)
             #spr.setup_effect('move', self.final_countdown, distance)
 
@@ -86,7 +86,7 @@ class Home(Screen):
         """ Setup event related action for menu navigation """
 
         # Each of self.action item is a function
-        # which start when key (like K_RETURN) is pressed.
+        # which start when key (like K_RETURN) is pressed. TODO : Must it be put in the doc?
         self.actions[pg.K_RETURN] = lambda: self.set_done(self.next)
 
     def update(self, window, keys, elapsed):

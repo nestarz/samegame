@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import pygame as pg
-from .gfx import SuperSurface, Image
-from .general_sprites import Sprite
-from ..cache import cache
-from ..tools import render_text
-from .. import constants as c
+from samegame.graphics.gfx import SuperSurface
+from samegame.graphics.general_sprites import Sprite
+from samegame.tools import render_text
+from samegame import constants as c
+
 
 class InformationGFX(Sprite):
 
@@ -42,9 +42,9 @@ class InformationGFX(Sprite):
         self.dirty = 1
         Sprite.update(self, elapsed)
 
-class CursorGFX(Sprite):
 
-    SIZE = (43*2+1,42+2)
+class CursorGFX(Sprite):
+    SIZE = (43*2+1, 42+2)
 
     def __init__(self, cursor, board_gfx):
 
@@ -56,7 +56,7 @@ class CursorGFX(Sprite):
         SuperSurface.__init__(self, ref)
 
         # Draw a rect with white 5px border size (not filled)
-        pg.draw.rect(self.image, (255,255,255), self.rect, 5)
+        pg.draw.rect(self.image, (255, 255, 255), self.rect, 5)
         self.image = self.image.convert()
 
         # Reference to logic cursor
@@ -103,11 +103,12 @@ class CursorGFX(Sprite):
             self.image.set_alpha(70)
         self.dirty = 1
 
+
 class BlockGFX(Sprite):
     """ Bloc de couleur """
 
     W, H = 38, 38
-    size = (W,H)
+    size = (W, H)
 
     def __init__(self, case, player):
         pg.sprite.DirtySprite.__init__(self)
@@ -132,7 +133,6 @@ class BlockGFX(Sprite):
         # Blocks will be positioned in the bottom of the surface
         self.rect.bottom = surface.rect.bottom - (self.pos[0]*43 + 5)
         self.rect.x = 5 + surface.rect.x + self.pos[1]*43
-
 
     def color_update(self):
 
@@ -239,6 +239,7 @@ class BlockGFX(Sprite):
 
         # Update the sprite (apply effects if needed)
         Sprite.update(self, elapsed)
+
 
 class BoardGFX(Sprite):
 

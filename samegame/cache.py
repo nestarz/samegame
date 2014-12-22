@@ -1,8 +1,15 @@
 import os
 import pygame as pg
 
-class ImageError(Exception): pass
-class FontError(Exception): pass
+
+class ImageError(Exception):
+    pass
+
+
+class FontError(Exception):
+    pass
+
+
 class Cache:
 
     def __init__(self):
@@ -23,7 +30,6 @@ class Cache:
                     img = img.convert()
                     img.set_colorkey(colorkey)
                 self.__graphics[name] = img
-
 
     def load_fonts(self, directory, accept=('.ttf')):
         for font in os.listdir(directory):
