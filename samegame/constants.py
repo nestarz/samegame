@@ -3,7 +3,7 @@ from pygame import locals as pg
 
 # GAME CONFIG
 NAME = "SAMEGAME"
-AUTHOR = "Mathieu Seurin", "Elias Rhouzlane"
+AUTHOR = "Mathieu Seurin", "Elias Rhouzlane", "Paul Ecoffet"
 SCREEN_HEIGHT = 574
 SCREEN_WIDTH = 1024
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
