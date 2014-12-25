@@ -104,7 +104,7 @@ COLORS_DICT = {
     "purple": PURPLE_RGB,
     "yellow": YELLOW_RGB,
     "pink": PINK_RGB,
-    "maroon": BROWN_RGB,
+    "brown": BROWN_RGB,
     "white": WHITE_RGB,
     "red": RED_RGB,
     "black": BLACK_RGB
