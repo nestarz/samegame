@@ -78,7 +78,7 @@ MODE_NAME_TUPLE = (
     (SPEED[3], BTN_TEXT_HARD),
     (SPEED[4], BTN_TEXT_INFERNO),
 )
-MODE_NAME_DICT = {s:btn for s,btn in MODE_NAME_TUPLE}
+MODE_NAME_DICT = {s: btn for s, btn in MODE_NAME_TUPLE}
 
 # FONT
 FONT1 = 'joystix'

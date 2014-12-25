@@ -416,6 +416,7 @@ class Case:
     def __repr__(self):
         return "Prev = %r, Next = %r, Color is %r" % (self.prev, self.nex, self.color)
 
+
 def find(c, board):
     for i, line in enumerate(board):
         try:

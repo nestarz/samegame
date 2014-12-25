@@ -104,15 +104,15 @@ class EffectObject:
 
     def __init__(self, delay):
         assert delay > 0
-        self.init_delay = delay #time duration of effect
-        self.current_delay = self.init_delay #remaining time before effect ending
-        self.visible = True #False=img will not be displayed
-        self.done = False #effect is done
+        self.init_delay = delay  # time duration of effect
+        self.current_delay = self.init_delay  # remaining time before effect ending
+        self.visible = True  # False=img will not be displayed
+        self.done = False  # effect is done
         self.first_apply = True
-        self.pause = False #True=effect will not apply
-        self.backup_img = None #img initial
-        self.backup_rect = None #rect initial
-        self.priority = 0 #1=other effects will wait until end of this one
+        self.pause = False  # True=effect will not apply
+        self.backup_img = None  # img initial
+        self.backup_rect = None  # rect initial
+        self.priority = 0  # 1=other effects will wait until end of this one
 
     def apply(
         self,
