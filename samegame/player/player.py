@@ -43,7 +43,7 @@ class Player:
 
     def setup_board(self, panel):
 
-        # Create graphic board thanks to logic board BIG TODO: ALL this comm in docstrings
+        # Create graphic board thanks to logic board ||| BIG TODO: ALL this comm in docstrings
         # Then add this board to LayeredDirty group
         self.board_gfx = BoardGFX(self.board, self.index, panel)
         self.board_gfx.setup_effect('fadein', 1500)
@@ -141,7 +141,7 @@ class Player:
 
     def up_row(self):
 
-        # Check if top row is empty, if True, player loses the game
+        # Check if top row is empty, if True, player loses the game TODO not explicit, docstring?
         game_over = not self.board.top_row_empty()
 
         if game_over and self.alive:
@@ -158,7 +158,7 @@ class Player:
 
     @property
     def new_row_timer(self):
-        return int((self.board.speed + self.pause_timer - self.up_timer)/600)
+        return int((self.board.speed + self.pause_timer - self.up_timer)/600) # TODO not explicit, docstring?
 
     def game_event(self, elapsed, destroy):
 

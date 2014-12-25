@@ -93,7 +93,7 @@ class Menu(Screen):
 
     def setup_buttons(self):
         """ Creating buttons """
-        pass  # Button creation is done by child menu
+        pass  # Button creation is done by child menu  ###TODO### raise NotImplemented?
 
     def add_btn(self, text, callback):
         style = c.MENU_BTN_STYLE

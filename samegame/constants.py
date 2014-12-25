@@ -54,7 +54,7 @@ LOGOGFXNAME = 'logo'
 BOARD_GFX_NAME = {0: 'board1', 1: 'board2'}
 
 ## TEXT
-SUBLOGO_TEXT = "Mathieu Seurin & Rhouzlane Elias"
+SUBLOGO_TEXT = "Mathieu Seurin, Rhouzlane Elias & Paul Ecoffet"
 START_TEXT = 'Press Start Button'
 # BTN TEXT
 BTN_TEXT_CONTINUE = "Continue"
@@ -95,7 +95,7 @@ GREY_RGB = (170, 170, 170)
 PINK_RGB = (240, 240, 240)
 BLUE_RGB = (66, 169, 188)
 PURPLE_RGB = (156, 82, 181)
-MAROON_RGB = (118, 93, 48)
+BROWN_RGB = (118, 93, 48)
 COLORS_DICT = {
     "blue": BLUE_RGB,
     "green": GREEN_RGB,
@@ -104,7 +104,7 @@ COLORS_DICT = {
     "purple": PURPLE_RGB,
     "yellow": YELLOW_RGB,
     "pink": PINK_RGB,
-    "maroon": MAROON_RGB,
+    "maroon": BROWN_RGB,
     "white": WHITE_RGB,
     "red": RED_RGB,
     "black": BLACK_RGB

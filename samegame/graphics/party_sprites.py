@@ -118,12 +118,12 @@ class BlockGFX(Sprite):
         self.image.fill(c.COLORS_DICT[case.color] + (245,))
         self.image = self.image.convert()
         self.board_gfx = player.board_gfx
-        self.case = case
+        self.cell = case
         self.pos = case.pos
         self.set_position(player.board_gfx)
         self.time_stacker = 0
         self.alive = True
-        self.case.dying = False
+        self.cell.dying = False
         self.dying_time = 0
         self.frozen = False
 
@@ -140,9 +140,9 @@ class BlockGFX(Sprite):
         if not self.player.alive:
             self.image.set_alpha(70)
         # Else if block is alive and not dying
-        elif self.alive and not self.case.dying:
+        elif self.alive and not self.cell.dying:
             # If case is in the hidden row, we set a special alpha on the block
-            if self.case.pos[0] == 0:
+            if self.cell.pos[0] == 0:
                 self.image.set_alpha(110)
             else:
                 self.image.set_alpha(255)
@@ -156,7 +156,7 @@ class BlockGFX(Sprite):
         # Then we freeze all blocks in the same column of the dying case
         # for the same duration of dying (for readability purpose)
         for line in dying_cases:
-            if self.case.pos in line:
+            if self.cell.pos in line:
 
                 # Dying constants (from constants.py)
                 BLINK_DURATION = c.BLINK_DURATION
@@ -169,7 +169,7 @@ class BlockGFX(Sprite):
                 self.dying_timer = DYING_TIMER
 
                 # Freeze all cases in the same col as dying case (dying case included)
-                self.board_gfx.freeze_col(self.case.pos[1], self.dying_timer)
+                self.board_gfx.freeze_col(self.cell.pos[1], self.dying_timer)
 
                 # Yes, the case is dying
                 return True
@@ -180,21 +180,21 @@ class BlockGFX(Sprite):
     def move(self):
 
         # Create shortcut
-        case = self.case
+        cell = self.cell
 
         # If case is moving on the vertical axis
-        if case.pos[1]-self.pos[1] != 0:
+        if cell.pos[1]-self.pos[1] != 0:
             #self.rect.move_ip(43*(case.pos[1]-self.pos[1]), 0)
-            self.setup_effect('move', 70, (43*(case.pos[1]-self.pos[1]), 0), 1)
+            self.setup_effect('move', 70, (43*(cell.pos[1]-self.pos[1]), 0), 1)
 
         # If case is moving on the vertical axis
-        if case.pos[0]-self.pos[0] != 0:
+        if cell.pos[0]-self.pos[0] != 0:
             #self.rect.move_ip(0, -43*(case.pos[0]-self.pos[0]))
-            self.setup_effect('move', 70, (0, -43*(case.pos[0]-self.pos[0])), 1)
+            self.setup_effect('move', 70, (0, -43*(cell.pos[0]-self.pos[0])), 1)
 
         # Update block position to correspond
         # with case position in the logic board
-        self.pos = case.pos
+        self.pos = cell.pos
 
     def update(self, elapsed, player, dying_blocks):
 
@@ -207,18 +207,18 @@ class BlockGFX(Sprite):
         #   OR (must be dying and frozen)
         # If dying, we update timer until fixed duration (blink effect duration)
         # then we kill the block, it will not be updated after this
-        if self.alive and not self.case.dying:
+        if self.alive and not self.cell.dying:
 
             # Check if block is in dying blocks (get from logic board process)
             # Note : dying blocks is a list of coordinate list (2 dimensions)
-            self.case.dying = self.is_block_dying(dying_blocks)
+            self.cell.dying = self.is_block_dying(dying_blocks)
 
             # If case is swapping, or if case is
             # not frozen, we try to move the block (if needed)
             # We do the same if block is dying AND frozen (for gravity purpose)
-            if self.case.on_swap or not self.case.frozen:
+            if self.cell.on_swap or not self.cell.frozen:
                 self.move()
-            elif self.case.dying and self.case.frozen:
+            elif self.cell.dying and self.cell.frozen:
                 self.move()
 
         elif self.dying_timer < 0:
@@ -228,10 +228,10 @@ class BlockGFX(Sprite):
             self.kill()
 
             # The case is no more dying nor alive (it is dead)
-            self.case.dying = False
+            self.cell.dying = False
             self.alive = False
 
-        elif self.case.dying:
+        elif self.cell.dying:
 
             # If case is still in the process of
             # dying, we decrease the dying timer
@@ -267,7 +267,7 @@ class BoardGFX(Sprite):
         ref = pg.Surface((w, h), pg.HWSURFACE | pg.SRCALPHA)
 
         # Create surface that will welcome our board
-        pg.sprite.DirtySprite.__init__(self)
+        pg.sprite.DirtySprite.__init__(self) # TODO Shouldn't you call the Sprite __init__? Weird stuff here
         SuperSurface.__init__(self, ref)
 
         # Crow image to BoardGFX size
@@ -282,10 +282,10 @@ class BoardGFX(Sprite):
         # Reference to logic board for mapping cases
         self.board = board
 
-        # Array that contain frozen blocks by col
-        self.frozen_cases = {}
+        # Dict that contain frozen blocks by col
+        self.frozen_cells = {}
 
-        # Array that contain freeze timer by col
+        # Dict that contain freeze timer by col
         self.freeze_timer = {}
 
     def __iter__(self):
@@ -305,17 +305,17 @@ class BoardGFX(Sprite):
 
     def freeze_col(self, col, duration):
         # Each case of a col will be frozen during "duration" ms
-        self.frozen_cases[col] = []
+        self.frozen_cells[col] = []
         for line in self.board:
             # If case is not empty, then I freeze the block and add a timer
             if line[col]:
                 line[col].frozen = True
                 self.freeze_timer[col] = duration
-                self.frozen_cases[col].append(line[col])
+                self.frozen_cells[col].append(line[col])
 
     def defreeze_col(self, col):
         # Each case in the col will be defreeze except if the case is dying
-        for case in self.frozen_cases[col]:
+        for case in self.frozen_cells[col]:
             if not case.dying:
                 case.frozen = False
 
