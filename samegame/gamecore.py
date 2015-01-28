@@ -81,12 +81,14 @@ class Board:
         self.speed = speed
         self.pause = 0   # amount of time during which the game is frozen after a combo
                          # (i.e no new line added)
+        self.time = 0  # time of the game in arbitrary units (ms seems the most logical)
+        self.next_up = 0
         self.num_color = num_color
         self.num_col = num_col
         self.num_row = num_row
         self.size = (self.num_row, self.num_col)
         self.destroy = []
-        self.color = [  # VALUES MUST BE IN THE CONSTANTS COLORS_DICT!! TODO What?
+        self.color = [  # VALUES MUST BE IN THE CONSTANTS COLORS_DICT!! TODO fix this
             'blue',
             'green',
             'orange',
@@ -132,27 +134,14 @@ class Board:
         self.generate_hidden()
         self.gravity()
 
-    def __str__(self):
-        case_length = len(max(self.color))
-        a = '*' + '-' * (case_length + 1) * self.num_col + '*\n'
-        string = ''
-
-        for row in reversed(range(self.num_row)):
-            string += a
-            for col in range(self.num_col):
-                string += '|'
-                if self.board[row][col].color is False:
-                    string += ' ' * case_length
-                else:
-                    color = str(self.board[row][col].color)
-                    string += (color + ' ' * (case_length
-                               - len(color)) if len(color)
-                               < case_length else color[:case_length])
-            string += '| \n'
-        string += a
-
-        return string
-        # return(str(self.board))
+    def update(self, time):
+        assert time > self.time
+        self.time = time
+        if self.next_up < self.time:
+            self.up()
+        for cell in self.check_destroy():
+            cell.mark_as_dying(self.time)
+        self.destroy_block()
 
     def top_row_empty(self):
         """
@@ -169,7 +158,7 @@ class Board:
         for row in reversed(range(1, self.num_row)):
             for col in range(self.num_col):
                 self.board[row][col] = self.board[row-1][col]
-        self.generate_hidden()
+        return self.generate_hidden()
 
     def check_destroy(self):
         """
@@ -352,6 +341,28 @@ class Board:
         else:
             print("Can't swap those cases")
 
+    def __str__(self):
+        case_length = len(max(self.color))
+        a = '*' + '-' * (case_length + 1) * self.num_col + '*\n'
+        string = ''
+
+        for row in reversed(range(self.num_row)):
+            string += a
+            for col in range(self.num_col):
+                string += '|'
+                if self.board[row][col].color is False:
+                    string += ' ' * case_length
+                else:
+                    color = str(self.board[row][col].color)
+                    string += (color + ' ' * (case_length
+                               - len(color)) if len(color)
+                               < case_length else color[:case_length])
+            string += '| \n'
+        string += a
+
+        return string
+        # return(str(self.board))
+
 
 class Cursor:
     """
@@ -403,11 +414,16 @@ class Case:
         self.board = board
         self.on_swap = False
         self.dying = False
+        self.death_date = 0
         self.frozen = False
         if color == 'bad':
             self.can_swap = False
         else:
             self.can_swap = True
+
+    def mark_as_dying(self, time):
+        self.dying = True
+        self.death_date = time + self.board.speed * 40  # NEED DYING_TIME CONSTANT
 
     @property
     def pos(self):

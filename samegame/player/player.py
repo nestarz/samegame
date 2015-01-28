@@ -149,9 +149,8 @@ class Player:
             self.add_information(GameOverInformation(self))
             self.alive = False
         elif self.alive:
-            self.board.up()
+            cases = self.board.up()
             self.cursor.move_up()
-            cases = self.board.generate_hidden()
             for case in cases:
                 block = BlockGFX(case, self)
                 block.add(self.block_group)
